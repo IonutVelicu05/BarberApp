@@ -5,12 +5,13 @@ using TMPro;
 
 public class BarberShop : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI shopName;
-    [SerializeField] TextMeshProUGUI shopAddress;
+    [SerializeField] private TextMeshProUGUI shopName;
+    [SerializeField] private TextMeshProUGUI shopAddress;
 
     public string ShopName
     {
         set { shopName.text = value; }
+        get { return shopName.text; }
     }
     public string ShopAddress
     {

@@ -17,6 +17,7 @@ public class Account : MonoBehaviour
     private int twoStarReviews;
     private int oneStarReviews;
     private bool isBoss;
+    private bool isLogged;
     [SerializeField] private AppManager appmanager;
 
     public string AccountUsername
@@ -30,6 +31,10 @@ public class Account : MonoBehaviour
     public bool IsAdmin
     {
         get { return isAdmin; }
+    }
+    public bool IsLogged
+    {
+        get { return isLogged; }
     }
     public void LoginAccount()
     {
@@ -47,14 +52,13 @@ public class Account : MonoBehaviour
         {
             Debug.Log("login suces");
             accountUsername = www.text.Split('\t')[1];
+            isLogged = true;
             bool.TryParse(www.text.Split('\t')[2], out isBoss);
             if(accountUsername == "test")
             {
                 isAdmin = true;
             }
-            appmanager.IsLoggedIn = true;
             appmanager.backButton();
-            //gameObject.GetComponent<AppManager>().backButton();
         }
         else
         {

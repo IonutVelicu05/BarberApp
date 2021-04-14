@@ -34,7 +34,6 @@ public class Login : MonoBehaviour
             stringmemory[1] = www.text.Split('\t')[1];
             if(stringmemory[1] == "IonutVelicu2205")
             {
-                gameObject.GetComponent<AppManager>().IsLoggedIn = true;
             }
         }
         else
