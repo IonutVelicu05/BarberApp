@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine.EventSystems;
+using UnityEngine.Networking;
 
 public class AppManager : MonoBehaviour
 {
@@ -31,6 +32,8 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI fridayHours;
     [SerializeField] private TextMeshProUGUI saturdayHours;
     [SerializeField] private TextMeshProUGUI sundayHours;
+    [SerializeField] private Image shopPhoto;
+    private int shopImageNumber = 1;
 
     private Image tempOpenHourImage;
     private Image tempOpenMinuteImage;
@@ -98,6 +101,8 @@ public class AppManager : MonoBehaviour
     }
     public void SelectSalon()
     {
+        shopImageNumber = 1;
+        setimagine();
         selectedShopName = EventSystem.current.currentSelectedGameObject.name;
         ShowShopDescription();
     }
@@ -317,10 +322,19 @@ public class AppManager : MonoBehaviour
         form.AddField("shopName", selectedShopName);
         WWW www = new WWW("http://localhost/barberapp/getworkinghours.php", form);
         yield return www;
+        
         if (www.text[0] != '0')
         {
             Debug.Log(www.text);
         }
+        foreach(string str in www.text.Split('\t'))
+        {
+            if (str == null || str == "")
+            {
+                
+            }
+        }
+
         mondayHours.text = "Monday: " + www.text.Split('\t')[1];
         tuesdayHours.text = "Tuesday: " + www.text.Split('\t')[2];
         wednesdayHours.text = "Wednesday: " + www.text.Split('\t')[3];
@@ -328,5 +342,140 @@ public class AppManager : MonoBehaviour
         fridayHours.text = "Friday: " + www.text.Split('\t')[5];
         saturdayHours.text = "Saturday: " + www.text.Split('\t')[6];
         sundayHours.text = "Sunday: " + www.text.Split('\t')[7];
+        for (int i = 0; i < 8; i++) // daca nu e nicio ora setata nu se lucreaza in ziua aia
+        {
+            if (www.text.Split('\t')[i] == null || www.text.Split('\t')[i] == "")
+            {
+                switch (i)
+                {
+                    case 1:
+                        mondayHours.text = "Monday: Not working";
+                        break;
+                    case 2:
+                        tuesdayHours.text = "Tuesday: Not working";
+                        break;
+                    case 3:
+                        wednesdayHours.text = "Wednesday: Not working";
+                        break;
+                    case 4:
+                        thursdayHours.text = "Thursday: Not working";
+                        break;
+                    case 5:
+                        fridayHours.text = "Friday: Not working";
+                        break;
+                    case 6:
+                        saturdayHours.text = "Saturday: Not working";
+                        break;
+                    case 7:
+                        sundayHours.text = "Sunday: Not working";
+                        break;
+                }
+            }
+        }
+    }
+    public void nextShopImage()
+    {
+        if (shopImageNumber < 5)
+        {
+        shopImageNumber++;
+        }
+        setimagine();
+    }
+    public void previousShopImage()
+    {
+        if(shopImageNumber > 1)
+        {
+        shopImageNumber--;
+        }
+        setimagine();
+    }
+    public void setimagine()
+    {
+        StartCoroutine(DownloadImage("http://localhost/barberapp/image" + shopImageNumber.ToString())); //balanced parens CAS
+    }
+    private bool isFailedImage(Texture tex) // to check if the downloaded image is equal to the question mark image(when it fails loading)
+    {
+        if (!tex) return true;
+
+        byte[] png1 = (tex as Texture2D).EncodeToPNG(); // encode the downloaded texture to bytes
+        // bytes representation of the question mark image
+        byte[] questionMarkPNG = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 8, 0, 0, 0, 8, 8, 2, 0, 0, 0, 75, 109, 41, 220, 0, 0, 0, 65, 73, 68, 65, 84, 8, 29, 85, 142, 81, 10, 0, 48, 8, 66, 107, 236, 254, 87, 110, 106, 35, 172, 143, 74, 243, 65, 89, 85, 129, 202, 100, 239, 146, 115, 184, 183, 11, 109, 33, 29, 126, 114, 141, 75, 213, 65, 44, 131, 70, 24, 97, 46, 50, 34, 72, 25, 39, 181, 9, 251, 205, 14, 10, 78, 123, 43, 35, 17, 17, 228, 109, 164, 219, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130, };
+
+        return Equivalent(png1, questionMarkPNG); //return if they are the same or not
+    }
+    public bool Equivalent(byte[] bytes1, byte[] bytes2) // check 2 arrays of bytes to see if they are the same or not
+    {
+        if (bytes1.Length != bytes2.Length) return false;
+        for (int i = 0; i < bytes1.Length; i++)
+            if (!bytes1[i].Equals(bytes2[i])) return false;
+        return true;
+    }
+    IEnumerator DownloadImage(string url)
+    {
+        WWW www = new WWW(url + ".jpg");
+        WWW w = new WWW(url + ".png");
+        yield return www;
+        yield return w;
+        if (isFailedImage(www.texture))
+        {
+            Debug.Log("muie");
+            shopPhoto.sprite = Sprite.Create(w.texture, new Rect(0, 0, w.texture.width, w.texture.height), new Vector2(0, 0));
+        }
+        else
+        {
+            shopPhoto.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
+        }
+
+    }
+    public void uploadImage()
+    {
+        StartCoroutine(StartUploading());
+    }
+    IEnumerator StartUploading()
+    {
+        WWWForm form = new WWWForm();
+        byte[] textureBytes = null;
+
+        //Get a copy of the texture, because we can't access original texure data directly. 
+        Texture2D photoTexture = GetTextureCopy(shopPhoto.sprite.texture);
+        textureBytes = photoTexture.EncodeToJPG();
+        string imageName = "image" + shopImageNumber + ".jpg";
+        form.AddBinaryData("myimage", textureBytes, imageName, "imagebro.jpg");
+
+        WWW w = new WWW("http://localhost/barberapp/uploadimage.php", form);
+
+        yield return w;
+        Debug.Log(w.text);
+        w.Dispose();
+    }
+
+    Texture2D GetTextureCopy(Texture2D source)
+    {
+        //Create a RenderTexture
+        RenderTexture rt = RenderTexture.GetTemporary(
+                               source.width,
+                               source.height,
+                               0,
+                               RenderTextureFormat.Default,
+                               RenderTextureReadWrite.Linear
+                           );
+
+        //Copy source texture to the new render (RenderTexture) 
+        Graphics.Blit(source, rt);
+
+        //Store the active RenderTexture & activate new created one (rt)
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = rt;
+
+        //Create new Texture2D and fill its pixels from rt and apply changes.
+        Texture2D readableTexture = new Texture2D(source.width, source.height);
+        readableTexture.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+        readableTexture.Apply();
+
+        //activate the (previous) RenderTexture and release texture created with (GetTemporary( ) ..)
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(rt);
+
+        return readableTexture;
     }
 }
