@@ -24,7 +24,7 @@ public class Register : MonoBehaviour
         form.AddField("isBoss", isBossToggle.isOn.ToString());
         form.AddField("shopName", shopNameField.text);
         form.AddField("shopAddress", shopAddressField.text);
-        WWW www = new WWW("http://localhost/barberapp/register.php", form);
+        WWW www = new WWW("http://81.196.99.232/barberapp/register.php", form);
         return www;
         if(www.text == "0")
         {

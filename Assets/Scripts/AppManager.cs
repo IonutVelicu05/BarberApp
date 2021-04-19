@@ -33,7 +33,11 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI saturdayHours;
     [SerializeField] private TextMeshProUGUI sundayHours;
     [SerializeField] private Image shopPhoto;
+    [SerializeField] private InputField imageFromPhoneName;
     private int shopImageNumber = 1;
+    private bool anotherShopSelected = false; //when selecting a shop it sets it to true and if its true when selecting it shows the first image of
+    //the shop; sets shopImageNumber to 1;
+    private Texture2D imageFromPhone;
 
     private Image tempOpenHourImage;
     private Image tempOpenMinuteImage;
@@ -101,7 +105,10 @@ public class AppManager : MonoBehaviour
     }
     public void SelectSalon()
     {
-        shopImageNumber = 1;
+        if(selectedShopName != EventSystem.current.currentSelectedGameObject.name)
+        {
+            shopImageNumber = 1;
+        }
         setimagine();
         selectedShopName = EventSystem.current.currentSelectedGameObject.name;
         ShowShopDescription();
@@ -117,7 +124,7 @@ public class AppManager : MonoBehaviour
             WWWForm form = new WWWForm();
             form.AddField("whatToPick", whatToPick);
 
-            WWW www = new WWW("http://localhost/barberapp/showShops.php", form);
+            WWW www = new WWW("http://81.196.99.232/barberapp/showShops.php", form);
             yield return www;
 
             switch (whatToPick)
@@ -154,7 +161,7 @@ public class AppManager : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("description", ShopDescriptionField.text);
         form.AddField("username", account.AccountUsername);
-        WWW www = new WWW("http://localhost/barberapp/editshopdescription.php", form);
+        WWW www = new WWW("http://81.196.99.232/barberapp/editshopdescription.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -174,12 +181,11 @@ public class AppManager : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("shopname", selectedShopName);
 
-        WWW www = new WWW("http://localhost/barberapp/showdescription.php", form);
+        WWW www = new WWW("http://81.196.99.232/barberapp/showdescription.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
             shopDescription.text = www.text.Split('\t')[1];
-            Debug.Log("showssccs");
         }
         else
         {
@@ -301,7 +307,7 @@ public class AppManager : MonoBehaviour
         form.AddField("workingHours", updateWorkingProgram);
         form.AddField("bossName", account.AccountUsername);
 
-        WWW www = new WWW("http://localhost/barberapp/editshopworkinghours.php", form);
+        WWW www = new WWW("http://81.196.99.232/barberapp/editshopworkinghours.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -320,7 +326,7 @@ public class AppManager : MonoBehaviour
     {
         WWWForm form = new WWWForm();
         form.AddField("shopName", selectedShopName);
-        WWW www = new WWW("http://localhost/barberapp/getworkinghours.php", form);
+        WWW www = new WWW("http://81.196.99.232/barberapp/getworkinghours.php", form);
         yield return www;
         
         if (www.text[0] != '0')
@@ -391,7 +397,7 @@ public class AppManager : MonoBehaviour
     }
     public void setimagine()
     {
-        StartCoroutine(DownloadImage("http://localhost/barberapp/image" + shopImageNumber.ToString())); //balanced parens CAS
+        StartCoroutine(DownloadImage("http://81.196.99.232/barberapp/image" + shopImageNumber.ToString())); //balanced parens CAS
     }
     private bool isFailedImage(Texture tex) // to check if the downloaded image is equal to the question mark image(when it fails loading)
     {
@@ -418,7 +424,6 @@ public class AppManager : MonoBehaviour
         yield return w;
         if (isFailedImage(www.texture))
         {
-            Debug.Log("muie");
             shopPhoto.sprite = Sprite.Create(w.texture, new Rect(0, 0, w.texture.width, w.texture.height), new Vector2(0, 0));
         }
         else
@@ -437,12 +442,12 @@ public class AppManager : MonoBehaviour
         byte[] textureBytes = null;
 
         //Get a copy of the texture, because we can't access original texure data directly. 
-        Texture2D photoTexture = GetTextureCopy(shopPhoto.sprite.texture);
+        Texture2D photoTexture = GetTextureCopy(imageFromPhone);
         textureBytes = photoTexture.EncodeToJPG();
         string imageName = "image" + shopImageNumber + ".jpg";
         form.AddBinaryData("myimage", textureBytes, imageName, "imagebro.jpg");
 
-        WWW w = new WWW("http://localhost/barberapp/uploadimage.php", form);
+        WWW w = new WWW("http://81.196.99.232/barberapp/uploadimage.php", form);
 
         yield return w;
         Debug.Log(w.text);
@@ -477,5 +482,27 @@ public class AppManager : MonoBehaviour
         RenderTexture.ReleaseTemporary(rt);
 
         return readableTexture;
+    }
+    public void PickPhoneImage()
+    {
+        NativeGallery.Permission permission = NativeGallery.GetImageFromGallery((path) =>
+        {
+            Debug.Log("Image path: " + path);
+            if (path != null)
+            {
+                // Create Texture from selected image
+
+                Texture2D texture = NativeGallery.LoadImageAtPath(path);
+                if (texture == null)
+                {
+                    Debug.Log("Couldn't load texture from " + path);
+                    return;
+                }
+                imageFromPhone = texture; // poza de upload sa fie textura luata din telefon
+                imageFromPhoneName.text = path.Split('/')[path.Split('/').Length - 1]; //seteaza inputFieldu sa aibe numele pozei selectate
+            }
+        }, "Select a PNG image", "image/png");
+
+        Debug.Log("Permission result: " + permission);
     }
 }
