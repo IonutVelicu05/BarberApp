@@ -11,6 +11,8 @@ public class Register : MonoBehaviour
     [SerializeField] private Toggle isBossToggle;
     [SerializeField] private TMP_InputField shopNameField;
     [SerializeField] private TMP_InputField shopAddressField;
+    [SerializeField] private Dropdown countyDropdown;
+    [SerializeField] private Dropdown cityDropdown;
 
     public void RegisterAccount()
     {
@@ -24,6 +26,8 @@ public class Register : MonoBehaviour
         form.AddField("isBoss", isBossToggle.isOn.ToString());
         form.AddField("shopName", shopNameField.text);
         form.AddField("shopAddress", shopAddressField.text);
+        form.AddField("countyName", countyDropdown.options[countyDropdown.value].text);
+        form.AddField("cityName", cityDropdown.options[cityDropdown.value].text);
         WWW www = new WWW("http://81.196.99.232/barberapp/register.php", form);
         return www;
         if(www.text == "0")

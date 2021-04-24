@@ -34,6 +34,8 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI sundayHours;
     [SerializeField] private Image shopPhoto;
     [SerializeField] private InputField imageFromPhoneName;
+    [SerializeField] private Dropdown createShopCityDropdown;
+    [SerializeField] private Dropdown createShopCountyDropdown;
     private int shopImageNumber = 1;
     private bool anotherShopSelected = false; //when selecting a shop it sets it to true and if its true when selecting it shows the first image of
     //the shop; sets shopImageNumber to 1;
@@ -102,13 +104,12 @@ public class AppManager : MonoBehaviour
     {
         ShowShops();
         backButton();
+        createShopCountyDropdown.onValueChanged.AddListener(delegate { CreateShopCountyPicked(createShopCountyDropdown); });
+        
     }
     public void SelectSalon()
     {
-        if(selectedShopName != EventSystem.current.currentSelectedGameObject.name)
-        {
-            shopImageNumber = 1;
-        }
+        shopImageNumber = 1;
         setimagine();
         selectedShopName = EventSystem.current.currentSelectedGameObject.name;
         ShowShopDescription();
@@ -236,11 +237,9 @@ public class AppManager : MonoBehaviour
     {
         for(int i = 0; i < 25; i ++)
         {
-            GameObject openWorkingHourBTN = Instantiate(openWorkingHourPrefab);
-            GameObject closeWorkingHourBTN = Instantiate(closeWorkingHourPrefab);
-            closeWorkingHourBTN.transform.SetParent(closeWorkingHourPrefab.transform.parent);
+            GameObject openWorkingHourBTN = Instantiate(openWorkingHourPrefab, openWorkingHourPrefab.transform.position, openWorkingHourPrefab.transform.rotation, openWorkingHourPrefab.transform.parent);
+            GameObject closeWorkingHourBTN = Instantiate(closeWorkingHourPrefab, closeWorkingHourPrefab.transform.position, closeWorkingHourPrefab.transform.rotation, closeWorkingHourPrefab.transform.parent);
             closeWorkingHourBTN.SetActive(true);
-            openWorkingHourBTN.transform.SetParent(openWorkingHourPrefab.transform.parent);
             openWorkingHourBTN.SetActive(true);
             if (i < 10)
             {
@@ -263,11 +262,10 @@ public class AppManager : MonoBehaviour
     {
         for(int i =0; i<60; i++)
         {
-            GameObject openWorkingMinuteBTN = Instantiate(openWorkingMinutePrefab);
-            GameObject closeWorkingMinuteBTN = Instantiate(closeWorkingMinutePrefab);
-            closeWorkingMinuteBTN.transform.SetParent(closeWorkingMinutePrefab.transform.parent);
+            GameObject openWorkingMinuteBTN = Instantiate(openWorkingMinutePrefab, openWorkingMinutePrefab.transform.position, openWorkingMinutePrefab.transform.rotation, openWorkingMinutePrefab.transform.parent);
+            GameObject closeWorkingMinuteBTN = Instantiate(closeWorkingMinutePrefab, closeWorkingMinutePrefab.transform.position, closeWorkingMinutePrefab.transform.rotation, closeWorkingMinutePrefab.transform.parent);
+
             closeWorkingMinuteBTN.SetActive(true);
-            openWorkingMinuteBTN.transform.SetParent(openWorkingMinutePrefab.transform.parent);
             openWorkingMinuteBTN.SetActive(true);
             if (i < 10)
             {
@@ -397,7 +395,7 @@ public class AppManager : MonoBehaviour
     }
     public void setimagine()
     {
-        StartCoroutine(DownloadImage("http://81.196.99.232/barberapp/image" + shopImageNumber.ToString())); //balanced parens CAS
+        StartCoroutine(DownloadImage("http://81.196.99.232/barberapp/shops/" + selectedShopName + "/image" + shopImageNumber.ToString())); //balanced parens CAS
     }
     private bool isFailedImage(Texture tex) // to check if the downloaded image is equal to the question mark image(when it fails loading)
     {
@@ -446,6 +444,7 @@ public class AppManager : MonoBehaviour
         textureBytes = photoTexture.EncodeToJPG();
         string imageName = "image" + shopImageNumber + ".jpg";
         form.AddBinaryData("myimage", textureBytes, imageName, "imagebro.jpg");
+        form.AddField("shopName", account.ShopNameOfUser);
 
         WWW w = new WWW("http://81.196.99.232/barberapp/uploadimage.php", form);
 
@@ -499,10 +498,28 @@ public class AppManager : MonoBehaviour
                     return;
                 }
                 imageFromPhone = texture; // poza de upload sa fie textura luata din telefon
-                imageFromPhoneName.text = path.Split('/')[path.Split('/').Length - 1]; //seteaza inputFieldu sa aibe numele pozei selectate
+                //imageFromPhoneName.text = path.Split('/')[path.Split('/').Length - 1]; //seteaza inputFieldu sa aibe numele pozei selectate
             }
         }, "Select a PNG image", "image/png");
 
         Debug.Log("Permission result: " + permission);
+    }
+    public void CreateShopCountyPicked(Dropdown createShopCounty)
+    {
+        switch (createShopCounty.value)
+        {
+            case 1:
+                createShopCityDropdown.interactable = true;
+                List<string> cityOltOptions = new List<string> { "Pick a city", "Caracal", "Farcasele", "Slatina", "Corabia" };
+                createShopCityDropdown.ClearOptions();
+                createShopCityDropdown.AddOptions(cityOltOptions);
+                break;
+            case 2:
+                createShopCityDropdown.interactable = true;
+                createShopCityDropdown.ClearOptions();
+                List<string> cityDoljOptions = new List<string> { "Pick a city","Craiova", "Radovan", "Gogosu", "Gura Racului" };
+                createShopCityDropdown.AddOptions(cityDoljOptions);
+                break;
+        }
     }
 }

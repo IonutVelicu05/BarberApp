@@ -18,11 +18,16 @@ public class Account : MonoBehaviour
     private int oneStarReviews;
     private bool isBoss;
     private bool isLogged;
+    private string shopNameOfUser;
     [SerializeField] private AppManager appmanager;
 
     public string AccountUsername
     {
         get { return accountUsername; }
+    }
+    public string ShopNameOfUser
+    {
+        get { return shopNameOfUser; }
     }
     public bool IsBoss
     {
@@ -58,6 +63,7 @@ public class Account : MonoBehaviour
             {
                 isAdmin = true;
             }
+            shopNameOfUser = www.text.Split('\t')[8];
             appmanager.backButton();
         }
         else
