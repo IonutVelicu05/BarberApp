@@ -25,7 +25,7 @@ public class Login : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("username", usernameField.text);
         form.AddField("password", passwordField.text);
-        WWW www = new WWW("http://81.196.99.232/barberapp/login.php", form);
+        WWW www = new WWW("http://81.196.99.236/barberapp/login.php", form);
         
         yield return www;
         if(www.text[0] == '0')

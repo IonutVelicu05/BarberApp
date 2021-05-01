@@ -1,11 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class AppManager : MonoBehaviour
 {
@@ -15,6 +13,8 @@ public class AppManager : MonoBehaviour
     [SerializeField] private GameObject loginMenu;
     [SerializeField] private GameObject manageShopMenu;
     [SerializeField] private GameObject adminMenu;
+    [SerializeField] private GameObject registerButton;
+    [SerializeField] private GameObject registerMenu;
     [SerializeField] private GameObject backBTN;
     [SerializeField] private Account account;
     private BarberShop barberShopClass;
@@ -32,10 +32,15 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI fridayHours;
     [SerializeField] private TextMeshProUGUI saturdayHours;
     [SerializeField] private TextMeshProUGUI sundayHours;
-    [SerializeField] private Image shopPhoto;
+    [SerializeField] private Image shopPhoto; //the photo user is currently seeing
+    private Texture2D[] shopImage = new Texture2D[6];
+    [SerializeField] private GameObject loadingObject;
+    [SerializeField] private GameObject shopMenu;
     [SerializeField] private InputField imageFromPhoneName;
     [SerializeField] private Dropdown createShopCityDropdown;
     [SerializeField] private Dropdown createShopCountyDropdown;
+    [SerializeField] private Dropdown whatImageToUpload;
+    private int uploadedImageNumber; //the number of the uploading image
     private int shopImageNumber = 1;
     private bool anotherShopSelected = false; //when selecting a shop it sets it to true and if its true when selecting it shows the first image of
     //the shop; sets shopImageNumber to 1;
@@ -55,11 +60,94 @@ public class AppManager : MonoBehaviour
     private string[] shopName;
     private string[] shopAddress;
     private string selectedShopName;
+    private string lastShopSelected; // name of the last shop sleceted (if its another shop, it shows the first image)
     private List<GameObject> shopList = new List<GameObject>();
     private string[] shopWorkingHours = new string[8];
 
+    private int whatToPickBarber = 1;
+    private List<GameObject> barberList = new List<GameObject>();
+    private string[] firstName;
+    private string[] lastName;
+    private string[] fiveStarReviews;
+    private string[] fourStarReviews;
+    private string[] threeStarReviews;
+    private string[] twoStarReviews;
+    private string[] oneStarReviews;
+    [SerializeField] private GameObject barberPrefab;
 
 
+    public string GetSelectedShopName()
+    {
+        return selectedShopName;
+    }
+    public void showBarbers()
+    {
+        StartCoroutine(ShowBarbersEnumerator());
+    }
+    IEnumerator ShowBarbersEnumerator()
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            WWWForm form = new WWWForm();
+            form.AddField("whatToPick", whatToPickBarber);
+            form.AddField("shopName", selectedShopName);
+            WWW www = new WWW("http://81.196.99.236/barberapp/showBarbers.php", form);
+            yield return www;
+            Debug.Log(www.text);
+            switch (whatToPickBarber)
+            {
+                case 1:
+                    firstName = www.text.Split('\t');
+                    whatToPickBarber = 2;
+                    break;
+                case 2:
+                    lastName = www.text.Split('\t');
+                    whatToPickBarber = 3;
+                    break;
+                case 3:
+                    fiveStarReviews = www.text.Split('\t');
+                    whatToPickBarber = 4;
+                    break;
+                case 4:
+                    fourStarReviews = www.text.Split('\t');
+                    whatToPickBarber = 5;
+                    break;
+                case 5:
+                    threeStarReviews = www.text.Split('\t');
+                    whatToPickBarber = 6;
+                    break;
+                case 6:
+                    twoStarReviews = www.text.Split('\t');
+                    whatToPickBarber = 7;
+                    break;
+                case 7:
+                    oneStarReviews = www.text.Split('\t');
+                    whatToPickBarber = 1;
+                    break;
+            }
+        }
+        if (lastName.Length > 0)
+        {
+            if (barberList.Count > 0)
+            {
+                foreach (GameObject barber in barberList)
+                {
+                    Destroy(barber.gameObject);
+                }
+                barberList.Clear();
+            }
+        }
+        for (int j = 0; j < lastName.Length -1; j++)
+        {
+            GameObject barber = Instantiate(barberPrefab);
+            barber.name = firstName[j] + lastName[j];
+            barber.GetComponent<Barber>().FirstNameUI = firstName[j];
+            barber.GetComponent<Barber>().LastNameUI = lastName[j];
+            barber.transform.SetParent(barberPrefab.transform.parent, false);
+            barber.SetActive(true);
+            barberList.Add(barber);
+        }
+    }
     //select day for changing its working hours
     public void Monday()
     {
@@ -95,6 +183,8 @@ public class AppManager : MonoBehaviour
         loginButton.SetActive(!account.IsLogged);
         manageShopButton.SetActive(account.IsBoss);
         adminButton.SetActive(account.IsAdmin);
+        registerButton.SetActive(!account.IsLogged);
+        registerMenu.SetActive(false);
         loginMenu.SetActive(false);
         manageShopMenu.SetActive(false);
         adminMenu.SetActive(false);
@@ -105,13 +195,24 @@ public class AppManager : MonoBehaviour
         ShowShops();
         backButton();
         createShopCountyDropdown.onValueChanged.AddListener(delegate { CreateShopCountyPicked(createShopCountyDropdown); });
+        whatImageToUpload.onValueChanged.AddListener(delegate { WhatImageToUpload(whatImageToUpload); });
         
     }
     public void SelectSalon()
     {
         shopImageNumber = 1;
-        setimagine();
+        //setimagine();
+        getShopImages();
         selectedShopName = EventSystem.current.currentSelectedGameObject.name;
+        Debug.Log(selectedShopName);
+        if(selectedShopName == lastShopSelected)
+        {
+            shopImageNumber = 1;
+        }
+        else
+        {
+            lastShopSelected = selectedShopName;
+        }
         ShowShopDescription();
     }
     public void ShowShops()
@@ -125,7 +226,7 @@ public class AppManager : MonoBehaviour
             WWWForm form = new WWWForm();
             form.AddField("whatToPick", whatToPick);
 
-            WWW www = new WWW("http://81.196.99.232/barberapp/showShops.php", form);
+            WWW www = new WWW("http://81.196.99.236/barberapp/showShops.php", form);
             yield return www;
 
             switch (whatToPick)
@@ -140,6 +241,14 @@ public class AppManager : MonoBehaviour
         }
         if(shopName.Length > 0)
         {
+            if(shopList.Count > 0)
+            {
+                foreach(GameObject shop in shopList)
+                {
+                    Destroy(shop.gameObject);
+                }
+                shopList.Clear();
+            }
             for(int i=0; i<shopName.Length-1; i++)
             {
                 GameObject barberShop = Instantiate(shopPrefab);
@@ -162,7 +271,7 @@ public class AppManager : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("description", ShopDescriptionField.text);
         form.AddField("username", account.AccountUsername);
-        WWW www = new WWW("http://81.196.99.232/barberapp/editshopdescription.php", form);
+        WWW www = new WWW("http://81.196.99.236/barberapp/editshopdescription.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -182,7 +291,7 @@ public class AppManager : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("shopname", selectedShopName);
 
-        WWW www = new WWW("http://81.196.99.232/barberapp/showdescription.php", form);
+        WWW www = new WWW("http://81.196.99.236/barberapp/showdescription.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -305,7 +414,7 @@ public class AppManager : MonoBehaviour
         form.AddField("workingHours", updateWorkingProgram);
         form.AddField("bossName", account.AccountUsername);
 
-        WWW www = new WWW("http://81.196.99.232/barberapp/editshopworkinghours.php", form);
+        WWW www = new WWW("http://81.196.99.236/barberapp/editshopworkinghours.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -324,7 +433,7 @@ public class AppManager : MonoBehaviour
     {
         WWWForm form = new WWWForm();
         form.AddField("shopName", selectedShopName);
-        WWW www = new WWW("http://81.196.99.232/barberapp/getworkinghours.php", form);
+        WWW www = new WWW("http://81.196.99.236/barberapp/getworkinghours.php", form);
         yield return www;
         
         if (www.text[0] != '0')
@@ -395,7 +504,42 @@ public class AppManager : MonoBehaviour
     }
     public void setimagine()
     {
-        StartCoroutine(DownloadImage("http://81.196.99.232/barberapp/shops/" + selectedShopName + "/image" + shopImageNumber.ToString())); //balanced parens CAS
+        shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+    }
+    public void getShopImages()
+    {
+        StartCoroutine(GetShopImages());
+    }
+    IEnumerator GetShopImages()
+    {
+        for(int i =0; i<6; i++)
+        {
+            loadingObject.SetActive(true);  //activeaza loading screenu
+            WWW www = new WWW("http://81.196.99.236/barberapp/shops/" + selectedShopName + "/image" + i + ".jpg");
+            WWW w = new WWW("http://81.196.99.236/barberapp/shops/" + selectedShopName + "/image" + i + ".png");
+            yield return www;
+            yield return w;
+            if (isFailedImage(www.texture)) // check if the image is the question mark
+            {
+                shopImage[i] = w.texture; //set the texture to a variable
+                if (i >= 5) //if the loop got the 5th photo close the loading screen and set the shown image to 1
+                {
+                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+                    loadingObject.SetActive(false);
+                    shopMenu.SetActive(true);
+                }
+            }
+            else
+            {
+                shopImage[i] = www.texture; //set the texture to a variable
+                if (i >= 5) //if the loop got the 5th photo close the loading screen and set the shown image to 1
+                {
+                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+                    loadingObject.SetActive(false);
+                    shopMenu.SetActive(true);
+                }
+            }
+        }
     }
     private bool isFailedImage(Texture tex) // to check if the downloaded image is equal to the question mark image(when it fails loading)
     {
@@ -414,22 +558,6 @@ public class AppManager : MonoBehaviour
             if (!bytes1[i].Equals(bytes2[i])) return false;
         return true;
     }
-    IEnumerator DownloadImage(string url)
-    {
-        WWW www = new WWW(url + ".jpg");
-        WWW w = new WWW(url + ".png");
-        yield return www;
-        yield return w;
-        if (isFailedImage(www.texture))
-        {
-            shopPhoto.sprite = Sprite.Create(w.texture, new Rect(0, 0, w.texture.width, w.texture.height), new Vector2(0, 0));
-        }
-        else
-        {
-            shopPhoto.sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0, 0));
-        }
-
-    }
     public void uploadImage()
     {
         StartCoroutine(StartUploading());
@@ -442,11 +570,11 @@ public class AppManager : MonoBehaviour
         //Get a copy of the texture, because we can't access original texure data directly. 
         Texture2D photoTexture = GetTextureCopy(imageFromPhone);
         textureBytes = photoTexture.EncodeToJPG();
-        string imageName = "image" + shopImageNumber + ".jpg";
+        string imageName = "image" + uploadedImageNumber + ".jpg";
         form.AddBinaryData("myimage", textureBytes, imageName, "imagebro.jpg");
         form.AddField("shopName", account.ShopNameOfUser);
 
-        WWW w = new WWW("http://81.196.99.232/barberapp/uploadimage.php", form);
+        WWW w = new WWW("http://81.196.99.236/barberapp/uploadimage.php", form);
 
         yield return w;
         Debug.Log(w.text);
@@ -498,11 +626,26 @@ public class AppManager : MonoBehaviour
                     return;
                 }
                 imageFromPhone = texture; // poza de upload sa fie textura luata din telefon
-                //imageFromPhoneName.text = path.Split('/')[path.Split('/').Length - 1]; //seteaza inputFieldu sa aibe numele pozei selectate
             }
         }, "Select a PNG image", "image/png");
 
         Debug.Log("Permission result: " + permission);
+    }
+    public void WhatImageToUpload(Dropdown dropdown)
+    {
+        switch (dropdown.value)
+        {
+            case 1: uploadedImageNumber = 1;
+                break;
+            case 2: uploadedImageNumber = 2;
+                break;
+            case 3: uploadedImageNumber = 3;
+                break;
+            case 4: uploadedImageNumber = 4;
+                break;
+            case 5: uploadedImageNumber = 5;
+                break;
+        }
     }
     public void CreateShopCountyPicked(Dropdown createShopCounty)
     {
