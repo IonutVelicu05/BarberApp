@@ -28,7 +28,7 @@ public class Register : MonoBehaviour
         form.AddField("shopAddress", shopAddressField.text);
         form.AddField("countyName", countyDropdown.options[countyDropdown.value].text);
         form.AddField("cityName", cityDropdown.options[cityDropdown.value].text);
-        WWW www = new WWW("http://81.196.99.236/barberapp/registershop.php", form);
+        WWW www = new WWW("http://localhost/barberapp/registershop.php", form);
         return www;
         if(www.text == "0")
         {

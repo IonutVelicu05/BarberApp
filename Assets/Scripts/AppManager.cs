@@ -40,6 +40,10 @@ public class AppManager : MonoBehaviour
     [SerializeField] private Dropdown createShopCityDropdown;
     [SerializeField] private Dropdown createShopCountyDropdown;
     [SerializeField] private Dropdown whatImageToUpload;
+    [SerializeField] private Dropdown countyDropdown;
+    [SerializeField] private Dropdown cityDropdown;
+    private List<string> countyList = new List<string>();
+    private List<string> cityList = new List<string>();
     private int uploadedImageNumber; //the number of the uploading image
     private int shopImageNumber = 1;
     private bool anotherShopSelected = false; //when selecting a shop it sets it to true and if its true when selecting it shows the first image of
@@ -75,7 +79,6 @@ public class AppManager : MonoBehaviour
     private string[] oneStarReviews;
     [SerializeField] private GameObject barberPrefab;
 
-
     public string GetSelectedShopName()
     {
         return selectedShopName;
@@ -91,9 +94,8 @@ public class AppManager : MonoBehaviour
             WWWForm form = new WWWForm();
             form.AddField("whatToPick", whatToPickBarber);
             form.AddField("shopName", selectedShopName);
-            WWW www = new WWW("http://81.196.99.236/barberapp/showBarbers.php", form);
+            WWW www = new WWW("http://localhost/barberapp/showBarbers.php", form);
             yield return www;
-            Debug.Log(www.text);
             switch (whatToPickBarber)
             {
                 case 1:
@@ -143,6 +145,11 @@ public class AppManager : MonoBehaviour
             barber.name = firstName[j] + lastName[j];
             barber.GetComponent<Barber>().FirstNameUI = firstName[j];
             barber.GetComponent<Barber>().LastNameUI = lastName[j];
+            barber.GetComponent<Barber>().FiveStarUI = fiveStarReviews[j];
+            barber.GetComponent<Barber>().FourStarUI = fourStarReviews[j];
+            barber.GetComponent<Barber>().ThreeStarUI = threeStarReviews[j];
+            barber.GetComponent<Barber>().TwoStarUI = twoStarReviews[j];
+            barber.GetComponent<Barber>().OneStarUI = oneStarReviews[j];
             barber.transform.SetParent(barberPrefab.transform.parent, false);
             barber.SetActive(true);
             barberList.Add(barber);
@@ -190,21 +197,39 @@ public class AppManager : MonoBehaviour
         adminMenu.SetActive(false);
         backBTN.SetActive(false);
     }
+
+    void CountyAddToList(params string[] list)
+    {
+        for (int i = 0; i < list.Length; i++)
+        {
+            countyList.Add(list[i]);
+        }
+    }
+    void CityAddToList(params string[] list)
+    {
+        for (int i = 0; i < list.Length; i++)
+        {
+            cityList.Add(list[i]);
+        }
+    }
     public void Start()
     {
-        ShowShops();
+        countyDropdown.ClearOptions();
+        CountyAddToList("Pick a county", "Olt", "Dolj", "Timis");
+        countyDropdown.AddOptions(countyList);
         backButton();
+        countyDropdown.onValueChanged.AddListener(delegate { CountyPicked(countyDropdown); });
+        
         createShopCountyDropdown.onValueChanged.AddListener(delegate { CreateShopCountyPicked(createShopCountyDropdown); });
         whatImageToUpload.onValueChanged.AddListener(delegate { WhatImageToUpload(whatImageToUpload); });
+
         
     }
     public void SelectSalon()
     {
         shopImageNumber = 1;
-        //setimagine();
         getShopImages();
         selectedShopName = EventSystem.current.currentSelectedGameObject.name;
-        Debug.Log(selectedShopName);
         if(selectedShopName == lastShopSelected)
         {
             shopImageNumber = 1;
@@ -214,6 +239,7 @@ public class AppManager : MonoBehaviour
             lastShopSelected = selectedShopName;
         }
         ShowShopDescription();
+        GetShopWorkingHours();
     }
     public void ShowShops()
     {
@@ -225,10 +251,11 @@ public class AppManager : MonoBehaviour
         {
             WWWForm form = new WWWForm();
             form.AddField("whatToPick", whatToPick);
+            form.AddField("city", cityDropdown.options[cityDropdown.value].text);
+            form.AddField("county", countyDropdown.options[countyDropdown.value].text);
 
-            WWW www = new WWW("http://81.196.99.236/barberapp/showShops.php", form);
+            WWW www = new WWW("http://localhost/barberapp/showShops.php", form);
             yield return www;
-
             switch (whatToPick)
             {
                 case 1: shopName = www.text.Split('\t');
@@ -271,7 +298,7 @@ public class AppManager : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("description", ShopDescriptionField.text);
         form.AddField("username", account.AccountUsername);
-        WWW www = new WWW("http://81.196.99.236/barberapp/editshopdescription.php", form);
+        WWW www = new WWW("http://localhost/barberapp/editshopdescription.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -291,7 +318,7 @@ public class AppManager : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("shopname", selectedShopName);
 
-        WWW www = new WWW("http://81.196.99.236/barberapp/showdescription.php", form);
+        WWW www = new WWW("http://localhost/barberapp/showdescription.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -414,7 +441,7 @@ public class AppManager : MonoBehaviour
         form.AddField("workingHours", updateWorkingProgram);
         form.AddField("bossName", account.AccountUsername);
 
-        WWW www = new WWW("http://81.196.99.236/barberapp/editshopworkinghours.php", form);
+        WWW www = new WWW("http://localhost/barberapp/editshopworkinghours.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -433,21 +460,13 @@ public class AppManager : MonoBehaviour
     {
         WWWForm form = new WWWForm();
         form.AddField("shopName", selectedShopName);
-        WWW www = new WWW("http://81.196.99.236/barberapp/getworkinghours.php", form);
+        WWW www = new WWW("http://localhost/barberapp/getworkinghours.php", form);
         yield return www;
         
         if (www.text[0] != '0')
         {
             Debug.Log(www.text);
         }
-        foreach(string str in www.text.Split('\t'))
-        {
-            if (str == null || str == "")
-            {
-                
-            }
-        }
-
         mondayHours.text = "Monday: " + www.text.Split('\t')[1];
         tuesdayHours.text = "Tuesday: " + www.text.Split('\t')[2];
         wednesdayHours.text = "Wednesday: " + www.text.Split('\t')[3];
@@ -515,8 +534,8 @@ public class AppManager : MonoBehaviour
         for(int i =0; i<6; i++)
         {
             loadingObject.SetActive(true);  //activeaza loading screenu
-            WWW www = new WWW("http://81.196.99.236/barberapp/shops/" + selectedShopName + "/image" + i + ".jpg");
-            WWW w = new WWW("http://81.196.99.236/barberapp/shops/" + selectedShopName + "/image" + i + ".png");
+            WWW www = new WWW("http://localhost/barberapp/shops/" + selectedShopName + "/image" + i + ".jpg");
+            WWW w = new WWW("http://localhost/barberapp/shops/" + selectedShopName + "/image" + i + ".png");
             yield return www;
             yield return w;
             if (isFailedImage(www.texture)) // check if the image is the question mark
@@ -574,7 +593,7 @@ public class AppManager : MonoBehaviour
         form.AddBinaryData("myimage", textureBytes, imageName, "imagebro.jpg");
         form.AddField("shopName", account.ShopNameOfUser);
 
-        WWW w = new WWW("http://81.196.99.236/barberapp/uploadimage.php", form);
+        WWW w = new WWW("http://localhost/barberapp/uploadimage.php", form);
 
         yield return w;
         Debug.Log(w.text);
@@ -663,6 +682,27 @@ public class AppManager : MonoBehaviour
                 List<string> cityDoljOptions = new List<string> { "Pick a city","Craiova", "Radovan", "Gogosu", "Gura Racului" };
                 createShopCityDropdown.AddOptions(cityDoljOptions);
                 break;
+        }
+    }
+    public void CountyPicked(Dropdown countyPicked)
+    {
+        switch (countyPicked.value)
+        {
+            case 1:
+                cityDropdown.interactable = true;
+                cityList.Clear();
+                CityAddToList("Pick a city", "Caracal", "Slatina", "Grojdibodu", "Conacu Piatra-Olt");
+                cityDropdown.ClearOptions();
+                cityDropdown.AddOptions(cityList);
+                break;
+            case 2:
+                cityDropdown.interactable = true;
+                cityList.Clear();
+                CityAddToList("Pick a city", "Craiova", "Radovan", "Gura Racului", "Gogosu");
+                cityDropdown.ClearOptions();
+                cityDropdown.AddOptions(cityList);
+                break;
+                
         }
     }
 }

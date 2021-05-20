@@ -20,8 +20,13 @@ public class Account : MonoBehaviour
     [SerializeField] private GameObject registerButton;
     [SerializeField] private GameObject nextButton;
     [SerializeField] private GameObject registerError;
+    [SerializeField] private TextMeshProUGUI profileFirstName;
+    [SerializeField] private TextMeshProUGUI profileLastName;
+    [SerializeField] private TextMeshProUGUI profileUsername;
     private string accountUsername;
     private bool isAdmin;
+    private string firstName;
+    private string lastName;
     private int fiveStarReviews;
     private int fourStarReviews;
     private int threeStarReviews;
@@ -89,7 +94,7 @@ public class Account : MonoBehaviour
         form.AddField("email", registerEmail.text);
         form.AddField("firstName", registerFirstName.text);
         form.AddField("lastName", registerLastName.text);
-        WWW www = new WWW("http://81.196.99.236/barberapp/register.php", form);
+        WWW www = new WWW("http://localhost/barberapp/register.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -108,7 +113,7 @@ public class Account : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("username", usernameField.text);
         form.AddField("password", passwordField.text);
-        WWW www = new WWW("http://81.196.99.236/barberapp/login.php", form);
+        WWW www = new WWW("http://localhost/barberapp/login.php", form);
 
         yield return www;
         if (www.text[0] == '0')
@@ -127,7 +132,12 @@ public class Account : MonoBehaviour
             int.TryParse(www.text.Split('\t')[6], out twoStarReviews);
             int.TryParse(www.text.Split('\t')[7], out oneStarReviews);
             shopNameOfUser = www.text.Split('\t')[8];
+            firstName = www.text.Split('\t')[9];
+            lastName = www.text.Split('\t')[10];
             appmanager.backButton();
+            profileUsername.text = accountUsername;
+            profileFirstName.text = firstName;
+            profileLastName.text = lastName;
         }
         else
         {

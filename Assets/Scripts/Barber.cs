@@ -22,5 +22,24 @@ public class Barber : MonoBehaviour
     {
         set { lastNameUI.text = value; }
     }
-
+    public string FiveStarUI
+    {
+        set { fiveStarReviewUI.text = value; }
+    }
+    public string FourStarUI
+    {
+        set { fourStarReviewUI.text = value; }
+    }
+    public string ThreeStarUI
+    {
+        set { threeStartReviewUI.text = value; }
+    }
+    public string TwoStarUI
+    {
+        set { twoStarReviewUI.text = value; }
+    }
+    public string OneStarUI
+    {
+        set { oneStarReviewUI.text = value; }
+    }
 }
