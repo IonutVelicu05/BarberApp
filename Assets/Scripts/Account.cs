@@ -35,6 +35,7 @@ public class Account : MonoBehaviour
     private bool isBoss;
     private bool isLogged;
     private string shopNameOfUser;
+    private bool isEmployed;
     [SerializeField] private AppManager appmanager;
 
     public string AccountUsername
@@ -56,6 +57,10 @@ public class Account : MonoBehaviour
     public bool IsLogged
     {
         get { return isLogged; }
+    }
+    public bool IsEmployed
+    {
+        get { return isEmployed; }
     }
     public void nextFields()
     {
@@ -134,6 +139,10 @@ public class Account : MonoBehaviour
             shopNameOfUser = www.text.Split('\t')[8];
             firstName = www.text.Split('\t')[9];
             lastName = www.text.Split('\t')[10];
+            if(www.text.Split('\t')[11] != null && www.text.Split('\t')[11] != "")
+            {
+                isEmployed = true;
+            }
             appmanager.backButton();
             profileUsername.text = accountUsername;
             profileFirstName.text = firstName;

@@ -15,9 +15,9 @@ public class AppManager : MonoBehaviour
     [SerializeField] private GameObject adminMenu;
     [SerializeField] private GameObject registerButton;
     [SerializeField] private GameObject registerMenu;
+    [SerializeField] private GameObject barberMenuBTN;
     [SerializeField] private GameObject backBTN;
     [SerializeField] private Account account;
-    private BarberShop barberShopClass;
     [SerializeField] private GameObject shopPrefab;
     [SerializeField] private TextMeshProUGUI shopDescription;
     [SerializeField] private InputField ShopDescriptionField;
@@ -78,6 +78,12 @@ public class AppManager : MonoBehaviour
     private string[] twoStarReviews;
     private string[] oneStarReviews;
     [SerializeField] private GameObject barberPrefab;
+    private int timeToCut;
+
+    public int GetTimeToCut()
+    {
+        return timeToCut;
+    }
 
     public string GetSelectedShopName()
     {
@@ -142,7 +148,7 @@ public class AppManager : MonoBehaviour
         for (int j = 0; j < lastName.Length -1; j++)
         {
             GameObject barber = Instantiate(barberPrefab);
-            barber.name = firstName[j] + lastName[j];
+            barber.name = firstName[j] + "\t" + lastName[j];
             barber.GetComponent<Barber>().FirstNameUI = firstName[j];
             barber.GetComponent<Barber>().LastNameUI = lastName[j];
             barber.GetComponent<Barber>().FiveStarUI = fiveStarReviews[j];
@@ -196,6 +202,7 @@ public class AppManager : MonoBehaviour
         manageShopMenu.SetActive(false);
         adminMenu.SetActive(false);
         backBTN.SetActive(false);
+        barberMenuBTN.SetActive(account.IsEmployed);
     }
 
     void CountyAddToList(params string[] list)
