@@ -57,7 +57,226 @@ public class Appointments : MonoBehaviour
     private int newCloseMinutes;
     private int newOpenMinutes;
     private int timeToCut = 0;
+    //------end-------
 
+    //show appointment to the barber ~~~ DAYS ~~~~
+    [SerializeField] private GameObject appointmentDayPrefab;
+    private GameObject appointmentDayNameObj;
+    private GameObject appointmentDayNumberObj;
+    private GameObject selectedAppointmentDayObj;
+    private List<GameObject> appointmentDayList = new List<GameObject>();
+    private string selectedAppointmentDay;
+    //show appointment to the barber ~~~ APPOINTMENT INFO ~~~
+    private string[] barberOccupiedMinutes = new string[130];
+    private string[] barberOccupiedHours = new string[130];
+    private bool[] barberOccupiedDays = new bool[33];
+    private string[] clientName = new string[130];
+    private string[] appointmentInfo = new string[130]; //info given by the client when the appointment was created
+    private List<GameObject> occupiedAppointments = new List<GameObject>();
+    [SerializeField] private GameObject occupiedAppointmentPrefab;
+    private TextMeshProUGUI appointmentClientName;
+    private TextMeshProUGUI occupiedAppointmentHour;
+    private TextMeshProUGUI occupiedAppointmentMinute;
+    private TextMeshProUGUI occupiedAppointmentInfo;
+    private int occupiedAppointmentCounter = 0; //increases for every appointment that has to be shown
+    //------end-------
+    //DELETE THE APPOINTMENT ~~BARBER~~
+    private GameObject selectedAppointment;
+    private string deleteAppointmentHour;
+    private string deleteAppointmentMinute;
+
+    //~~~ END ~~~
+
+    public void CheckBarberAppointmentsDays()
+    {
+        StartCoroutine(CheckBarberAppointmentsEnum());
+    }
+    IEnumerator CheckBarberAppointmentsEnum()
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("barberName", accountClass.BarberName);
+        form.AddField("currentMonth", currentMonth);
+        form.AddField("currentYear", currentYear);
+        WWW www = new WWW("http://localhost/barberapp/checkbarberappdays.php", form);
+        yield return www;
+        string[] days = new string[33];
+        Debug.Log(www.text);
+        for (int i = 0; i < www.text.Split('\t').Length; i++)
+        {
+            days[i] = www.text.Split('\t')[i];
+            for (int k = 0; k < days.Length; k++)
+            {
+                foreach (string str in days)
+                {
+                    if (str == k.ToString())
+                    {
+                        barberOccupiedDays[int.Parse(str)] = true;
+                    }
+                }
+            }
+        }
+    }
+    public void CheckBarberAppointmentsTime()
+    {
+        StartCoroutine(CheckBarberAppointmentsTimeEnum());
+    }
+
+    IEnumerator CheckBarberAppointmentsTimeEnum()
+    {
+        int WTP = 1;
+        for (int i = 0; i < 4; i++)
+        {
+            WWWForm form = new WWWForm();
+            form.AddField("barberName", accountClass.BarberName);
+            form.AddField("currentMonth", currentMonth);
+            form.AddField("currentYear", currentYear);
+            form.AddField("selectedDay", selectedAppointmentDay);
+            form.AddField("wtp", WTP);
+            WWW www = new WWW("http://localhost/barberapp/getoccupiedtime.php", form);
+            yield return www;
+            switch (WTP)
+            {
+                case 1:
+                    for(int j = 0; j < www.text.Split('\t').Length; j++)
+                    {
+                        barberOccupiedHours[j] = www.text.Split('\t')[j];
+                        occupiedAppointmentCounter++;
+                    }
+                    WTP = 2;
+                    break;
+                case 2:
+                    Debug.Log("textlkength = " + www.text.Split('\t').Length);
+                    Debug.Log(www.text);
+                    for (int j = 0; j < www.text.Split('\t').Length; j++)
+                    {
+                        barberOccupiedMinutes[j] = www.text.Split('\t')[j];
+                        Debug.Log("occupiedMNS = " + barberOccupiedMinutes[j]);
+                    }
+                    WTP = 3;
+                    break;
+                case 3:
+                    for(int j = 0; j<www.text.Split('\t').Length; j++)
+                    {
+                        clientName[j] = www.text.Split('\t')[j];
+                    }
+                    WTP = 4;
+                    break;
+                case 4:
+                    for (int j = 0; j < www.text.Split('\t').Length; j++)
+                    {
+                        appointmentInfo[j] = www.text.Split('\t')[j];
+                    }
+                    WTP = 1;
+                    break;
+            }
+        }
+        CreateOccupiedAppointments();
+    }
+    public void BarberSelectAppointment()
+    {
+        selectedAppointment = EventSystem.current.currentSelectedGameObject;
+    }
+    public void BarberDeleteAppointment()
+    {
+        StartCoroutine(BarberDeleteAppointmentEnum());
+    }
+    IEnumerator BarberDeleteAppointmentEnum()
+    {
+        string hour = selectedAppointment.transform.Find("Hour").gameObject.transform.Find("Number").gameObject.GetComponent<TextMeshProUGUI>().text;
+        string minute = selectedAppointment.transform.Find("Minute").gameObject.transform.Find("Number").gameObject.GetComponent<TextMeshProUGUI>().text;        
+        WWWForm form = new WWWForm();
+        form.AddField("clientName", selectedAppointment.name);
+        form.AddField("appHour", hour);
+        form.AddField("appMinute", minute);
+        WWW www = new WWW("http://localhost/barberapp/barberdeleteapp.php", form);
+        yield return www;
+        if(www.text[0] == '0')
+        {
+            Debug.Log("deleted succesfully");
+            Destroy(selectedAppointment);
+        }
+        else
+        {
+            Debug.Log(www.text);
+        }
+    }
+    public void CreateOccupiedAppointments()
+    {
+        loadingScreen.SetActive(true);
+        if(occupiedAppointments.Count > 0)
+        {
+            foreach(GameObject obj in occupiedAppointments)
+            {
+                Destroy(obj);
+            }
+            occupiedAppointments.Clear();
+        }
+        for(int i = 0; i < occupiedAppointmentCounter-1; i++)
+        {
+            GameObject appointment = Instantiate(occupiedAppointmentPrefab);
+            appointment.transform.SetParent(occupiedAppointmentPrefab.transform.parent);
+            appointment.SetActive(true);
+            appointment.name = clientName[i];
+            appointment.transform.localScale = new Vector3(1f, 1f, 1f);
+            appointment.transform.localPosition = new Vector3(appointment.transform.position.x, appointment.transform.position.y, 0f);
+            GameObject hour = appointment.transform.Find("Hour").gameObject;
+            occupiedAppointmentHour = hour.transform.Find("Number").gameObject.GetComponent<TextMeshProUGUI>();
+            occupiedAppointmentHour.text = barberOccupiedHours[i];
+            GameObject minute = appointment.transform.Find("Minute").gameObject;
+            occupiedAppointmentMinute = minute.transform.Find("Number").gameObject.GetComponent<TextMeshProUGUI>();
+            occupiedAppointmentMinute.text = barberOccupiedMinutes[i];
+            appointmentClientName = appointment.transform.Find("ClientName").gameObject.GetComponent<TextMeshProUGUI>();
+            appointmentClientName.text = clientName[i];
+            occupiedAppointments.Add(appointment);
+        }
+        occupiedAppointmentCounter = 0;
+        loadingScreen.SetActive(false);
+    }
+    public void CreateAppointmentDays()
+    {
+        loadingScreen.SetActive(true);
+        if(appointmentDayList.Count > 0)
+        {
+            foreach(GameObject obj in appointmentDayList)
+            {
+                Destroy(obj);
+            }
+            appointmentDayList.Clear();
+        }
+        for(int i = 1; i < DateTime.DaysInMonth(currentYear, currentMonth) + 1; i++)
+        {
+            GameObject day = Instantiate(appointmentDayPrefab);
+            day.name = i.ToString();
+            day.transform.SetParent(appointmentDayPrefab.transform.parent);
+            day.SetActive(true);
+            day.transform.localScale = new Vector3(1f, 1f, 1f);
+            day.transform.localPosition = new Vector3(day.transform.position.x, day.transform.position.y, 0f);
+            appointmentDayNumberObj = day.transform.Find("DayNumber").gameObject;
+            appointmentDayNumberObj.GetComponent<TextMeshProUGUI>().text = i.ToString();
+            appointmentDayNameObj = day.transform.Find("DayName").gameObject;
+            currentDate = new DateTime(currentYear, currentMonth, i);
+            appointmentDayNameObj.GetComponent<TextMeshProUGUI>().text = currentDate.DayOfWeek.ToString();
+            appointmentDayList.Add(day);
+            if (barberOccupiedDays[i] == true)
+            {
+                day.GetComponent<Image>().color = new Color(1f, 0f, 0f, 1f);
+            }
+        }
+        loadingScreen.SetActive(false);
+    }
+
+    public void SelectAppointmentDay()
+    {
+        selectedAppointmentDayObj = EventSystem.current.currentSelectedGameObject;
+        selectedAppointmentDay = selectedAppointmentDayObj.name;
+        CheckBarberAppointmentsTime();
+    }
+
+    public void ResetDateTime()
+    {
+        currentMonth = DateTime.Now.Month;
+        currentYear = DateTime.Now.Year;
+    }
     public void CreateCalendar()
     {
         loadingScreen.SetActive(true);
@@ -257,7 +476,6 @@ public class Appointments : MonoBehaviour
         if(www.text[0] == '0')
         {
             timeToCut = int.Parse(www.text.Split('\t')[1]);
-            Debug.Log("bv timetocut = " + timeToCut);
         }
         else
         {
@@ -293,7 +511,7 @@ public class Appointments : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("shopname", appmanagerClass.GetSelectedShopName());
         form.AddField("selectedDay", selectedDayString);
-        WWW www = new WWW("http://localhost/barberapp/test.php", form);
+        WWW www = new WWW("http://localhost/barberapp/getshopprogramapp.php", form);
         yield return www;
 
         if(www.text[0] == '0')
@@ -419,6 +637,8 @@ public class Appointments : MonoBehaviour
         form.AddField("day", selectedDayObj.name);
         form.AddField("month", currentMonth);
         form.AddField("year", currentYear);
+        form.AddField("hour", selectedHour);
+        form.AddField("minute", selectedMinute);
         WWW www = new WWW("http://localhost/barberapp/createappointment.php", form);
         yield return www;
         if(www.text[0] == '0')

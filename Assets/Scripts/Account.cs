@@ -38,6 +38,10 @@ public class Account : MonoBehaviour
     private bool isEmployed;
     [SerializeField] private AppManager appmanager;
 
+    public string BarberName
+    {
+        get { return firstName + lastName; }
+    }
     public string AccountUsername
     {
         get { return accountUsername; }
@@ -123,7 +127,7 @@ public class Account : MonoBehaviour
         yield return www;
         if (www.text[0] == '0')
         {
-            Debug.Log("login suces");
+            Debug.Log("login suces 0");
             accountUsername = www.text.Split('\t')[1];
             isLogged = true;
             bool.TryParse(www.text.Split('\t')[2], out isBoss);
@@ -140,6 +144,32 @@ public class Account : MonoBehaviour
             firstName = www.text.Split('\t')[9];
             lastName = www.text.Split('\t')[10];
             if(www.text.Split('\t')[11] != null && www.text.Split('\t')[11] != "")
+            {
+                isEmployed = true;
+            }
+            appmanager.backButton();
+            profileUsername.text = accountUsername;
+            profileFirstName.text = firstName;
+            profileLastName.text = lastName;
+        }
+        else if(www.text[0] == '1')
+        {
+            Debug.Log("login suces 1");
+            accountUsername = www.text.Split('\t')[1];
+            isLogged = true;
+            bool.TryParse(www.text.Split('\t')[2], out isBoss);
+            if (accountUsername == "test")
+            {
+                isAdmin = true;
+            }
+            int.TryParse(www.text.Split('\t')[3], out fiveStarReviews);
+            int.TryParse(www.text.Split('\t')[4], out fourStarReviews);
+            int.TryParse(www.text.Split('\t')[5], out threeStarReviews);
+            int.TryParse(www.text.Split('\t')[6], out twoStarReviews);
+            int.TryParse(www.text.Split('\t')[7], out oneStarReviews);
+            firstName = www.text.Split('\t')[8];
+            lastName = www.text.Split('\t')[9];
+            if (www.text.Split('\t')[10] != null && www.text.Split('\t')[10] != "")
             {
                 isEmployed = true;
             }
