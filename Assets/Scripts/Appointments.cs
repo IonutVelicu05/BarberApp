@@ -14,7 +14,7 @@ public class Appointments : MonoBehaviour
     [SerializeField] private TextMeshProUGUI dayNumber; //text of the daynumber textbox;
     [SerializeField] private TextMeshProUGUI dayName; //text of the dayname textbox;
     [SerializeField] private Account accountClass;
-    [SerializeField] private Button createAppointmentBTN;
+    [SerializeField] private Button createAppointmentHours;
     [SerializeField] private AppManager appmanagerClass;
     [SerializeField] private GameObject loadingScreen;
     [SerializeField] private InputField timeToCutInput;
@@ -31,6 +31,19 @@ public class Appointments : MonoBehaviour
     private GameObject dayNumberObj; //object representing the text object that holds the number of the day
     private GameObject dayNameObj; //object representing the text object that holds the name of the day
     private DateTime currentDate;
+    [SerializeField] private GameObject calendarBG;
+    [SerializeField] private GameObject selectedDateBG;
+    [SerializeField] private GameObject appointmentMenu; //child of full appointment menu
+    [SerializeField] private GameObject fullAppointmentMenu; //the whole menu responsible for appointments
+    private GameObject checkHoursBTN;
+    private GameObject nextMonthDateBTN;
+    private GameObject previousMonthDateBTN;
+    private GameObject hoursScrollView;
+    private GameObject minutesScrollView;
+    private GameObject daysScrollView;
+    private GameObject closeAppointmentBTN;
+    private GameObject backToHoursBTN;
+    private GameObject nextToInsertClientNameBTN;
 
     //time selection
     [SerializeField] private GameObject hourPrefab;
@@ -43,6 +56,8 @@ public class Appointments : MonoBehaviour
     private List<GameObject> minuteObjects = new List<GameObject>();
     private int selectedHour;
     private int selectedMinute;
+    private GameObject selectedMinuteObj;
+    private GameObject selectedHourObj;
     private bool[] occupiedHours = new bool[25];
     private bool[] occupiedMinutes = new bool[60];
     private Image selectedHourImage;
@@ -57,6 +72,16 @@ public class Appointments : MonoBehaviour
     private int newCloseMinutes;
     private int newOpenMinutes;
     private int timeToCut = 0;
+    [SerializeField] private GameObject createAppointmentBTN;
+    [SerializeField] private GameObject clientNameInsertObj;
+    [SerializeField] private InputField clientNameInputField;
+    [SerializeField] private GameObject clientMentionsObj;
+    [SerializeField] private InputField clientMentionInputField;
+    [SerializeField] private GameObject errorInfoObj;
+    [SerializeField] private TextMeshProUGUI errorInfoTXT;
+    
+    private string clientMentionsWrite;
+
     //------end-------
 
     //show appointment to the barber ~~~ DAYS ~~~~
@@ -82,12 +107,100 @@ public class Appointments : MonoBehaviour
     //------end-------
     //DELETE THE APPOINTMENT ~~BARBER~~
     private GameObject selectedAppointment;
-    private string deleteAppointmentHour;
-    private string deleteAppointmentMinute;
 
     //~~~ END ~~~
 
-    public void CheckBarberAppointmentsDays()
+
+
+
+
+
+
+    private void StartDateUpdate()
+    {
+        currentDateString = DateTime.Now.Day + " / " + DateTime.Now.Month + " / " + DateTime.Now.Year;
+        currentDateTXT.text = currentDateString;
+    }
+    public void BackToCalendar()
+    {
+        backToHoursBTN.SetActive(false);
+        closeAppointmentBTN.SetActive(true);
+        minutesScrollView.SetActive(false);
+        hoursScrollView.SetActive(false);
+        daysScrollView.SetActive(true);
+        nextMonthDateBTN.SetActive(true);
+        previousMonthDateBTN.SetActive(true);
+        //checkIfLoggedInBTN.SetActive(false);
+        checkHoursBTN.SetActive(true);
+    }
+    private void Start()
+    {
+        StartDateUpdate();
+        checkHoursBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("CheckHoursBTN").gameObject;
+        nextMonthDateBTN = selectedDateBG.transform.Find("NextPrevButtons").gameObject.transform.Find("NextMonthBTN").gameObject;
+        previousMonthDateBTN = selectedDateBG.transform.Find("NextPrevButtons").gameObject.transform.Find("PreviousMonthBTN").gameObject;
+        hoursScrollView = calendarBG.transform.Find("HoursScrollView").gameObject;
+        minutesScrollView = calendarBG.transform.Find("MinutesScrollView").gameObject;
+        daysScrollView = calendarBG.transform.Find("DaysScrollView").gameObject;
+        closeAppointmentBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("CloseAppointmentMenu").gameObject;
+        backToHoursBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("BackBTN(Hours)").gameObject;
+        nextToInsertClientNameBTN = selectedDateBG.transform.Find("CheckIfLoggedIn").gameObject;
+    }
+
+    public void CheckForSelectedTime()
+    {
+        string hour = selectedHour.ToString();
+        string minute = selectedMinute.ToString();
+        if (accountClass.IsLogged)
+        {
+            if (hour != null && minute != null)
+            {
+                createAppointmentBTN.GetComponent<Button>().interactable = true;
+            }
+        }
+        else
+        {
+            if (hour != null && minute != null)
+            {
+                nextToInsertClientNameBTN.GetComponent<Button>().interactable = true;
+            }
+        }
+    }
+
+    public void CheckIfUserIsLoggedIn()
+    {
+        if (accountClass.IsLogged)
+        {
+            Debug.Log("e logat");
+            nextToInsertClientNameBTN.SetActive(false);
+            createAppointmentBTN.SetActive(true);
+        }
+        else
+        {
+            Debug.Log("nu e logat");
+            nextToInsertClientNameBTN.SetActive(true);
+        }
+    }
+    public void NextToInsertClientName() //after selecting the hour and minute click the button to insert client name if user is not logged in
+    {
+        clientNameInsertObj.SetActive(true);
+        nextToInsertClientNameBTN.SetActive(false);
+        createAppointmentBTN.SetActive(true);
+    }
+    public void CloseInsertClientName() //when clicking the close button to close the menu to insert a client name when user not logged in
+    {
+        minutesScrollView.SetActive(false);
+        clientMentionsObj.SetActive(false);
+        hoursScrollView.SetActive(false);
+        daysScrollView.SetActive(true);
+        nextToInsertClientNameBTN.SetActive(false);
+        checkHoursBTN.SetActive(true);
+        createAppointmentBTN.SetActive(false);
+        clientNameInsertObj.SetActive(false);
+        nextMonthDateBTN.SetActive(true);
+        previousMonthDateBTN.SetActive(true);
+    }
+    public void CheckBarberAppointmentsDays() //check which days are occupied
     {
         StartCoroutine(CheckBarberAppointmentsEnum());
     }
@@ -100,7 +213,6 @@ public class Appointments : MonoBehaviour
         WWW www = new WWW("http://localhost/barberapp/checkbarberappdays.php", form);
         yield return www;
         string[] days = new string[33];
-        Debug.Log(www.text);
         for (int i = 0; i < www.text.Split('\t').Length; i++)
         {
             days[i] = www.text.Split('\t')[i];
@@ -145,12 +257,9 @@ public class Appointments : MonoBehaviour
                     WTP = 2;
                     break;
                 case 2:
-                    Debug.Log("textlkength = " + www.text.Split('\t').Length);
-                    Debug.Log(www.text);
                     for (int j = 0; j < www.text.Split('\t').Length; j++)
                     {
                         barberOccupiedMinutes[j] = www.text.Split('\t')[j];
-                        Debug.Log("occupiedMNS = " + barberOccupiedMinutes[j]);
                     }
                     WTP = 3;
                     break;
@@ -335,11 +444,12 @@ public class Appointments : MonoBehaviour
         //update the string of the current date textbox and
         selectedDayString = date.DayOfWeek.ToString();
         UpdateCurrentDate();
-        createAppointmentBTN.interactable = true;
+        createAppointmentHours.interactable = true;
+        
     }
     public void UpdateCurrentDate()
     {
-        currentDateString = selectedDayString + " / " + currentDate.Month + " / " + currentYear;
+        currentDateString = selectedAppointmentDay + " / " + currentDate.Month + " / " + currentYear;
         currentDateTXT.text = currentDateString;
     }
     public void NextMonth()
@@ -370,13 +480,13 @@ public class Appointments : MonoBehaviour
         barberFirstName = selectedBarberObj.name.Split('\t')[0];
         barberLastName = selectedBarberObj.name.Split('\t')[1];
         GetTimeToCut(); //get the time needed for the barber to do a cut
+        appointmentMenu.SetActive(true);
 
     }
     public void SelectHour()
     {
         selectedHour = int.Parse(EventSystem.current.currentSelectedGameObject.gameObject.name);
         CheckForAvailableAppointment();
-        CreateMinutes();
         //if the lasthour image is not null (or an hour button has been selected already)
         if (lastSelectedHourImage != null)
         {
@@ -389,6 +499,7 @@ public class Appointments : MonoBehaviour
         selectedHourImage.color = new Color(0.62f, 0.62f, 0.62f);
         //set the lastday image to be the image of the current selected hour object
         lastSelectedHourImage = selectedHourImage;
+        CreateMinutes();
     }
     public void SelectMinute()
     {
@@ -519,15 +630,23 @@ public class Appointments : MonoBehaviour
             loadingScreen.SetActive(true);
             Debug.Log("success");
             string workingHours = www.text.Split('\t')[1];
-            string openHM = workingHours.Split('-')[0];
-            string closeHM = workingHours.Split('-')[1];
-            openHour = int.Parse(openHM.Split(':')[0]);
-            openMinute = int.Parse(openHM.Split(':')[1]);
-            closeHour = int.Parse(closeHM.Split(':')[0]);
-            closeMinute = int.Parse(closeHM.Split(':')[1]);
-            newOpenMinutes = openMinute;
-            CreateHours();
-            loadingScreen.SetActive(false);
+            if(workingHours == null || workingHours == "")
+            {
+                errorInfoTXT.text = "This day is not a working day or the working program has not been updated yet.";
+                errorInfoObj.SetActive(true);
+                loadingScreen.SetActive(false);
+            }
+            else
+            {
+                string openHM = workingHours.Split('-')[0];
+                string closeHM = workingHours.Split('-')[1];
+                openHour = int.Parse(openHM.Split(':')[0]);
+                openMinute = int.Parse(openHM.Split(':')[1]);
+                closeHour = int.Parse(closeHM.Split(':')[0]);
+                closeMinute = int.Parse(closeHM.Split(':')[1]);
+                newOpenMinutes = openMinute;
+                CreateHours();
+            }
         }
         else
         {
@@ -556,6 +675,17 @@ public class Appointments : MonoBehaviour
             hour.SetActive(true); //set the object to be visible
             hourObjects.Add(hour); //add the object to the list
         }
+        loadingScreen.SetActive(false);
+        daysScrollView.SetActive(false);
+        minutesScrollView.SetActive(true);
+        hoursScrollView.SetActive(true);
+        closeAppointmentBTN.SetActive(false);
+        backToHoursBTN.SetActive(true);
+        nextMonthDateBTN.SetActive(false);
+        previousMonthDateBTN.SetActive(false);
+        //checkIfLoggedInBTN.SetActive(true);
+        checkHoursBTN.SetActive(false);
+        clientMentionsObj.SetActive(true);
     }
     public void CreateMinutes()//function to create the minutes buttons to create a new appointment
     {
@@ -631,25 +761,95 @@ public class Appointments : MonoBehaviour
     }
     IEnumerator CreateAppointmentEnumerator()
     {
-        WWWForm form = new WWWForm();
-        form.AddField("barberName", barberFirstName + barberLastName);
-        form.AddField("clientName", accountClass.AccountUsername);
-        form.AddField("day", selectedDayObj.name);
-        form.AddField("month", currentMonth);
-        form.AddField("year", currentYear);
-        form.AddField("hour", selectedHour);
-        form.AddField("minute", selectedMinute);
-        WWW www = new WWW("http://localhost/barberapp/createappointment.php", form);
-        yield return www;
-        if(www.text[0] == '0')
+        if (accountClass.IsLogged)
         {
-            Debug.Log(":sucscessss");
-            createAppointmentBTN.interactable = false;
+            {
+                WWWForm form = new WWWForm();
+                form.AddField("barberName", barberFirstName + barberLastName);
+                form.AddField("clientName", accountClass.AccountUsername);
+                form.AddField("day", selectedDayObj.name);
+                form.AddField("month", currentMonth);
+                form.AddField("year", currentYear);
+                form.AddField("hour", selectedHour);
+                form.AddField("minute", selectedMinute);
+                form.AddField("mentions", clientMentionInputField.text);
+                WWW www = new WWW("http://localhost/barberapp/createappointment.php", form);
+                yield return www;
+                daysScrollView.SetActive(true);
+                hoursScrollView.SetActive(false);
+                minutesScrollView.SetActive(false);
+                closeAppointmentBTN.SetActive(true);
+                backToHoursBTN.SetActive(false);
+                nextMonthDateBTN.SetActive(true);
+                previousMonthDateBTN.SetActive(true);
+                checkHoursBTN.SetActive(true);
+                createAppointmentBTN.SetActive(false);
+                appointmentMenu.SetActive(false);
+                clientMentionsObj.SetActive(false);
+                fullAppointmentMenu.SetActive(false);
+                if (www.text[0] == '0')
+                {
+                    errorInfoTXT.text = "Appointment successfully created ! You can check your current appointments in your profile page.";
+                    errorInfoObj.SetActive(true);
+                }
+                else
+                {
+                    Debug.Log(www.text);
+                    errorInfoTXT.text = "Something went wrong! Failed to create your appointment. Try again in a few minutes.";
+                    errorInfoObj.SetActive(true);
+                }
+            }
         }
         else
         {
-            Debug.Log(www.text);
+            if (clientNameInputField.text == null || clientNameInputField.text == "")
+            {
+                errorInfoTXT.text = "Please insert a real name so the barber will know you";
+                errorInfoObj.SetActive(true);
+            }
+            else
+            {
+                WWWForm form = new WWWForm();
+                form.AddField("barberName", barberFirstName + barberLastName);
+                form.AddField("clientName", clientNameInputField.text);
+                form.AddField("day", selectedDayObj.name);
+                form.AddField("month", currentMonth);
+                form.AddField("year", currentYear);
+                form.AddField("hour", selectedHour);
+                form.AddField("minute", selectedMinute);
+                form.AddField("mentions", clientMentionInputField.text);
+                WWW www = new WWW("http://localhost/barberapp/createappointment.php", form);
+                yield return www;
+                daysScrollView.SetActive(true);
+                hoursScrollView.SetActive(false);
+                minutesScrollView.SetActive(false);
+                closeAppointmentBTN.SetActive(true);
+                backToHoursBTN.SetActive(false);
+                nextMonthDateBTN.SetActive(true);
+                previousMonthDateBTN.SetActive(true);
+                checkHoursBTN.SetActive(true);
+                createAppointmentBTN.SetActive(false);
+                appointmentMenu.SetActive(false);
+                clientMentionsObj.SetActive(false);
+                fullAppointmentMenu.SetActive(false);
+                if (www.text[0] == '0')
+                {
+                    errorInfoTXT.text = "Appointment successfully created !";
+                    errorInfoObj.SetActive(true);
+                }
+                else
+                {
+                    Debug.Log(www.text);
+                    errorInfoTXT.text = "Something went wrong! Failed to create your appointment. Try again in a few minutes.";
+                    errorInfoObj.SetActive(true);
+                }
+            }
         }
+    }
+    public void ClearErrorInfo()
+    {
+        errorInfoTXT.text = "";
+        errorInfoObj.SetActive(false);
     }
 }
 
