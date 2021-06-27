@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-
 public class Barber : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI firstNameUI;

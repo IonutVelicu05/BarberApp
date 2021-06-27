@@ -23,6 +23,9 @@ public class Account : MonoBehaviour
     [SerializeField] private TextMeshProUGUI profileFirstName;
     [SerializeField] private TextMeshProUGUI profileLastName;
     [SerializeField] private TextMeshProUGUI profileUsername;
+    [SerializeField] private GameObject errorInfoObj;
+    [SerializeField] private TextMeshProUGUI errorInfoTXT;
+    [SerializeField] private GameObject settingsMenu;
     private string accountUsername;
     private bool isAdmin;
     private string firstName;
@@ -36,11 +39,31 @@ public class Account : MonoBehaviour
     private bool isLogged;
     private string shopNameOfUser;
     private bool isEmployed;
+    private int personalCode;
+    private int timeToCut;
+    private int shopsCreated; //number of shops the user has already created
+    private int shopsToCreate; //number of shops the user can still create
     [SerializeField] private AppManager appmanager;
 
     public string BarberName
     {
         get { return firstName + lastName; }
+    }
+    public int PersonalCode
+    {
+        get { return personalCode; }
+    }
+    public bool CanCreateShops
+    {
+        get { return shopsToCreate - shopsCreated > 0; }
+    }
+    public int ShopsCreated
+    {
+        get { return shopsCreated; }
+    }
+    public int ShopsToCreate
+    {
+        get { return shopsToCreate; }
     }
     public string AccountUsername
     {
@@ -110,8 +133,25 @@ public class Account : MonoBehaviour
             registerUsername.text = "";
             registerPassword.text = "";
             registerEmail.text = "";
+            errorInfoTXT.text = "Account created successfully ! You can now login.";
+            errorInfoObj.SetActive(true);
         }
-        appmanager.backButton();
+        else if(www.text[0] == '1')
+        {
+            errorInfoTXT.text = "There is a problem with the server's connection. Please try again. If the problem continues contact an administrator.";
+            errorInfoObj.SetActive(true);
+        }
+        else if(www.text[0] == '2')
+        {
+            errorInfoTXT.text = "There is already an account created with that name. Try another one.";
+            errorInfoObj.SetActive(true);
+        }
+        else
+        {
+            errorInfoTXT.text = "Something went wrong. Please try again later. If the problem continues contact an administrator.";
+            errorInfoObj.SetActive(true);
+        }
+        appmanager.afterLogin();
     }
     public void LoginAccount()
     {
@@ -127,7 +167,8 @@ public class Account : MonoBehaviour
         yield return www;
         if (www.text[0] == '0')
         {
-            Debug.Log("login suces 0");
+            errorInfoTXT.text = "Login succesful !";
+            errorInfoObj.SetActive(true);
             accountUsername = www.text.Split('\t')[1];
             isLogged = true;
             bool.TryParse(www.text.Split('\t')[2], out isBoss);
@@ -147,14 +188,20 @@ public class Account : MonoBehaviour
             {
                 isEmployed = true;
             }
-            appmanager.backButton();
+            timeToCut = int.Parse(www.text.Split('\t')[12]);
+            personalCode = int.Parse(www.text.Split('\t')[13]);
+            shopsCreated = int.Parse(www.text.Split('\t')[14]);
+            shopsToCreate = int.Parse(www.text.Split('\t')[15]);
+            Debug.Log("shopsCreated = " + shopsCreated + " shopstocr = " + shopsToCreate);
+            appmanager.afterLogin();
             profileUsername.text = accountUsername;
             profileFirstName.text = firstName;
             profileLastName.text = lastName;
         }
         else if(www.text[0] == '1')
         {
-            Debug.Log("login suces 1");
+            errorInfoTXT.text = "Login succesful !";
+            errorInfoObj.SetActive(true);
             accountUsername = www.text.Split('\t')[1];
             isLogged = true;
             bool.TryParse(www.text.Split('\t')[2], out isBoss);
@@ -173,14 +220,23 @@ public class Account : MonoBehaviour
             {
                 isEmployed = true;
             }
-            appmanager.backButton();
+            timeToCut = int.Parse(www.text.Split('\t')[11]);
+            personalCode = int.Parse(www.text.Split('\t')[12]);
+            appmanager.afterLogin();
             profileUsername.text = accountUsername;
             profileFirstName.text = firstName;
             profileLastName.text = lastName;
         }
+        else if(www.text[0] == '2')
+        {
+            
+            errorInfoTXT.text = "Username or password incorrect !";
+            errorInfoObj.SetActive(true);
+        }
         else
         {
-            Debug.Log(www.text);
+            errorInfoTXT.text = "Something went wrong! Please try again later. If the problem continues contact an administrator.";
+            errorInfoObj.SetActive(true);
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Globalization;
 using System;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 
 public class Appointments : MonoBehaviour
 {
@@ -42,8 +43,34 @@ public class Appointments : MonoBehaviour
     private GameObject minutesScrollView;
     private GameObject daysScrollView;
     private GameObject closeAppointmentBTN;
-    private GameObject backToHoursBTN;
+    private GameObject backFromHoursBTN;
     private GameObject nextToInsertClientNameBTN;
+    private GameObject nextToServicesBTN;
+    private GameObject servicesBG;
+    private GameObject backToHoursBTN;
+    //barber prices 
+    private int barberHaircutPrice;
+    private int barberBeardPrice;
+    private int barberMustachePrice;
+    private int barberColourPrice;
+    private int barberEyebrowPrice;
+    private bool haircutService = false;
+    private bool beardService = false;
+    private bool mustacheService = false;
+    private bool colourService = false;
+    private bool eyebrowService = false;
+    [SerializeField] private TextMeshProUGUI barberHaircutPriceTXT;
+    [SerializeField] private TextMeshProUGUI barberBeardPriceTXT;
+    [SerializeField] private TextMeshProUGUI barberMustachePriceTXT;
+    [SerializeField] private TextMeshProUGUI barberColourPriceTXT;
+    [SerializeField] private TextMeshProUGUI barberEyebrowPriceTXT;
+    [SerializeField] private TextMeshProUGUI totalServicesPrice;
+    private GameObject haircutServiceButton;
+    private GameObject beardServiceButton;
+    private GameObject mustacheServiceButton;
+    private GameObject colourServiceButton;
+    private GameObject eyebrowServiceButton;
+    private int totalPrice;
 
     //time selection
     [SerializeField] private GameObject hourPrefab;
@@ -78,6 +105,7 @@ public class Appointments : MonoBehaviour
     [SerializeField] private GameObject clientMentionsObj;
     [SerializeField] private InputField clientMentionInputField;
     [SerializeField] private GameObject errorInfoObj;
+    [SerializeField] private GameObject checkIfLoggedInBTN;
     [SerializeField] private TextMeshProUGUI errorInfoTXT;
     
     private string clientMentionsWrite;
@@ -102,7 +130,7 @@ public class Appointments : MonoBehaviour
     private TextMeshProUGUI appointmentClientName;
     private TextMeshProUGUI occupiedAppointmentHour;
     private TextMeshProUGUI occupiedAppointmentMinute;
-    private TextMeshProUGUI occupiedAppointmentInfo;
+    [SerializeField] private TextMeshProUGUI occupiedAppointmentInfo;
     private int occupiedAppointmentCounter = 0; //increases for every appointment that has to be shown
     //------end-------
     //DELETE THE APPOINTMENT ~~BARBER~~
@@ -116,26 +144,25 @@ public class Appointments : MonoBehaviour
 
 
 
-    private void StartDateUpdate()
-    {
-        currentDateString = DateTime.Now.Day + " / " + DateTime.Now.Month + " / " + DateTime.Now.Year;
-        currentDateTXT.text = currentDateString;
-    }
     public void BackToCalendar()
     {
-        backToHoursBTN.SetActive(false);
+        backFromHoursBTN.SetActive(false);
         closeAppointmentBTN.SetActive(true);
         minutesScrollView.SetActive(false);
         hoursScrollView.SetActive(false);
         daysScrollView.SetActive(true);
         nextMonthDateBTN.SetActive(true);
         previousMonthDateBTN.SetActive(true);
-        //checkIfLoggedInBTN.SetActive(false);
+        checkIfLoggedInBTN.SetActive(false);
+        clientMentionsObj.SetActive(false);
         checkHoursBTN.SetActive(true);
+        nextToServicesBTN.SetActive(false);
+
     }
     private void Start()
     {
-        StartDateUpdate();
+        currentDateString = " / " + DateTime.Now.Month + " / " + DateTime.Now.Year;
+        currentDateTXT.text = currentDateString;
         checkHoursBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("CheckHoursBTN").gameObject;
         nextMonthDateBTN = selectedDateBG.transform.Find("NextPrevButtons").gameObject.transform.Find("NextMonthBTN").gameObject;
         previousMonthDateBTN = selectedDateBG.transform.Find("NextPrevButtons").gameObject.transform.Find("PreviousMonthBTN").gameObject;
@@ -143,8 +170,16 @@ public class Appointments : MonoBehaviour
         minutesScrollView = calendarBG.transform.Find("MinutesScrollView").gameObject;
         daysScrollView = calendarBG.transform.Find("DaysScrollView").gameObject;
         closeAppointmentBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("CloseAppointmentMenu").gameObject;
-        backToHoursBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("BackBTN(Hours)").gameObject;
+        backFromHoursBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("BackBTN(Hours)").gameObject;
         nextToInsertClientNameBTN = selectedDateBG.transform.Find("CheckIfLoggedIn").gameObject;
+        nextToServicesBTN = selectedDateBG.transform.Find("NextToServicesBTN").gameObject;
+        servicesBG = selectedDateBG.transform.Find("BarberServicesBG").gameObject;
+        backToHoursBTN = servicesBG.transform.Find("BackToHoursBTN").gameObject;
+        haircutServiceButton = servicesBG.transform.Find("HaircutButton").gameObject;
+        beardServiceButton = servicesBG.transform.Find("BeardButton").gameObject;
+        mustacheServiceButton = servicesBG.transform.Find("MustacheButton").gameObject;
+        colourServiceButton = servicesBG.transform.Find("ColourButton").gameObject;
+        eyebrowServiceButton = servicesBG.transform.Find("EyebrowButton").gameObject;
     }
 
     public void CheckForSelectedTime()
@@ -181,6 +216,110 @@ public class Appointments : MonoBehaviour
             nextToInsertClientNameBTN.SetActive(true);
         }
     }
+    public void NextToServices()
+    {
+        servicesBG.SetActive(true);
+        nextToServicesBTN.SetActive(false);
+        clientMentionsObj.SetActive(false);
+        backFromHoursBTN.SetActive(false);
+    }
+    public void BackToHours()
+    {
+        servicesBG.SetActive(false);
+        nextToServicesBTN.SetActive(true);
+        backFromHoursBTN.SetActive(true);
+        clientMentionsObj.SetActive(true);
+    }
+    /* cand e butonul selectat se seteaza variabila bool sa fie inversul a valorii de era
+    * daca este true, adica daca e butonu selectat se face culoarea lui mai gri sa para selectat
+    * daca e false se face invers, se face alb sa para deselectat
+    * daca este selectat butonul se adauga pretul serviciului respectiv la totalPrice si se updateaza textul afisat
+    */
+    public void selectHaircutService()
+    {
+        haircutService = !haircutService;
+        if (haircutService)
+        {
+            haircutServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
+            totalPrice += barberHaircutPrice;
+            totalServicesPrice.text = "Price: " + totalPrice;
+        }
+        else
+        {
+            haircutServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+            totalPrice -= barberHaircutPrice;
+            totalServicesPrice.text = "Price: " + totalPrice;
+        }
+        CheckIfUserIsLoggedIn(); //cand e selectat unul dintre servicii sa verifice daca e useru logat sau nu mancamiar pl
+    }
+    public void selectBeardService()
+    {
+        beardService = !beardService;
+        if (beardService)
+        {
+            beardServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
+            totalPrice += barberBeardPrice;
+            totalServicesPrice.text = "Price: " + totalPrice;
+        }
+        else
+        {
+            beardServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+            totalPrice -= barberBeardPrice;
+            totalServicesPrice.text = "Price: " + totalPrice;
+        }
+        CheckIfUserIsLoggedIn();
+    }
+    public void selectMustacheService()
+    {
+        mustacheService = !mustacheService;
+        if (mustacheService)
+        {
+            mustacheServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
+            totalPrice += barberMustachePrice;
+            totalServicesPrice.text = "Price: " + totalPrice;
+        }
+        else
+        {
+            mustacheServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+            totalPrice -= barberMustachePrice;
+            totalServicesPrice.text = "Price: " + totalPrice;
+        }
+        CheckIfUserIsLoggedIn();
+    }
+    public void selectColourService()
+    {
+        colourService = !colourService;
+        if (colourService)
+        {
+            colourServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
+            totalPrice += barberColourPrice;
+            totalServicesPrice.text = "Price: " + totalPrice;
+        }
+        else
+        {
+            colourServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+            totalPrice -= barberColourPrice;
+            totalServicesPrice.text = "Price: " + totalPrice;
+        }
+        CheckIfUserIsLoggedIn();
+    }
+    public void selectEyebrowService()
+    {
+        eyebrowService = !eyebrowService;
+        if (eyebrowService)
+        {
+            eyebrowServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
+            totalPrice += barberEyebrowPrice;
+            totalServicesPrice.text = "Price: " + totalPrice;
+        }
+        else
+        {
+            eyebrowServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+            totalPrice -= barberEyebrowPrice;
+            totalServicesPrice.text = "Price: " + totalPrice;
+        }
+        CheckIfUserIsLoggedIn();
+    }
     public void NextToInsertClientName() //after selecting the hour and minute click the button to insert client name if user is not logged in
     {
         clientNameInsertObj.SetActive(true);
@@ -199,6 +338,7 @@ public class Appointments : MonoBehaviour
         clientNameInsertObj.SetActive(false);
         nextMonthDateBTN.SetActive(true);
         previousMonthDateBTN.SetActive(true);
+        servicesBG.SetActive(false);
     }
     public void CheckBarberAppointmentsDays() //check which days are occupied
     {
@@ -294,7 +434,7 @@ public class Appointments : MonoBehaviour
         string hour = selectedAppointment.transform.Find("Hour").gameObject.transform.Find("Number").gameObject.GetComponent<TextMeshProUGUI>().text;
         string minute = selectedAppointment.transform.Find("Minute").gameObject.transform.Find("Number").gameObject.GetComponent<TextMeshProUGUI>().text;        
         WWWForm form = new WWWForm();
-        form.AddField("clientName", selectedAppointment.name);
+        form.AddField("clientName", selectedAppointment.transform.Find("ClientName").gameObject.GetComponent<TextMeshProUGUI>().text);
         form.AddField("appHour", hour);
         form.AddField("appMinute", minute);
         WWW www = new WWW("http://localhost/barberapp/barberdeleteapp.php", form);
@@ -325,7 +465,7 @@ public class Appointments : MonoBehaviour
             GameObject appointment = Instantiate(occupiedAppointmentPrefab);
             appointment.transform.SetParent(occupiedAppointmentPrefab.transform.parent);
             appointment.SetActive(true);
-            appointment.name = clientName[i];
+            appointment.name = i.ToString();
             appointment.transform.localScale = new Vector3(1f, 1f, 1f);
             appointment.transform.localPosition = new Vector3(appointment.transform.position.x, appointment.transform.position.y, 0f);
             GameObject hour = appointment.transform.Find("Hour").gameObject;
@@ -340,6 +480,10 @@ public class Appointments : MonoBehaviour
         }
         occupiedAppointmentCounter = 0;
         loadingScreen.SetActive(false);
+    }
+    public void ShowBarberAppointmentInfo() //show the appointment info to the barber based on the parent's name of the infoButton clicked.
+    {
+        occupiedAppointmentInfo.text = appointmentInfo[int.Parse(EventSystem.current.currentSelectedGameObject.transform.parent.name)];
     }
     public void CreateAppointmentDays()
     {
@@ -385,6 +529,8 @@ public class Appointments : MonoBehaviour
     {
         currentMonth = DateTime.Now.Month;
         currentYear = DateTime.Now.Year;
+        currentDateString = " / " + DateTime.Now.Month + " / " + DateTime.Now.Year;
+        currentDateTXT.text = currentDateString;
     }
     public void CreateCalendar()
     {
@@ -442,10 +588,19 @@ public class Appointments : MonoBehaviour
         //get the name of the selected day
         DateTime date = new DateTime(currentYear, currentMonth, int.Parse(selectedDayObj.name));
         //update the string of the current date textbox and
+        selectedAppointmentDay = selectedDayObj.name;
         selectedDayString = date.DayOfWeek.ToString();
         UpdateCurrentDate();
         createAppointmentHours.interactable = true;
         
+    }
+    public string BarberFirstName
+    {
+        get { return barberFirstName; }
+    }
+    public string BarberLastName
+    {
+        get { return barberLastName; }
     }
     public void UpdateCurrentDate()
     {
@@ -455,6 +610,8 @@ public class Appointments : MonoBehaviour
     public void NextMonth()
     {
         currentMonth++;
+        selectedDayString = "";
+        selectedAppointmentDay = "";
         if (currentMonth > 12)
         {
             currentMonth = 1;
@@ -466,6 +623,8 @@ public class Appointments : MonoBehaviour
     public void PreviousMonth()
     {
         currentMonth--;
+        selectedDayString = "";
+        selectedAppointmentDay = "";
         if (currentMonth < 1)
         {
             currentMonth = 12;
@@ -481,7 +640,39 @@ public class Appointments : MonoBehaviour
         barberLastName = selectedBarberObj.name.Split('\t')[1];
         GetTimeToCut(); //get the time needed for the barber to do a cut
         appointmentMenu.SetActive(true);
-
+        GetBarberPrices();
+        selectedAppointmentDay = DateTime.Now.Day.ToString();
+    }
+    public void GetBarberPrices()
+    {
+        StartCoroutine(GetBarberPricesEnum());
+    }
+    IEnumerator GetBarberPricesEnum()
+    {
+        loadingScreen.SetActive(true);
+        List<IMultipartFormSection> newform = new List<IMultipartFormSection>();
+        newform.Add(new MultipartFormDataSection("barberFirstName", barberFirstName));
+        newform.Add(new MultipartFormDataSection("barberLastName", barberLastName));
+        UnityWebRequest webreq = UnityWebRequest.Post("http://localhost/barberapp/getbarberprices.php", newform);
+        yield return webreq.SendWebRequest();
+        if (webreq.isNetworkError || webreq.isHttpError)
+        {
+            Debug.Log(webreq.error);
+        }
+        else
+        {
+            barberHaircutPrice = int.Parse(webreq.downloadHandler.text.Split('\t')[1]);
+            barberBeardPrice = int.Parse(webreq.downloadHandler.text.Split('\t')[2]);
+            barberMustachePrice = int.Parse(webreq.downloadHandler.text.Split('\t')[3]);
+            barberColourPrice = int.Parse(webreq.downloadHandler.text.Split('\t')[4]);
+            barberEyebrowPrice = int.Parse(webreq.downloadHandler.text.Split('\t')[5]);
+            barberHaircutPriceTXT.text = barberHaircutPrice.ToString();
+            barberBeardPriceTXT.text = barberBeardPrice.ToString();
+            barberMustachePriceTXT.text = barberMustachePrice.ToString();
+            barberColourPriceTXT.text = barberColourPrice.ToString();
+            barberEyebrowPriceTXT.text = barberEyebrowPrice.ToString();
+            loadingScreen.SetActive(false);
+        }
     }
     public void SelectHour()
     {
@@ -499,7 +690,6 @@ public class Appointments : MonoBehaviour
         selectedHourImage.color = new Color(0.62f, 0.62f, 0.62f);
         //set the lastday image to be the image of the current selected hour object
         lastSelectedHourImage = selectedHourImage;
-        CreateMinutes();
     }
     public void SelectMinute()
     {
@@ -572,6 +762,7 @@ public class Appointments : MonoBehaviour
                     break;
             }
         }
+        CreateMinutes();
     }
     public void GetTimeToCut()
     {
@@ -618,40 +809,50 @@ public class Appointments : MonoBehaviour
         StartCoroutine(CreateAppointmentHoursEnum());
     }
     IEnumerator CreateAppointmentHoursEnum()
-    {
-        WWWForm form = new WWWForm();
-        form.AddField("shopname", appmanagerClass.GetSelectedShopName());
-        form.AddField("selectedDay", selectedDayString);
-        WWW www = new WWW("http://localhost/barberapp/getshopprogramapp.php", form);
-        yield return www;
-
-        if(www.text[0] == '0')
+    { 
+        if(selectedDayString == "" || selectedDayString == null)
         {
-            loadingScreen.SetActive(true);
-            Debug.Log("success");
-            string workingHours = www.text.Split('\t')[1];
-            if(workingHours == null || workingHours == "")
-            {
-                errorInfoTXT.text = "This day is not a working day or the working program has not been updated yet.";
-                errorInfoObj.SetActive(true);
-                loadingScreen.SetActive(false);
-            }
-            else
-            {
-                string openHM = workingHours.Split('-')[0];
-                string closeHM = workingHours.Split('-')[1];
-                openHour = int.Parse(openHM.Split(':')[0]);
-                openMinute = int.Parse(openHM.Split(':')[1]);
-                closeHour = int.Parse(closeHM.Split(':')[0]);
-                closeMinute = int.Parse(closeHM.Split(':')[1]);
-                newOpenMinutes = openMinute;
-                CreateHours();
-            }
+            errorInfoTXT.text = "You must select a day before checking it's program.";
+            errorInfoObj.SetActive(true);
         }
         else
         {
-            Debug.Log(www.text);
-        } 
+            WWWForm form = new WWWForm();
+            form.AddField("shopname", appmanagerClass.GetSelectedShopName());
+            form.AddField("selectedDay", selectedDayString);
+            WWW www = new WWW("http://localhost/barberapp/getshopprogramapp.php", form);
+            yield return www;
+
+            if (www.text[0] == '0')
+            {
+                loadingScreen.SetActive(true);
+                Debug.Log("success");
+                string workingHours = www.text.Split('\t')[1];
+                if (workingHours == null || workingHours == "")
+                {
+                    errorInfoTXT.text = "This day is not a working day or the working program has not been updated yet.";
+                    errorInfoObj.SetActive(true);
+                    loadingScreen.SetActive(false);
+                }
+                else
+                {
+                    string openHM = workingHours.Split('-')[0];
+                    string closeHM = workingHours.Split('-')[1];
+                    openHour = int.Parse(openHM.Split(':')[0]);
+                    openMinute = int.Parse(openHM.Split(':')[1]);
+                    closeHour = int.Parse(closeHM.Split(':')[0]);
+                    closeMinute = int.Parse(closeHM.Split(':')[1]);
+                    newOpenMinutes = openMinute;
+                    CreateHours();
+                }
+            }
+            else
+            {
+                Debug.Log(www.text);
+                errorInfoTXT.text = "Something went wrong. If this error continues to happen please contact the developer.";
+                errorInfoObj.SetActive(true);
+            }
+        }
     }
     public void CreateHours() //function to create the hours buttons to create a new appointment
     {
@@ -680,10 +881,11 @@ public class Appointments : MonoBehaviour
         minutesScrollView.SetActive(true);
         hoursScrollView.SetActive(true);
         closeAppointmentBTN.SetActive(false);
-        backToHoursBTN.SetActive(true);
+        backFromHoursBTN.SetActive(true);
         nextMonthDateBTN.SetActive(false);
         previousMonthDateBTN.SetActive(false);
         //checkIfLoggedInBTN.SetActive(true);
+        nextToServicesBTN.SetActive(true);
         checkHoursBTN.SetActive(false);
         clientMentionsObj.SetActive(true);
     }
@@ -779,7 +981,7 @@ public class Appointments : MonoBehaviour
                 hoursScrollView.SetActive(false);
                 minutesScrollView.SetActive(false);
                 closeAppointmentBTN.SetActive(true);
-                backToHoursBTN.SetActive(false);
+                backFromHoursBTN.SetActive(false);
                 nextMonthDateBTN.SetActive(true);
                 previousMonthDateBTN.SetActive(true);
                 checkHoursBTN.SetActive(true);
@@ -824,7 +1026,7 @@ public class Appointments : MonoBehaviour
                 hoursScrollView.SetActive(false);
                 minutesScrollView.SetActive(false);
                 closeAppointmentBTN.SetActive(true);
-                backToHoursBTN.SetActive(false);
+                backFromHoursBTN.SetActive(false);
                 nextMonthDateBTN.SetActive(true);
                 previousMonthDateBTN.SetActive(true);
                 checkHoursBTN.SetActive(true);
@@ -832,9 +1034,15 @@ public class Appointments : MonoBehaviour
                 appointmentMenu.SetActive(false);
                 clientMentionsObj.SetActive(false);
                 fullAppointmentMenu.SetActive(false);
+                clientNameInsertObj.SetActive(false);
                 if (www.text[0] == '0')
                 {
                     errorInfoTXT.text = "Appointment successfully created !";
+                    errorInfoObj.SetActive(true);
+                }
+                else if (www.text[0] == '3')
+                {
+                    errorInfoTXT.text = "There is already an appointment for created on this date and hour. Try selecting another hour/minute.";
                     errorInfoObj.SetActive(true);
                 }
                 else

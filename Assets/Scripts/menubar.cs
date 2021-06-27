@@ -48,7 +48,7 @@ public class menubar : MonoBehaviour
     {
         if(openMenu == true) //check if the user clicked the OpenMenu button
         {
-            if(lerptime <= 1)
+            if(lerptime <= 0.8)
             {
                 lerptime += Time.deltaTime;
             }
@@ -57,18 +57,18 @@ public class menubar : MonoBehaviour
             {
                 openMenuObject.SetActive(false);
                 closeMenuObject.SetActive(true);
+                triggerFunction = true; // set the bool to true so the open/close functions can run when user click the buttons
             }
-            if (lerptime >= 1)
+            if (lerptime >= 0.8)
             {
                 openMenu = false;
                 startPosClose = gameObject.transform.position; //set the variable to be the start position of the bar when the user closes the menu
                 lerptime = 0f; // set it to 0 so the transition can run again when CloseMenu button is clicked
-                triggerFunction = true; // set the bool to true so the open/close functions can run when user click the buttons
             }
         }
         else if(closeMenu == true) // check if the user clicked CloseMenu button
         {
-            if (lerptime <= 1)
+            if (lerptime <= 0.8)
             {
                 lerptime += Time.deltaTime;
             }
@@ -77,12 +77,12 @@ public class menubar : MonoBehaviour
             {
                 closeMenuObject.SetActive(false);
                 openMenuObject.SetActive(true);
+                triggerFunction = true; // set the bool to true so the open/close functions can run when user click the buttons
             }
-            if (lerptime >= 1)
+            if (lerptime >= 0.8)
             {
                 closeMenu = false;
                 lerptime = 0f; // set it to 0 so the transition can run again when CloseMenu button is clicked
-                triggerFunction = true; // set the bool to true so the open/close functions can run when user click the buttons
             }
         }
     }

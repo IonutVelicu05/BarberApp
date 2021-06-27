@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 
 public class AppManager : MonoBehaviour
 {
@@ -18,6 +19,8 @@ public class AppManager : MonoBehaviour
     [SerializeField] private GameObject barberMenuBTN;
     [SerializeField] private GameObject backBTN;
     [SerializeField] private Account account;
+    [SerializeField] private Appointments appointments;
+    //SHOP 
     [SerializeField] private GameObject shopPrefab;
     [SerializeField] private TextMeshProUGUI shopDescription;
     [SerializeField] private InputField ShopDescriptionField;
@@ -34,12 +37,12 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI sundayHours;
     [SerializeField] private Image shopPhoto; //the photo user is currently seeing
     private Texture2D[] shopImage = new Texture2D[6];
-    [SerializeField] private GameObject loadingObject;
+    [SerializeField] private GameObject loadingScreen;
     [SerializeField] private GameObject shopMenu;
     [SerializeField] private InputField imageFromPhoneName;
-    [SerializeField] private Dropdown createShopCityDropdown;
-    [SerializeField] private Dropdown createShopCountyDropdown;
     [SerializeField] private Dropdown whatImageToUpload;
+    //SHOP
+
     [SerializeField] private Dropdown countyDropdown;
     [SerializeField] private Dropdown cityDropdown;
     private List<string> countyList = new List<string>();
@@ -49,6 +52,23 @@ public class AppManager : MonoBehaviour
     private bool anotherShopSelected = false; //when selecting a shop it sets it to true and if its true when selecting it shows the first image of
     //the shop; sets shopImageNumber to 1;
     private Texture2D imageFromPhone;
+    // ~~~ User (boss) manage shop ~~~
+    private string[] shopsOfUser;
+    private string[] shopsOfUserAddress;
+    private string[] shopsOfUserCity;
+    private GameObject selectedShopToManage;
+    [SerializeField] private GameObject manageShopPrefab;
+    private TextMeshProUGUI manageShopNameTXT;
+    private TextMeshProUGUI manageShopAddressTXT;
+    private TextMeshProUGUI manageShopCityTXT;
+    private List<GameObject> shopsOfUserList = new List<GameObject>();
+    // ~~ end of manage shop ~~
+    //ERROR INFO //
+    [SerializeField] private GameObject errorObj;
+    [SerializeField] private TextMeshProUGUI errorTXT;
+    private string generalError = "Something went wrong. Please try again in a few minutes. If the problem continues contact the administrator.";
+    //END ERROR INFO//
+
 
     private Image tempOpenHourImage;
     private Image tempOpenMinuteImage;
@@ -79,6 +99,12 @@ public class AppManager : MonoBehaviour
     private string[] oneStarReviews;
     [SerializeField] private GameObject barberPrefab;
     private int timeToCut;
+    //boss create shop --
+    [SerializeField] private InputField createShopName;
+    [SerializeField] private InputField createShopAddress;
+    [SerializeField] private GameObject createShopMenuBTN;
+    [SerializeField] private Dropdown createShopCityDropdown;
+    [SerializeField] private Dropdown createShopCountyDropdown;
 
     public int GetTimeToCut()
     {
@@ -191,7 +217,7 @@ public class AppManager : MonoBehaviour
         selectedWorkingDay = 7;
     }
 
-    public void backButton()
+    public void afterLogin()
     {
         loginButton.SetActive(!account.IsLogged);
         manageShopButton.SetActive(account.IsBoss);
@@ -203,8 +229,50 @@ public class AppManager : MonoBehaviour
         adminMenu.SetActive(false);
         backBTN.SetActive(false);
         barberMenuBTN.SetActive(account.IsEmployed);
+        if (account.IsLogged)
+        {
+            if (account.IsBoss)
+            {
+                createShopMenuBTN.SetActive(account.CanCreateShops);
+            }
+            if(shopsOfUserList.Count <= 0)
+            {
+                GetShopsOfUser();
+            }
+        }
     }
-
+    public void CreateShop()
+    {
+        StartCoroutine(CreateShopEnum());
+    }
+    IEnumerator CreateShopEnum()
+    {
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("shopName", createShopName.text));
+        form.Add(new MultipartFormDataSection("shopAddress", createShopAddress.text));
+        form.Add(new MultipartFormDataSection("shopCounty", createShopCountyDropdown.options[createShopCountyDropdown.value].text));
+        form.Add(new MultipartFormDataSection("shopCity", createShopCityDropdown.options[createShopCityDropdown.value].text));
+        form.Add(new MultipartFormDataSection("username", account.AccountUsername));
+        form.Add(new MultipartFormDataSection("personalCode", account.PersonalCode.ToString()));
+        UnityWebRequest webreq = UnityWebRequest.Post("http://localhost/barberapp/createshop.php", form);
+        yield return webreq.SendWebRequest();
+        if (webreq.isNetworkError || webreq.isHttpError)
+        {
+            Debug.Log(webreq.error);
+            errorTXT.text = "Something went wrong. Please try again in a few minutes. If the problem continues contact the administrator.";
+            errorObj.SetActive(true);
+        }
+        else
+        {
+            errorTXT.text = "Shop created ! Check the manage shops menu for more edit options.";
+            errorObj.SetActive(true);
+            createShopName.text = "";
+            createShopAddress.text = "";
+            createShopCountyDropdown.RefreshShownValue();
+            createShopCityDropdown.RefreshShownValue();
+            createShopMenuBTN.SetActive(account.ShopsToCreate - account.ShopsCreated > 0);
+        }
+    }
     void CountyAddToList(params string[] list)
     {
         for (int i = 0; i < list.Length; i++)
@@ -219,12 +287,20 @@ public class AppManager : MonoBehaviour
             cityList.Add(list[i]);
         }
     }
+
+    public void CreateShopLocation()
+    {
+    }
     public void Start()
     {
-        countyDropdown.ClearOptions();
+        countyDropdown.ClearOptions(); //choosing from which location to show shops
         CountyAddToList("Pick a county", "Olt", "Dolj", "Timis");
         countyDropdown.AddOptions(countyList);
-        backButton();
+
+        createShopCountyDropdown.ClearOptions();
+        createShopCountyDropdown.AddOptions(countyList);
+
+        afterLogin();
         countyDropdown.onValueChanged.AddListener(delegate { CountyPicked(countyDropdown); });
         
         createShopCountyDropdown.onValueChanged.AddListener(delegate { CreateShopCountyPicked(createShopCountyDropdown); });
@@ -302,18 +378,21 @@ public class AppManager : MonoBehaviour
     }
     IEnumerator EditShopDescriptionEnum()
     {
-        WWWForm form = new WWWForm();
-        form.AddField("description", ShopDescriptionField.text);
-        form.AddField("username", account.AccountUsername);
-        WWW www = new WWW("http://localhost/barberapp/editshopdescription.php", form);
-        yield return www;
-        if(www.text[0] == '0')
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("description", ShopDescriptionField.text));
+        form.Add(new MultipartFormDataSection("shopName", selectedShopToManage.name));
+        UnityWebRequest webreq = UnityWebRequest.Post("http://localhost/barberapp/editshopdescription.php", form);
+        yield return webreq.SendWebRequest();
+        if (webreq.isNetworkError || webreq.isHttpError)
         {
-            Debug.Log("descruiption changed");
+            Debug.Log(webreq.error);
+            errorTXT.text = "Something went wrong. Please try again in a few minutes. If the problem continues contact the administrator.";
+            errorObj.SetActive(true);
         }
         else
         {
-            Debug.Log(www.text);
+            errorTXT.text = "Shop's description changed successfully !";
+            errorObj.SetActive(true);
         }
     }
     public void ShowShopDescription()
@@ -322,18 +401,19 @@ public class AppManager : MonoBehaviour
     }
     IEnumerator ShowShopDescriptionEnum()
     {
-        WWWForm form = new WWWForm();
-        form.AddField("shopname", selectedShopName);
 
-        WWW www = new WWW("http://localhost/barberapp/showdescription.php", form);
-        yield return www;
-        if(www.text[0] == '0')
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("shopname", selectedShopName));
+        UnityWebRequest webreq = UnityWebRequest.Post("http://localhost/barberapp/showdescription.php", form);
+        yield return webreq.SendWebRequest();
+        if(webreq.isHttpError || webreq.isNetworkError)
         {
-            shopDescription.text = www.text.Split('\t')[1];
+            errorTXT.text = generalError;
+            errorObj.SetActive(true);
         }
         else
         {
-            Debug.Log(www.text);
+            shopDescription.text = webreq.downloadHandler.text.Split('\t')[1];
         }
     }
     public void SelectOpenWorkingHour()
@@ -446,7 +526,7 @@ public class AppManager : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("selectedDay", selectedWorkingDay);
         form.AddField("workingHours", updateWorkingProgram);
-        form.AddField("bossName", account.AccountUsername);
+        form.AddField("shopName", selectedShopToManage.name);
 
         WWW www = new WWW("http://localhost/barberapp/editshopworkinghours.php", form);
         yield return www;
@@ -540,7 +620,7 @@ public class AppManager : MonoBehaviour
     {
         for(int i =0; i<6; i++)
         {
-            loadingObject.SetActive(true);  //activeaza loading screenu
+            loadingScreen.SetActive(true);  //activeaza loading screenu
             WWW www = new WWW("http://localhost/barberapp/shops/" + selectedShopName + "/image" + i + ".jpg");
             WWW w = new WWW("http://localhost/barberapp/shops/" + selectedShopName + "/image" + i + ".png");
             yield return www;
@@ -551,7 +631,7 @@ public class AppManager : MonoBehaviour
                 if (i >= 5) //if the loop got the 5th photo close the loading screen and set the shown image to 1
                 {
                     shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    loadingObject.SetActive(false);
+                    loadingScreen.SetActive(false);
                     shopMenu.SetActive(true);
                 }
             }
@@ -561,7 +641,7 @@ public class AppManager : MonoBehaviour
                 if (i >= 5) //if the loop got the 5th photo close the loading screen and set the shown image to 1
                 {
                     shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    loadingObject.SetActive(false);
+                    loadingScreen.SetActive(false);
                     shopMenu.SetActive(true);
                 }
             }
@@ -598,7 +678,7 @@ public class AppManager : MonoBehaviour
         textureBytes = photoTexture.EncodeToJPG();
         string imageName = "image" + uploadedImageNumber + ".jpg";
         form.AddBinaryData("myimage", textureBytes, imageName, "imagebro.jpg");
-        form.AddField("shopName", account.ShopNameOfUser);
+        form.AddField("shopName", selectedShopToManage.name);
 
         WWW w = new WWW("http://localhost/barberapp/uploadimage.php", form);
 
@@ -671,6 +751,70 @@ public class AppManager : MonoBehaviour
                 break;
             case 5: uploadedImageNumber = 5;
                 break;
+        }
+    }
+    public void GetShopsOfUser()
+    {
+        StartCoroutine(GetShopsOfUserEnum());
+    }
+    IEnumerator GetShopsOfUserEnum()
+    {
+        for(int i = 1; i <4; i++)
+        {
+            List<IMultipartFormSection> newform = new List<IMultipartFormSection>();
+            newform.Add(new MultipartFormDataSection("username", account.AccountUsername));
+            newform.Add(new MultipartFormDataSection("whatData", i.ToString()));
+            UnityWebRequest webreq = UnityWebRequest.Post("http://localhost/barberapp/getshopsofuser.php", newform);
+            yield return webreq.SendWebRequest();
+            if (webreq.isNetworkError || webreq.isHttpError)
+            {
+                Debug.Log(webreq.error);
+            }
+            else
+            {
+                if(i == 1)
+                {
+                    shopsOfUser = webreq.downloadHandler.text.Split('\t');
+                    Debug.Log(webreq.downloadHandler.text);
+                }
+                else if(i == 2)
+                {
+                    shopsOfUserAddress = webreq.downloadHandler.text.Split('\t');
+                    Debug.Log("ADRESS = " + webreq.downloadHandler.text);
+                }
+                else if(i == 3)
+                {
+                    shopsOfUserCity = webreq.downloadHandler.text.Split('\t');
+                }
+            }
+        }
+    }
+    public void SelectShopToManage()
+    {
+        selectedShopToManage = EventSystem.current.currentSelectedGameObject.gameObject;
+    }
+    public void CreateShopsToManage()
+    {
+        if(shopsOfUserList.Count > 0)
+        {
+            foreach(GameObject obj in shopsOfUserList)
+            {
+                Destroy(obj);
+            }
+            shopsOfUserList.Clear();
+        }
+        for(int i=0; i<shopsOfUser.Length -1; i++)
+        {
+            GameObject shopToManage = Instantiate(manageShopPrefab, manageShopPrefab.transform.position, manageShopPrefab.transform.rotation, manageShopPrefab.transform.parent);
+            shopToManage.name = shopsOfUser[i];
+            manageShopNameTXT = shopToManage.transform.Find("ShopName").transform.Find("Name").GetComponent<TextMeshProUGUI>();
+            manageShopNameTXT.text = shopsOfUser[i];
+            manageShopAddressTXT = shopToManage.transform.Find("ShopAddress").transform.Find("Address").GetComponent<TextMeshProUGUI>();
+            manageShopAddressTXT.text = shopsOfUserAddress[i];
+            manageShopCityTXT = shopToManage.transform.Find("ShopCity").transform.Find("City").GetComponent<TextMeshProUGUI>();
+            manageShopCityTXT.text = shopsOfUserCity[i];
+            shopToManage.SetActive(true);
+            shopsOfUserList.Add(shopToManage);
         }
     }
     public void CreateShopCountyPicked(Dropdown createShopCounty)
