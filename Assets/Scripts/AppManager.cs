@@ -62,7 +62,18 @@ public class AppManager : MonoBehaviour
     private TextMeshProUGUI manageShopAddressTXT;
     private TextMeshProUGUI manageShopCityTXT;
     private List<GameObject> shopsOfUserList = new List<GameObject>();
+    [SerializeField] private InputField shopInsertEditPrice;
+    private int editGeneralPrices = 0; // 1=haircut; 2=beard; 3=mustache; 4=colour; 5=eyebrow
+    private bool shopGeneralPrice;
+    [SerializeField] private GameObject EditGeneralPricesBTN;
     // ~~ end of manage shop ~~
+
+    // ~~ Barber manage profile ~~
+    [SerializeField] private GameObject EditBarberPricesBTN;
+    private int editBarberPrices = 0; // 1=haircut; 2=beard; 3=mustache; 4=colour; 5=eyebrow
+    [SerializeField] private InputField barberInsertEditPrice;
+    // ~~ end of barber manage profile ~~
+
     //ERROR INFO //
     [SerializeField] private GameObject errorObj;
     [SerializeField] private TextMeshProUGUI errorTXT;
@@ -105,6 +116,7 @@ public class AppManager : MonoBehaviour
     [SerializeField] private GameObject createShopMenuBTN;
     [SerializeField] private Dropdown createShopCityDropdown;
     [SerializeField] private Dropdown createShopCountyDropdown;
+    [SerializeField] private Toggle createShopGeneralPrices;
 
     public int GetTimeToCut()
     {
@@ -114,6 +126,106 @@ public class AppManager : MonoBehaviour
     public string GetSelectedShopName()
     {
         return selectedShopName;
+    }
+
+    public void EditGeneralHaircutPrice()
+    {
+        editGeneralPrices = 1;
+    }
+    public void EditGeneralBeardPrice()
+    {
+        editGeneralPrices = 2;
+    }
+    public void EditGeneralMustachePrice()
+    {
+        editGeneralPrices = 3;
+    }
+    public void EditGeneralHaircolourPrice()
+    {
+        editGeneralPrices = 4;
+    }
+    public void EditGeneralEyebrowPrice()
+    {
+        editGeneralPrices = 5;
+    }
+    public void EditBarberHaircutPrice()
+    {
+        editBarberPrices = 1;
+    }
+    public void EditBarberBeardPrice()
+    {
+        editBarberPrices = 2;
+    }
+    public void EditBarberMustachePrice()
+    {
+        editBarberPrices = 3;
+    }
+    public void EditBarberHaircolourPrice()
+    {
+        editBarberPrices = 4;
+    }
+    public void EditBarberEyebrowPrice()
+    {
+        editBarberPrices = 5;
+    }
+    public void UpdateGeneralPrices()
+    {
+        StartCoroutine(UpdateGeneralPricesEnum());
+    }
+    IEnumerator UpdateGeneralPricesEnum()
+    {
+        if (int.TryParse(shopInsertEditPrice.text, out int a) == false)
+        {
+            errorTXT.text = "Please insert a correct number.";
+            errorObj.SetActive(true);
+        }
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("whatToUpdate", editGeneralPrices.ToString()));
+        form.Add(new MultipartFormDataSection("price", shopInsertEditPrice.text));
+        form.Add(new MultipartFormDataSection("shopName", selectedShopToManage.name));
+        UnityWebRequest web = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/updategeneralprices.php", form);
+        yield return web.SendWebRequest();
+        if (web.isNetworkError || web.isHttpError)
+        {
+            Debug.Log(web.error);
+            errorTXT.text = "Something went wrong, please try again later.";
+            errorObj.SetActive(true);
+        }
+        else
+        {
+            errorTXT.text = "Price updated successfully.";
+            errorObj.SetActive(true);
+        }
+    }
+    public void UpdateBarberPrices()
+    {
+        StartCoroutine(UpdateBarberPricesEnum());
+    }
+    IEnumerator UpdateBarberPricesEnum()
+    {
+        if (int.TryParse(barberInsertEditPrice.text, out int a) == false)
+        {
+            errorTXT.text = "Please insert a correct number.";
+            errorObj.SetActive(true);
+        }
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("whatToUpdate", editBarberPrices.ToString()));
+        form.Add(new MultipartFormDataSection("price", barberInsertEditPrice.text));
+        form.Add(new MultipartFormDataSection("shopName", account.WorksAt));
+        form.Add(new MultipartFormDataSection("username", account.AccountUsername));
+        UnityWebRequest web = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/updatebarberprices.php", form);
+        yield return web.SendWebRequest();
+        if (web.isNetworkError || web.isHttpError)
+        {
+            Debug.Log(web.error);
+            errorTXT.text = "Something went wrong, please try again later.";
+            errorObj.SetActive(true);
+        }
+        else
+        {
+            errorTXT.text = "Price updated successfully.";
+            errorObj.SetActive(true);
+        }
     }
     public void showBarbers()
     {
@@ -126,7 +238,7 @@ public class AppManager : MonoBehaviour
             WWWForm form = new WWWForm();
             form.AddField("whatToPick", whatToPickBarber);
             form.AddField("shopName", selectedShopName);
-            WWW www = new WWW("http://localhost/barberapp/showBarbers.php", form);
+            WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/showBarbers.php", form);
             yield return www;
             switch (whatToPickBarber)
             {
@@ -254,7 +366,9 @@ public class AppManager : MonoBehaviour
         form.Add(new MultipartFormDataSection("shopCity", createShopCityDropdown.options[createShopCityDropdown.value].text));
         form.Add(new MultipartFormDataSection("username", account.AccountUsername));
         form.Add(new MultipartFormDataSection("personalCode", account.PersonalCode.ToString()));
-        UnityWebRequest webreq = UnityWebRequest.Post("http://localhost/barberapp/createshop.php", form);
+        form.Add(new MultipartFormDataSection("generalPrices", createShopGeneralPrices.isOn.ToString()));
+
+        UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/createshop.php", form);
         yield return webreq.SendWebRequest();
         if (webreq.isNetworkError || webreq.isHttpError)
         {
@@ -330,6 +444,7 @@ public class AppManager : MonoBehaviour
     }
     IEnumerator ShowShopsEnumerator()
     {
+        loadingScreen.SetActive(true);
         for(int i=0; i<2; i++)
         {
             WWWForm form = new WWWForm();
@@ -337,7 +452,7 @@ public class AppManager : MonoBehaviour
             form.AddField("city", cityDropdown.options[cityDropdown.value].text);
             form.AddField("county", countyDropdown.options[countyDropdown.value].text);
 
-            WWW www = new WWW("http://localhost/barberapp/showShops.php", form);
+            WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/showShops.php", form);
             yield return www;
             switch (whatToPick)
             {
@@ -370,6 +485,7 @@ public class AppManager : MonoBehaviour
                 shopList.Add(barberShop);
             }
         }
+        loadingScreen.SetActive(false);
     }
 
     public void EditShopDescription()
@@ -381,7 +497,7 @@ public class AppManager : MonoBehaviour
         List<IMultipartFormSection> form = new List<IMultipartFormSection>();
         form.Add(new MultipartFormDataSection("description", ShopDescriptionField.text));
         form.Add(new MultipartFormDataSection("shopName", selectedShopToManage.name));
-        UnityWebRequest webreq = UnityWebRequest.Post("http://localhost/barberapp/editshopdescription.php", form);
+        UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/editshopdescription.php", form);
         yield return webreq.SendWebRequest();
         if (webreq.isNetworkError || webreq.isHttpError)
         {
@@ -404,7 +520,7 @@ public class AppManager : MonoBehaviour
 
         List<IMultipartFormSection> form = new List<IMultipartFormSection>();
         form.Add(new MultipartFormDataSection("shopname", selectedShopName));
-        UnityWebRequest webreq = UnityWebRequest.Post("http://localhost/barberapp/showdescription.php", form);
+        UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/showdescription.php", form);
         yield return webreq.SendWebRequest();
         if(webreq.isHttpError || webreq.isNetworkError)
         {
@@ -528,7 +644,7 @@ public class AppManager : MonoBehaviour
         form.AddField("workingHours", updateWorkingProgram);
         form.AddField("shopName", selectedShopToManage.name);
 
-        WWW www = new WWW("http://localhost/barberapp/editshopworkinghours.php", form);
+        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/editshopworkinghours.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -547,7 +663,7 @@ public class AppManager : MonoBehaviour
     {
         WWWForm form = new WWWForm();
         form.AddField("shopName", selectedShopName);
-        WWW www = new WWW("http://localhost/barberapp/getworkinghours.php", form);
+        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/getworkinghours.php", form);
         yield return www;
         
         if (www.text[0] != '0')
@@ -621,8 +737,8 @@ public class AppManager : MonoBehaviour
         for(int i =0; i<6; i++)
         {
             loadingScreen.SetActive(true);  //activeaza loading screenu
-            WWW www = new WWW("http://localhost/barberapp/shops/" + selectedShopName + "/image" + i + ".jpg");
-            WWW w = new WWW("http://localhost/barberapp/shops/" + selectedShopName + "/image" + i + ".png");
+            WWW www = new WWW("http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + i + ".jpg");
+            WWW w = new WWW("http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + i + ".png");
             yield return www;
             yield return w;
             if (isFailedImage(www.texture)) // check if the image is the question mark
@@ -680,7 +796,7 @@ public class AppManager : MonoBehaviour
         form.AddBinaryData("myimage", textureBytes, imageName, "imagebro.jpg");
         form.AddField("shopName", selectedShopToManage.name);
 
-        WWW w = new WWW("http://localhost/barberapp/uploadimage.php", form);
+        WWW w = new WWW("http://mybarber.vlcapps.com/appscripts/uploadimage.php", form);
 
         yield return w;
         Debug.Log(w.text);
@@ -764,7 +880,7 @@ public class AppManager : MonoBehaviour
             List<IMultipartFormSection> newform = new List<IMultipartFormSection>();
             newform.Add(new MultipartFormDataSection("username", account.AccountUsername));
             newform.Add(new MultipartFormDataSection("whatData", i.ToString()));
-            UnityWebRequest webreq = UnityWebRequest.Post("http://localhost/barberapp/getshopsofuser.php", newform);
+            UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/getshopsofuser.php", newform);
             yield return webreq.SendWebRequest();
             if (webreq.isNetworkError || webreq.isHttpError)
             {
@@ -789,9 +905,46 @@ public class AppManager : MonoBehaviour
             }
         }
     }
+    public void CheckBarberCanEditPrices()
+    {
+        StartCoroutine(CheckBarberCanEditPricesEnum());
+    }
+    IEnumerator CheckBarberCanEditPricesEnum()
+    {
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("shopName", account.WorksAt));
+        UnityWebRequest web = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/checkbarbereditprice.php", form);
+        yield return web.SendWebRequest();
+        if(web.downloadHandler.text == "0")
+        {
+            EditBarberPricesBTN.SetActive(false);
+        }
+        else
+        {
+            EditBarberPricesBTN.SetActive(true);
+        }
+    }
     public void SelectShopToManage()
     {
         selectedShopToManage = EventSystem.current.currentSelectedGameObject.gameObject;
+        StartCoroutine(CheckForShopGeneralPrice());
+    }
+    IEnumerator CheckForShopGeneralPrice()
+    {
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("shopName", selectedShopToManage.name));
+        UnityWebRequest web = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/hasgeneralprice.php", form);
+        yield return web.SendWebRequest();
+        if(web.downloadHandler.text == "0")
+        {
+            shopGeneralPrice = false;
+            EditGeneralPricesBTN.SetActive(false);
+        }
+        else
+        {
+            shopGeneralPrice = true;
+            EditGeneralPricesBTN.SetActive(true);
+        }
     }
     public void CreateShopsToManage()
     {

@@ -26,6 +26,7 @@ public class Account : MonoBehaviour
     [SerializeField] private GameObject errorInfoObj;
     [SerializeField] private TextMeshProUGUI errorInfoTXT;
     [SerializeField] private GameObject settingsMenu;
+    [SerializeField] private GameObject loadingScreen;
     private string accountUsername;
     private bool isAdmin;
     private string firstName;
@@ -43,8 +44,13 @@ public class Account : MonoBehaviour
     private int timeToCut;
     private int shopsCreated; //number of shops the user has already created
     private int shopsToCreate; //number of shops the user can still create
+    private string worksAt;
     [SerializeField] private AppManager appmanager;
 
+    public string WorksAt
+    {
+        get { return worksAt; }
+    }
     public string BarberName
     {
         get { return firstName + lastName; }
@@ -126,7 +132,7 @@ public class Account : MonoBehaviour
         form.AddField("email", registerEmail.text);
         form.AddField("firstName", registerFirstName.text);
         form.AddField("lastName", registerLastName.text);
-        WWW www = new WWW("http://localhost/barberapp/register.php", form);
+        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/register.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -159,10 +165,11 @@ public class Account : MonoBehaviour
     }
     IEnumerator LoginEnumerator()
     {
+        loadingScreen.SetActive(true);
         WWWForm form = new WWWForm();
         form.AddField("username", usernameField.text);
         form.AddField("password", passwordField.text);
-        WWW www = new WWW("http://localhost/barberapp/login.php", form);
+        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/login.php", form);
 
         yield return www;
         if (www.text[0] == '0')
@@ -187,6 +194,7 @@ public class Account : MonoBehaviour
             if(www.text.Split('\t')[11] != null && www.text.Split('\t')[11] != "")
             {
                 isEmployed = true;
+                worksAt = www.text.Split('\t')[10];
             }
             timeToCut = int.Parse(www.text.Split('\t')[12]);
             personalCode = int.Parse(www.text.Split('\t')[13]);
@@ -197,6 +205,7 @@ public class Account : MonoBehaviour
             profileUsername.text = accountUsername;
             profileFirstName.text = firstName;
             profileLastName.text = lastName;
+            loadingScreen.SetActive(false);
         }
         else if(www.text[0] == '1')
         {
@@ -219,6 +228,7 @@ public class Account : MonoBehaviour
             if (www.text.Split('\t')[10] != null && www.text.Split('\t')[10] != "")
             {
                 isEmployed = true;
+                worksAt = www.text.Split('\t')[10];
             }
             timeToCut = int.Parse(www.text.Split('\t')[11]);
             personalCode = int.Parse(www.text.Split('\t')[12]);
@@ -226,17 +236,20 @@ public class Account : MonoBehaviour
             profileUsername.text = accountUsername;
             profileFirstName.text = firstName;
             profileLastName.text = lastName;
+            loadingScreen.SetActive(false);
         }
         else if(www.text[0] == '2')
         {
             
             errorInfoTXT.text = "Username or password incorrect !";
             errorInfoObj.SetActive(true);
+            loadingScreen.SetActive(false);
         }
         else
         {
             errorInfoTXT.text = "Something went wrong! Please try again later. If the problem continues contact an administrator.";
             errorInfoObj.SetActive(true);
+            loadingScreen.SetActive(false);
         }
     }
 }

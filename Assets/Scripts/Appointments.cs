@@ -124,12 +124,14 @@ public class Appointments : MonoBehaviour
     private string[] barberOccupiedHours = new string[130];
     private bool[] barberOccupiedDays = new bool[33];
     private string[] clientName = new string[130];
+    private string[] appointmentPrice = new string[130];
     private string[] appointmentInfo = new string[130]; //info given by the client when the appointment was created
     private List<GameObject> occupiedAppointments = new List<GameObject>();
     [SerializeField] private GameObject occupiedAppointmentPrefab;
     private TextMeshProUGUI appointmentClientName;
     private TextMeshProUGUI occupiedAppointmentHour;
     private TextMeshProUGUI occupiedAppointmentMinute;
+    private TextMeshProUGUI occupiedAppointmentPrice;
     [SerializeField] private TextMeshProUGUI occupiedAppointmentInfo;
     private int occupiedAppointmentCounter = 0; //increases for every appointment that has to be shown
     //------end-------
@@ -229,6 +231,8 @@ public class Appointments : MonoBehaviour
         nextToServicesBTN.SetActive(true);
         backFromHoursBTN.SetActive(true);
         clientMentionsObj.SetActive(true);
+        checkIfLoggedInBTN.SetActive(false);
+        createAppointmentBTN.SetActive(false);
     }
     /* cand e butonul selectat se seteaza variabila bool sa fie inversul a valorii de era
     * daca este true, adica daca e butonu selectat se face culoarea lui mai gri sa para selectat
@@ -339,6 +343,7 @@ public class Appointments : MonoBehaviour
         nextMonthDateBTN.SetActive(true);
         previousMonthDateBTN.SetActive(true);
         servicesBG.SetActive(false);
+        closeAppointmentBTN.SetActive(true);
     }
     public void CheckBarberAppointmentsDays() //check which days are occupied
     {
@@ -350,7 +355,7 @@ public class Appointments : MonoBehaviour
         form.AddField("barberName", accountClass.BarberName);
         form.AddField("currentMonth", currentMonth);
         form.AddField("currentYear", currentYear);
-        WWW www = new WWW("http://localhost/barberapp/checkbarberappdays.php", form);
+        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/checkbarberappdays.php", form);
         yield return www;
         string[] days = new string[33];
         for (int i = 0; i < www.text.Split('\t').Length; i++)
@@ -376,7 +381,7 @@ public class Appointments : MonoBehaviour
     IEnumerator CheckBarberAppointmentsTimeEnum()
     {
         int WTP = 1;
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 5; i++)
         {
             WWWForm form = new WWWForm();
             form.AddField("barberName", accountClass.BarberName);
@@ -384,7 +389,7 @@ public class Appointments : MonoBehaviour
             form.AddField("currentYear", currentYear);
             form.AddField("selectedDay", selectedAppointmentDay);
             form.AddField("wtp", WTP);
-            WWW www = new WWW("http://localhost/barberapp/getoccupiedtime.php", form);
+            WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/getoccupiedtime.php", form);
             yield return www;
             switch (WTP)
             {
@@ -415,6 +420,13 @@ public class Appointments : MonoBehaviour
                     {
                         appointmentInfo[j] = www.text.Split('\t')[j];
                     }
+                    WTP = 5;
+                    break;
+                case 5:
+                    for(int j = 0; j < www.text.Split('\t').Length; j++)
+                    {
+                        appointmentPrice[j] = www.text.Split('\t')[j];
+                    }
                     WTP = 1;
                     break;
             }
@@ -437,7 +449,7 @@ public class Appointments : MonoBehaviour
         form.AddField("clientName", selectedAppointment.transform.Find("ClientName").gameObject.GetComponent<TextMeshProUGUI>().text);
         form.AddField("appHour", hour);
         form.AddField("appMinute", minute);
-        WWW www = new WWW("http://localhost/barberapp/barberdeleteapp.php", form);
+        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/barberdeleteapp.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -476,6 +488,9 @@ public class Appointments : MonoBehaviour
             occupiedAppointmentMinute.text = barberOccupiedMinutes[i];
             appointmentClientName = appointment.transform.Find("ClientName").gameObject.GetComponent<TextMeshProUGUI>();
             appointmentClientName.text = clientName[i];
+            GameObject price = appointment.transform.Find("Price").gameObject;
+            occupiedAppointmentPrice = price.transform.Find("Number").gameObject.GetComponent<TextMeshProUGUI>();
+            occupiedAppointmentPrice.text = appointmentPrice[i];
             occupiedAppointments.Add(appointment);
         }
         occupiedAppointmentCounter = 0;
@@ -653,7 +668,7 @@ public class Appointments : MonoBehaviour
         List<IMultipartFormSection> newform = new List<IMultipartFormSection>();
         newform.Add(new MultipartFormDataSection("barberFirstName", barberFirstName));
         newform.Add(new MultipartFormDataSection("barberLastName", barberLastName));
-        UnityWebRequest webreq = UnityWebRequest.Post("http://localhost/barberapp/getbarberprices.php", newform);
+        UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/getbarberprices.php", newform);
         yield return webreq.SendWebRequest();
         if (webreq.isNetworkError || webreq.isHttpError)
         {
@@ -720,7 +735,7 @@ public class Appointments : MonoBehaviour
             form.AddField("whatToPick", WhatToPick);
             form.AddField("firstname", barberFirstName);
             form.AddField("lastname", barberLastName);
-            WWW www = new WWW("http://localhost/barberapp/checkforappointment.php", form);
+            WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/checkforappointment.php", form);
             yield return www;
             string[] hours = new string[24];
             string[] minutes = new string[60];
@@ -773,7 +788,7 @@ public class Appointments : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("firstname", barberFirstName);
         form.AddField("lastname", barberLastName);
-        WWW www = new WWW("http://localhost/barberapp/getttc.php", form);
+        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/getttc.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -793,7 +808,7 @@ public class Appointments : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("timetocut", timeToCutInput.text);
         form.AddField("username", accountClass.AccountUsername);
-        WWW www = new WWW("http://localhost/barberapp/updatetimetocut.php", form);
+        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/updatetimetocut.php", form);
         yield return www;
         if(www.text[0] == '0')
         {
@@ -820,7 +835,7 @@ public class Appointments : MonoBehaviour
             WWWForm form = new WWWForm();
             form.AddField("shopname", appmanagerClass.GetSelectedShopName());
             form.AddField("selectedDay", selectedDayString);
-            WWW www = new WWW("http://localhost/barberapp/getshopprogramapp.php", form);
+            WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/getshopprogramapp.php", form);
             yield return www;
 
             if (www.text[0] == '0')
@@ -975,7 +990,8 @@ public class Appointments : MonoBehaviour
                 form.AddField("hour", selectedHour);
                 form.AddField("minute", selectedMinute);
                 form.AddField("mentions", clientMentionInputField.text);
-                WWW www = new WWW("http://localhost/barberapp/createappointment.php", form);
+                form.AddField("totalprice", totalPrice);
+                WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/createappointment.php", form);
                 yield return www;
                 daysScrollView.SetActive(true);
                 hoursScrollView.SetActive(false);
@@ -1020,7 +1036,7 @@ public class Appointments : MonoBehaviour
                 form.AddField("hour", selectedHour);
                 form.AddField("minute", selectedMinute);
                 form.AddField("mentions", clientMentionInputField.text);
-                WWW www = new WWW("http://localhost/barberapp/createappointment.php", form);
+                WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/createappointment.php", form);
                 yield return www;
                 daysScrollView.SetActive(true);
                 hoursScrollView.SetActive(false);
