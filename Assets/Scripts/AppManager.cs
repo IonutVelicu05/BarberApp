@@ -77,6 +77,29 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramHoursOpensAtTxt;
     [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramHoursClosesAtTxt;
     [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramHoursUpdateBtn;
+    [SerializeField] private TextMeshProUGUI editShopMenuPhotosInfoTxt;
+    [SerializeField] private TextMeshProUGUI editShopMenuSelectPhotosBtn;
+    [SerializeField] private TextMeshProUGUI editShopMenuUpdatePhotosBtn;
+    [SerializeField] private TextMeshProUGUI salonMenuInfoBtn;
+    [SerializeField] private TextMeshProUGUI salonMenuBarberBtn;
+    [SerializeField] private TextMeshProUGUI salonMenuBarberFirstName;
+    [SerializeField] private TextMeshProUGUI salonMenuBarberLastName;
+    [SerializeField] private TextMeshProUGUI appointmentMenuCheckHoursBtn;
+    [SerializeField] private TextMeshProUGUI appointmentMenuCheckHoursBackBtn;
+    [SerializeField] private TextMeshProUGUI appointmentMenuNextToServicesBtn;
+    [SerializeField] private TextMeshProUGUI appointmentMenuNextToServicesBackBtn;
+    [SerializeField] private TextMeshProUGUI appointmentMenuMentionsInfoTxt;
+    [SerializeField] private Text appointmentMenuMentionsPlaceholder;
+    [SerializeField] private TextMeshProUGUI appointmentMenuNextToNameBtn;
+    [SerializeField] private TextMeshProUGUI appointmentMenuInsertNameInfoTxt;
+    [SerializeField] private Text appointmentMenuInsertNamePlaceholder;
+    [SerializeField] private TextMeshProUGUI appointmentMenuCreateAppointmentBtn;
+    [SerializeField] private TextMeshProUGUI appointmentMenuHaircutServiceBtn;
+    [SerializeField] private TextMeshProUGUI appointmentMenuBeardServiceBtn;
+    [SerializeField] private TextMeshProUGUI appointmentMenuMustacheServiceBtn;
+    [SerializeField] private TextMeshProUGUI appointmentMenuHairColourBtn;
+    [SerializeField] private TextMeshProUGUI appointmentMenuEyebrowBtn;
+    [SerializeField] private TextMeshProUGUI appointmentMenuBackToHourBtn;
 
     //end of translation
 
@@ -109,6 +132,7 @@ public class AppManager : MonoBehaviour
     private List<string> cityList = new List<string>();
     private int uploadedImageNumber; //the number of the uploading image
     private int shopImageNumber = 1;
+    private List<string> uploadImageList = new List<string>();
     private bool anotherShopSelected = false; //when selecting a shop it sets it to true and if its true when selecting it shows the first image of
     //the shop; sets shopImageNumber to 1;
     private Texture2D imageFromPhone;
@@ -527,6 +551,13 @@ public class AppManager : MonoBehaviour
             cityList.Add(list[i]);
         }
     }
+    void ImageAddToList(params string[] list)
+    {
+        for (int i = 0; i < list.Length; i++)
+        {
+            uploadImageList.Add(list[i]);
+        }
+    }
     public void updateLanguageTexts() //whenever the language is changed all the texts will be updated here.
     {
         if (selectedLanguage == 1)
@@ -590,6 +621,34 @@ public class AppManager : MonoBehaviour
             editShopMenuWorkingProgramHoursOpensAtTxt.text = "Se deschide \n la ora ->";
             editShopMenuWorkingProgramHoursClosesAtTxt.text = "Se inchide \n la ora ->";
             editShopMenuWorkingProgramHoursUpdateBtn.text = "Actualizeaza";
+            editShopMenuPhotosInfoTxt.text = "Alege o poza din telefonul tau";
+            editShopMenuSelectPhotosBtn.text = "Alege poza";
+            editShopMenuUpdatePhotosBtn.text = "Actualizeaza";
+            whatImageToUpload.ClearOptions();
+            uploadImageList.Clear();
+            ImageAddToList("Ce imagine vrei sa schimbi", "Imaginea 1", "Imaginea 2", "Imaginea 3", "Imaginea 4", "Imaginea 5");
+            whatImageToUpload.AddOptions(uploadImageList);
+            salonMenuInfoBtn.text = "Informatii";
+            salonMenuBarberBtn.text = "Frizeri";
+            salonMenuBarberFirstName.text = "Prenume: ";
+            salonMenuBarberLastName.text = "Nume: ";
+            appointmentMenuCheckHoursBtn.text = "Verifica ora";
+            appointmentMenuCheckHoursBackBtn.text = "Inapoi";
+            appointmentMenuNextToServicesBtn.text = "Inainte";
+            appointmentMenuNextToServicesBackBtn.text = "Inapoi";
+            appointmentMenuMentionsInfoTxt.text = "Daca ai informatii/mentiuni pentru frizer scrie-le mai jos";
+            appointmentMenuMentionsPlaceholder.text = "Scrie aici..";
+            appointmentMenuInsertNameInfoTxt.text = "Introdu mai jos numele care va fi afisat frizerului pentru programare.";
+            appointmentMenuInsertNamePlaceholder.text = "Scrie aici...";
+            appointmentMenuNextToNameBtn.text = "Inainte";
+            appointmentMenuHaircutServiceBtn.text = "Tunsoare";
+            appointmentMenuBeardServiceBtn.text = "Barba";
+            appointmentMenuMustacheServiceBtn.text = "Mustata";
+            appointmentMenuHairColourBtn.text = "Vopsit";
+            appointmentMenuEyebrowBtn.text = "Pensat";
+            appointmentMenuBackToHourBtn.text = "Inapoi";
+            appointmentMenuCreateAppointmentBtn.text = "Creeaza";
+
 
 
             loadingScreen.SetActive(false);
@@ -655,7 +714,33 @@ public class AppManager : MonoBehaviour
             editShopMenuWorkingProgramHoursOpensAtTxt.text = "Opens at";
             editShopMenuWorkingProgramHoursClosesAtTxt.text = "Closes at";
             editShopMenuWorkingProgramHoursUpdateBtn.text = "Update";
-
+            editShopMenuPhotosInfoTxt.text = "Pick a photo from your phone";
+            editShopMenuSelectPhotosBtn.text = "Select photo";
+            editShopMenuUpdatePhotosBtn.text = "Update";
+            whatImageToUpload.ClearOptions();
+            uploadImageList.Clear();
+            ImageAddToList("Which image to change", "Image 1", "Image 2", "Image 3", "Image 4", "Image 5");
+            whatImageToUpload.AddOptions(uploadImageList);
+            salonMenuInfoBtn.text = "Informations";
+            salonMenuBarberBtn.text = "Barbers";
+            salonMenuBarberFirstName.text = "First name: ";
+            salonMenuBarberLastName.text = "Last name: ";
+            appointmentMenuCheckHoursBtn.text = "Check hours";
+            appointmentMenuCheckHoursBackBtn.text = "Back";
+            appointmentMenuNextToServicesBtn.text = "Next";
+            appointmentMenuNextToServicesBackBtn.text = "Back";
+            appointmentMenuMentionsInfoTxt.text = "If you have any information the barber should know about  type it bellow";
+            appointmentMenuMentionsPlaceholder.text = "Type here..";
+            appointmentMenuInsertNameInfoTxt.text = "Enter below the name that will be shown to the barber for this appointment.";
+            appointmentMenuInsertNamePlaceholder.text = "Type here...";
+            appointmentMenuNextToNameBtn.text = "Next";
+            appointmentMenuHaircutServiceBtn.text = "Haircut";
+            appointmentMenuBeardServiceBtn.text = "Beard";
+            appointmentMenuMustacheServiceBtn.text = "Mustache";
+            appointmentMenuHairColourBtn.text = "Hair colour";
+            appointmentMenuEyebrowBtn.text = "Eyebrows";
+            appointmentMenuBackToHourBtn.text = "Back";
+            appointmentMenuCreateAppointmentBtn.text = "Create";
 
 
             loadingScreen.SetActive(false);

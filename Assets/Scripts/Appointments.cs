@@ -107,7 +107,7 @@ public class Appointments : MonoBehaviour
     [SerializeField] private GameObject errorInfoObj;
     [SerializeField] private GameObject checkIfLoggedInBTN;
     [SerializeField] private TextMeshProUGUI errorInfoTXT;
-    
+    [SerializeField] private TextMeshProUGUI selectDateInfoTxt;
     private string clientMentionsWrite;
 
     //------end-------
@@ -159,7 +159,14 @@ public class Appointments : MonoBehaviour
         clientMentionsObj.SetActive(false);
         checkHoursBTN.SetActive(true);
         nextToServicesBTN.SetActive(false);
-
+        if(appmanagerClass.SelectedLanguage == 1)
+        {
+            selectDateInfoTxt.text = "Alege o data pentru programare";
+        }
+        else
+        {
+            selectDateInfoTxt.text = "Select a date for your appointment";
+        }
     }
     private void Start()
     {
@@ -224,6 +231,14 @@ public class Appointments : MonoBehaviour
         nextToServicesBTN.SetActive(false);
         clientMentionsObj.SetActive(false);
         backFromHoursBTN.SetActive(false);
+        if(appmanagerClass.SelectedLanguage == 1)
+        {
+            selectDateInfoTxt.text = "Alege ce servicii doresti";
+        }
+        else
+        {
+            selectDateInfoTxt.text = "Select what services do you want.";
+        }
     }
     public void BackToHours()
     {
@@ -233,6 +248,14 @@ public class Appointments : MonoBehaviour
         clientMentionsObj.SetActive(true);
         checkIfLoggedInBTN.SetActive(false);
         createAppointmentBTN.SetActive(false);
+        if(appmanagerClass.SelectedLanguage == 1)
+        {
+            selectDateInfoTxt.text = "Alege o ora pentru programare.";
+        }
+        else if(appmanagerClass.SelectedLanguage == 2)
+        {
+            selectDateInfoTxt.text = "Select an hour for your appointment.";
+        }
     }
     /* cand e butonul selectat se seteaza variabila bool sa fie inversul a valorii de era
     * daca este true, adica daca e butonu selectat se face culoarea lui mai gri sa para selectat
@@ -629,6 +652,15 @@ public class Appointments : MonoBehaviour
     public void CreateCalendar()
     {
         loadingScreen.SetActive(true);
+        if (appmanagerClass.SelectedLanguage == 2)
+        {
+            selectDateInfoTxt.text = "Select a date for your appointment.";
+        }
+        else if (appmanagerClass.SelectedLanguage == 1)
+        {
+            selectDateInfoTxt.text = "Alege o data pentru programare.";
+            Debug.Log("loba 1");
+        }
         //if the list is not empty destroy every object in that list
         if (daysObjects.Count > 0)
         {
@@ -903,7 +935,15 @@ public class Appointments : MonoBehaviour
         StartCoroutine(CreateAppointmentHoursEnum());
     }
     IEnumerator CreateAppointmentHoursEnum()
-    { 
+    {
+        if(appmanagerClass.SelectedLanguage == 1)
+        {
+            selectDateInfoTxt.text = "Alege o ora pentru programare.";
+        }
+        else if(appmanagerClass.SelectedLanguage == 2)
+        {
+            selectDateInfoTxt.text = "Select an hour for your appointment.";
+        }
         if(selectedDayString == "" || selectedDayString == null)
         {
             if (appmanagerClass.SelectedLanguage == 2)

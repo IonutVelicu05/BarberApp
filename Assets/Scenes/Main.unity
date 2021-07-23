@@ -3235,8 +3235,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.892, y: 0.6912743}
   m_AnchorMax: {x: 1, y: 0.81600004}
-  m_AnchoredPosition: {x: -259.19, y: -264}
-  m_SizeDelta: {x: 147.28271, y: 83.74893}
+  m_AnchoredPosition: {x: -257.7, y: -264}
+  m_SizeDelta: {x: 185.1203, y: 83.74893}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &116442849
 MonoBehaviour:
@@ -6448,6 +6448,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 181100073}
   m_CullTransparentMesh: 0
+--- !u!114 &183764323 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5553619802819314380, guid: 7035c80eff08b834f8fd212bcc5b1138, type: 3}
+  m_PrefabInstance: {fileID: 5553619801731177504}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &185411969
 GameObject:
   m_ObjectHideFlags: 0
@@ -7404,7 +7415,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Select Photo
+  m_text: Select photo
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -8422,7 +8433,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Upload
+  m_text: Update
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -12302,8 +12313,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.892, y: 0.6912743}
   m_AnchorMax: {x: 1, y: 0.81600004}
-  m_AnchoredPosition: {x: -286.84717, y: -636.1643}
-  m_SizeDelta: {x: 140.58563, y: 28.845055}
+  m_AnchoredPosition: {x: -289.7, y: -636.1643}
+  m_SizeDelta: {x: 166.78098, y: 28.845055}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &388169150
 MonoBehaviour:
@@ -12348,18 +12359,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 863758358}
-        m_TargetAssemblyTypeName: TMPro.TMP_Text, Unity.TextMeshPro
-        m_MethodName: set_text
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Select an hour for your appointment.
-          m_BoolArgument: 1
-        m_CallState: 2
       - m_Target: {fileID: 744176103}
         m_TargetAssemblyTypeName: Appointments, Assembly-CSharp
         m_MethodName: BackToHours
@@ -12423,7 +12422,7 @@ GameObject:
   - component: {fileID: 395163432}
   - component: {fileID: 395163431}
   m_Layer: 5
-  m_Name: Scroll View
+  m_Name: BarbersScroll View
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18036,18 +18035,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 863758358}
-        m_TargetAssemblyTypeName: TMPro.TMP_Text, Unity.TextMeshPro
-        m_MethodName: set_text
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Select an hour for your appointment.
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &593767572
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19657,18 +19644,6 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 863758358}
-        m_TargetAssemblyTypeName: TMPro.TMP_Text, Unity.TextMeshPro
-        m_MethodName: set_text
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Select what service do you want.
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &643700546
@@ -22309,6 +22284,7 @@ MonoBehaviour:
   errorInfoObj: {fileID: 696781717}
   checkIfLoggedInBTN: {fileID: 1611540529}
   errorInfoTXT: {fileID: 2146743402}
+  selectDateInfoTxt: {fileID: 863758358}
   appointmentDayPrefab: {fileID: 574784415}
   occupiedAppointmentPrefab: {fileID: 1720519102}
   occupiedAppointmentInfo: {fileID: 1696706845}
@@ -24619,7 +24595,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &806402441
 Transform:
   m_ObjectHideFlags: 0
@@ -31899,7 +31875,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: e3265ab4bf004d28a9537516768c1c75, type: 3}
-    m_FontSize: 22
+    m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 1
     m_MinSize: 10
@@ -31910,7 +31886,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Which image to change
+  m_Text: Image1
 --- !u!222 &1056731864
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -37790,8 +37766,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.00010681, y: -265.7}
-  m_SizeDelta: {x: 228.14165, y: 102.713264}
+  m_AnchoredPosition: {x: 0.00000095367, y: -265.7}
+  m_SizeDelta: {x: 296.57935, y: 102.713264}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1288244822
 MonoBehaviour:
@@ -38090,6 +38066,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1299856396}
   m_CullTransparentMesh: 0
+--- !u!114 &1300853361 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5553619801915295125, guid: 7035c80eff08b834f8fd212bcc5b1138, type: 3}
+  m_PrefabInstance: {fileID: 5553619801731177504}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1302312618
 GameObject:
   m_ObjectHideFlags: 0
@@ -39401,7 +39388,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1336807967
 RectTransform:
   m_ObjectHideFlags: 0
@@ -47014,8 +47001,6 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: Which image to change
-      m_Image: {fileID: 0}
     - m_Text: Image1
       m_Image: {fileID: 0}
     - m_Text: Image2
@@ -48351,7 +48336,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: BACK
+  m_text: Inapoi
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -51436,7 +51421,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 2}
-  m_SizeDelta: {x: 0, y: 150}
+  m_SizeDelta: {x: 0, y: 160.12534}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1686875598
 MonoBehaviour:
@@ -56432,7 +56417,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: BACK
+  m_text: Inapoi
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -58941,8 +58926,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.000020981, y: 335}
-  m_SizeDelta: {x: 271.4592, y: 122.7128}
+  m_AnchoredPosition: {x: -40.6, y: 312.6}
+  m_SizeDelta: {x: 429.04605, y: 167.50064}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1968881654
 MonoBehaviour:
@@ -59211,8 +59196,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.892, y: 0.6912743}
   m_AnchorMax: {x: 1, y: 0.81600004}
-  m_AnchoredPosition: {x: -259.19, y: -264}
-  m_SizeDelta: {x: 147.28271, y: 83.74893}
+  m_AnchoredPosition: {x: -257.7743, y: -264}
+  m_SizeDelta: {x: 184.4514, y: 83.74893}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1982480673
 MonoBehaviour:
@@ -59267,18 +59252,6 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 863758358}
-        m_TargetAssemblyTypeName: TMPro.TMP_Text, Unity.TextMeshPro
-        m_MethodName: set_text
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Select a date for your appointment.
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1982480674
@@ -63722,7 +63695,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2106069673
 Transform:
   m_ObjectHideFlags: 0
@@ -65645,6 +65618,106 @@ PrefabInstance:
       propertyPath: editShopMenuWorkingProgramHoursUpdateBtn
       value: 
       objectReference: {fileID: 64777023}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: editShopMenuPhotosInfoTxt
+      value: 
+      objectReference: {fileID: 1968881654}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: editShopMenuSelectPhotosBtn
+      value: 
+      objectReference: {fileID: 208397094}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: editShopMenuUpdatePhotosBtn
+      value: 
+      objectReference: {fileID: 229088209}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: editShopMenuPhotosDropdownTxt
+      value: 
+      objectReference: {fileID: 1056731863}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: salonMenuInfoBtn
+      value: 
+      objectReference: {fileID: 2139462486}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: salonMenuBarberBtn
+      value: 
+      objectReference: {fileID: 1699786462}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: salonMenuBarberFirstName
+      value: 
+      objectReference: {fileID: 183764323}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: salonMenuBarberLastName
+      value: 
+      objectReference: {fileID: 1300853361}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuSelectDayTxt
+      value: 
+      objectReference: {fileID: 863758358}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuCheckHoursBtn
+      value: 
+      objectReference: {fileID: 1362092834}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuCheckHoursBackBtn
+      value: 
+      objectReference: {fileID: 1621417915}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuNextToServicesBtn
+      value: 
+      objectReference: {fileID: 1491671988}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuNextToServicesBackBtn
+      value: 
+      objectReference: {fileID: 81796191}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuMentionsInfoTxt
+      value: 
+      objectReference: {fileID: 562087296}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuMentionsPlaceholder
+      value: 
+      objectReference: {fileID: 215005059}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuInsertNamePlaceholder
+      value: 
+      objectReference: {fileID: 122672280}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuInsertNameInfoTxt
+      value: 
+      objectReference: {fileID: 432573093}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuNextToNameBtn
+      value: 
+      objectReference: {fileID: 763232774}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuCreateAppointmentBtn
+      value: 
+      objectReference: {fileID: 822324711}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuHaircutServiceBtn
+      value: 
+      objectReference: {fileID: 1646170241}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuBeardServiceBtn
+      value: 
+      objectReference: {fileID: 806774307}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuMustacheServiceBtn
+      value: 
+      objectReference: {fileID: 1249883159}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuHairColourBtn
+      value: 
+      objectReference: {fileID: 194633200}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuEyebrowBtn
+      value: 
+      objectReference: {fileID: 1398328707}
+    - target: {fileID: 2823922496958728437, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
+      propertyPath: appointmentMenuBackToHourBtn
+      value: 
+      objectReference: {fileID: 1886242514}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8ecc62378d796ea4ba162ae1e5752603, type: 3}
 --- !u!1001 &5553619801731177504
