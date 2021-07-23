@@ -42,7 +42,7 @@ public class menubar : MonoBehaviour
     {
         startposOpen = gameObject.transform.position; //set the variable to be the position of the bar at the start of the app
         endPosClose = gameObject.transform.position; //set the variable to be the position of the bar at the start of the app
-        endPosOpen = gameObject.transform.position + Vector3.right * 265f; //set the var to be the position of the bar at the end of opening transition
+        endPosOpen = gameObject.transform.position + Vector3.right * 200f; //set the var to be the position of the bar at the end of opening transition
     }
     void Update()
     {
@@ -53,7 +53,7 @@ public class menubar : MonoBehaviour
                 lerptime += Time.deltaTime;
             }
             gameObject.transform.position = Vector3.Lerp(startposOpen, endPosOpen, lerptime * transitionSpeed);// move the bar the the end position
-            if (lerptime >= 0.3)
+            if (lerptime >= 0.5)
             {
                 openMenuObject.SetActive(false);
                 closeMenuObject.SetActive(true);
@@ -73,7 +73,7 @@ public class menubar : MonoBehaviour
                 lerptime += Time.deltaTime;
             }
             gameObject.transform.position = Vector3.Lerp(startPosClose, endPosClose, lerptime * transitionSpeed); // move the bar the the end position
-            if (lerptime >= 0.4)
+            if (lerptime >= 0.5)
             {
                 closeMenuObject.SetActive(false);
                 openMenuObject.SetActive(true);

@@ -106,7 +106,16 @@ public class Account : MonoBehaviour
         }
         else
         {
-            registerError.SetActive(true);
+            if(appmanager.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Cerinte de înregistrare: \n -> nume utilizator > 7 caractere \n -> parola > 7 caractere \n -> un email real pentru a putea sa iti recuperezi contul.";
+                errorInfoObj.SetActive(true);
+            }
+            else if(appmanager.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "Register requirements: \n -> username > 7 characters \n -> password > 7 characters \n -> a real email so you can recover your account if lost";
+                errorInfoObj.SetActive(true);
+            }
             firstFields.SetActive(false);
             secondFields.SetActive(false);
             nextButton.SetActive(false);
@@ -118,7 +127,6 @@ public class Account : MonoBehaviour
         secondFields.SetActive(false);
         registerButton.SetActive(false);
         nextButton.SetActive(true);
-        registerError.SetActive(false);
     }
     public void RegisterAccount()
     {
@@ -139,22 +147,50 @@ public class Account : MonoBehaviour
             registerUsername.text = "";
             registerPassword.text = "";
             registerEmail.text = "";
-            errorInfoTXT.text = "Account created successfully ! You can now login.";
+            if(appmanager.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "Account created successfully ! You can now login.";
+            }
+            else if(appmanager.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Contul a fost creat cu succes! Te poti conecta.";
+            }
             errorInfoObj.SetActive(true);
         }
         else if(www.text[0] == '1')
         {
-            errorInfoTXT.text = "There is a problem with the server's connection. Please try again. If the problem continues contact an administrator.";
+            if(appmanager.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "There is a problem with the server's connection. Please try again. If the problem continues contact an administrator.";
+            }
+            else if(appmanager.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "A intervenit o problema cu conexiunea serverului. Te rugam sa incerci din nou. Daca problema persista contacteaza un administrator.";
+            }
             errorInfoObj.SetActive(true);
         }
         else if(www.text[0] == '2')
         {
-            errorInfoTXT.text = "There is already an account created with that name. Try another one.";
+            if (appmanager.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "There is already an account created with that name. Try another one.";
+            }
+            else if (appmanager.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Exista deja un cont creat cu acest nume. Incearca altul.";
+            }
             errorInfoObj.SetActive(true);
         }
         else
         {
-            errorInfoTXT.text = "Something went wrong. Please try again later. If the problem continues contact an administrator.";
+            if (appmanager.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "Something went wrong. Please try again later. If the problem continues contact an administrator.";
+            }
+            else if (appmanager.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Ceva nu a functionat. Te rugam sa incerci din nou mai tarziu. Daca problema continua contacteaza un administrator.";
+            }
             errorInfoObj.SetActive(true);
         }
         appmanager.afterLogin();
@@ -172,9 +208,31 @@ public class Account : MonoBehaviour
         WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/login.php", form);
 
         yield return www;
-        if (www.text[0] == '0')
+        if(usernameField.text.Length < 1 || passwordField.text.Length < 1)
         {
-            errorInfoTXT.text = "Login succesful !";
+            if(appmanager.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Nu ai introdus niciun nume de utilizator sau parola. Incearca din nou.";
+                errorInfoObj.SetActive(true);
+                loadingScreen.SetActive(false);
+            }
+            else if(appmanager.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "You did not enter a username or a password. Try again.";
+                errorInfoObj.SetActive(true);
+                loadingScreen.SetActive(false);
+            }
+        }
+        else if (www.text[0] == '0')
+        {
+            if (appmanager.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "Login succesful !";
+            }
+            else if (appmanager.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Conectare reusita !";
+            }
             errorInfoObj.SetActive(true);
             accountUsername = www.text.Split('\t')[1];
             isLogged = true;
@@ -209,7 +267,14 @@ public class Account : MonoBehaviour
         }
         else if(www.text[0] == '1')
         {
-            errorInfoTXT.text = "Login succesful !";
+            if (appmanager.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "Login succesful !";
+            }
+            else if (appmanager.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Conectare reusita !";
+            }
             errorInfoObj.SetActive(true);
             accountUsername = www.text.Split('\t')[1];
             isLogged = true;
@@ -240,14 +305,27 @@ public class Account : MonoBehaviour
         }
         else if(www.text[0] == '2')
         {
-            
-            errorInfoTXT.text = "Username or password incorrect !";
+            if (appmanager.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "Username or password incorrect !";
+            }
+            else if (appmanager.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Nume sau parola incorecte !";
+            }
             errorInfoObj.SetActive(true);
             loadingScreen.SetActive(false);
         }
         else
         {
-            errorInfoTXT.text = "Something went wrong! Please try again later. If the problem continues contact an administrator.";
+            if (appmanager.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "Something went wrong! Please try again later. If the problem continues contact an administrator.";
+            }
+            else if (appmanager.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Ceva nu a functionat ! Te rugam sa incerci din nou. Daca problema persista contacteaza un administrator.";
+            }
             errorInfoObj.SetActive(true);
             loadingScreen.SetActive(false);
         }

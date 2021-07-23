@@ -246,13 +246,27 @@ public class Appointments : MonoBehaviour
         {
             haircutServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
             totalPrice += barberHaircutPrice;
-            totalServicesPrice.text = "Price: " + totalPrice;
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                totalServicesPrice.text = "Price: " + totalPrice;
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                totalServicesPrice.text = "Pret: " + totalPrice;
+            }
         }
         else
         {
             haircutServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
             totalPrice -= barberHaircutPrice;
-            totalServicesPrice.text = "Price: " + totalPrice;
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                totalServicesPrice.text = "Price: " + totalPrice;
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                totalServicesPrice.text = "Pret: " + totalPrice;
+            }
         }
         CheckIfUserIsLoggedIn(); //cand e selectat unul dintre servicii sa verifice daca e useru logat sau nu mancamiar pl
     }
@@ -263,13 +277,27 @@ public class Appointments : MonoBehaviour
         {
             beardServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
             totalPrice += barberBeardPrice;
-            totalServicesPrice.text = "Price: " + totalPrice;
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                totalServicesPrice.text = "Price: " + totalPrice;
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                totalServicesPrice.text = "Pret: " + totalPrice;
+            }
         }
         else
         {
             beardServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
             totalPrice -= barberBeardPrice;
-            totalServicesPrice.text = "Price: " + totalPrice;
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                totalServicesPrice.text = "Price: " + totalPrice;
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                totalServicesPrice.text = "Pret: " + totalPrice;
+            }
         }
         CheckIfUserIsLoggedIn();
     }
@@ -280,13 +308,27 @@ public class Appointments : MonoBehaviour
         {
             mustacheServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
             totalPrice += barberMustachePrice;
-            totalServicesPrice.text = "Price: " + totalPrice;
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                totalServicesPrice.text = "Price: " + totalPrice;
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                totalServicesPrice.text = "Pret: " + totalPrice;
+            }
         }
         else
         {
             mustacheServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
             totalPrice -= barberMustachePrice;
-            totalServicesPrice.text = "Price: " + totalPrice;
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                totalServicesPrice.text = "Price: " + totalPrice;
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                totalServicesPrice.text = "Pret: " + totalPrice;
+            }
         }
         CheckIfUserIsLoggedIn();
     }
@@ -297,13 +339,27 @@ public class Appointments : MonoBehaviour
         {
             colourServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
             totalPrice += barberColourPrice;
-            totalServicesPrice.text = "Price: " + totalPrice;
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                totalServicesPrice.text = "Price: " + totalPrice;
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                totalServicesPrice.text = "Pret: " + totalPrice;
+            }
         }
         else
         {
             colourServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
             totalPrice -= barberColourPrice;
-            totalServicesPrice.text = "Price: " + totalPrice;
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                totalServicesPrice.text = "Price: " + totalPrice;
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                totalServicesPrice.text = "Pret: " + totalPrice;
+            }
         }
         CheckIfUserIsLoggedIn();
     }
@@ -314,13 +370,27 @@ public class Appointments : MonoBehaviour
         {
             eyebrowServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
             totalPrice += barberEyebrowPrice;
-            totalServicesPrice.text = "Price: " + totalPrice;
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                totalServicesPrice.text = "Price: " + totalPrice;
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                totalServicesPrice.text = "Pret: " + totalPrice;
+            }
         }
         else
         {
             eyebrowServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
             totalPrice -= barberEyebrowPrice;
-            totalServicesPrice.text = "Price: " + totalPrice;
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                totalServicesPrice.text = "Price: " + totalPrice;
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                totalServicesPrice.text = "Pret: " + totalPrice;
+            }
         }
         CheckIfUserIsLoggedIn();
     }
@@ -453,7 +523,16 @@ public class Appointments : MonoBehaviour
         yield return www;
         if(www.text[0] == '0')
         {
-            Debug.Log("deleted succesfully");
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "Appointment deleted succesfully !";
+                errorInfoObj.SetActive(true);
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Programare stearsa cu succes !";
+                errorInfoObj.SetActive(true);
+            }
             Destroy(selectedAppointment);
         }
         else
@@ -827,7 +906,14 @@ public class Appointments : MonoBehaviour
     { 
         if(selectedDayString == "" || selectedDayString == null)
         {
-            errorInfoTXT.text = "You must select a day before checking it's program.";
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "You must select a day before checking it's program.";
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Trebuie sa selectezi o zi inainte sa verifici programul acesteia.";
+            }
             errorInfoObj.SetActive(true);
         }
         else
@@ -845,7 +931,14 @@ public class Appointments : MonoBehaviour
                 string workingHours = www.text.Split('\t')[1];
                 if (workingHours == null || workingHours == "")
                 {
-                    errorInfoTXT.text = "This day is not a working day or the working program has not been updated yet.";
+                    if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        errorInfoTXT.text = "This day is not a working day or the working program has not been updated yet.";
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        errorInfoTXT.text = "Aceasta zi nu are un program de munca sau nu a fost actualizat inca.";
+                    }
                     errorInfoObj.SetActive(true);
                     loadingScreen.SetActive(false);
                 }
@@ -864,7 +957,14 @@ public class Appointments : MonoBehaviour
             else
             {
                 Debug.Log(www.text);
-                errorInfoTXT.text = "Something went wrong. If this error continues to happen please contact the developer.";
+                if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    errorInfoTXT.text = "Something went wrong. If this error continues to happen please contact the developer.";
+                }
+                else if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    errorInfoTXT.text = "Ceva nu a functionat ! Daca problema continua va rugam sa contactati un administrator.";
+                }
                 errorInfoObj.SetActive(true);
             }
         }
@@ -1007,13 +1107,39 @@ public class Appointments : MonoBehaviour
                 fullAppointmentMenu.SetActive(false);
                 if (www.text[0] == '0')
                 {
-                    errorInfoTXT.text = "Appointment successfully created ! You can check your current appointments in your profile page.";
+                    if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        errorInfoTXT.text = "Appointment successfully created !";
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        errorInfoTXT.text = "Programare creata cu succes !";
+                    }
+                    errorInfoObj.SetActive(true);
+                }
+                else if (www.text[0] == '3')
+                {
+                    if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        errorInfoTXT.text = "There is already an appointment for created on this date and hour. Try selecting another hour/minute.";
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        errorInfoTXT.text = "Deja exista o programare creata pentru aceasta zi si ora. Incearca sa selectezi alta ora.";
+                    }
                     errorInfoObj.SetActive(true);
                 }
                 else
                 {
                     Debug.Log(www.text);
-                    errorInfoTXT.text = "Something went wrong! Failed to create your appointment. Try again in a few minutes.";
+                    if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        errorInfoTXT.text = "Something went wrong! Failed to create your appointment. Try again in a few minutes.";
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        errorInfoTXT.text = "Ceva nu a functionat. Programarea nu a fost creata. Incearca din nou in cateva minute.";
+                    }
                     errorInfoObj.SetActive(true);
                 }
             }
@@ -1022,7 +1148,14 @@ public class Appointments : MonoBehaviour
         {
             if (clientNameInputField.text == null || clientNameInputField.text == "")
             {
-                errorInfoTXT.text = "Please insert a real name so the barber will know you";
+                if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    errorInfoTXT.text = "Please insert a real name so the barber will know you";
+                }
+                else if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    errorInfoTXT.text = "Introdu un nume real pentru ca frizerul sa te cunoasca.";
+                }
                 errorInfoObj.SetActive(true);
             }
             else
@@ -1036,6 +1169,7 @@ public class Appointments : MonoBehaviour
                 form.AddField("hour", selectedHour);
                 form.AddField("minute", selectedMinute);
                 form.AddField("mentions", clientMentionInputField.text);
+                form.AddField("totalprice", totalPrice);
                 WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/createappointment.php", form);
                 yield return www;
                 daysScrollView.SetActive(true);
@@ -1053,18 +1187,39 @@ public class Appointments : MonoBehaviour
                 clientNameInsertObj.SetActive(false);
                 if (www.text[0] == '0')
                 {
-                    errorInfoTXT.text = "Appointment successfully created !";
+                    if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        errorInfoTXT.text = "Appointment successfully created !";
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        errorInfoTXT.text = "Programare creata cu succes !";
+                    }
                     errorInfoObj.SetActive(true);
                 }
                 else if (www.text[0] == '3')
                 {
-                    errorInfoTXT.text = "There is already an appointment for created on this date and hour. Try selecting another hour/minute.";
+                    if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        errorInfoTXT.text = "There is already an appointment for created on this date and hour. Try selecting another hour/minute.";
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        errorInfoTXT.text = "Deja exista o programare creata pentru aceasta zi si ora. Incearca sa selectezi alta ora.";
+                    }
                     errorInfoObj.SetActive(true);
                 }
                 else
                 {
                     Debug.Log(www.text);
-                    errorInfoTXT.text = "Something went wrong! Failed to create your appointment. Try again in a few minutes.";
+                    if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        errorInfoTXT.text = "Something went wrong! Failed to create your appointment. Try again in a few minutes.";
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        errorInfoTXT.text = "Ceva nu a functionat. Programarea nu a fost creata. Incearca din nou in cateva minute.";
+                    }
                     errorInfoObj.SetActive(true);
                 }
             }

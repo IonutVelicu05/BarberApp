@@ -20,6 +20,66 @@ public class AppManager : MonoBehaviour
     [SerializeField] private GameObject backBTN;
     [SerializeField] private Account account;
     [SerializeField] private Appointments appointments;
+    //translation
+
+    private int selectedLanguage = 1; // 1 = romana ;; 2 = engleza
+    public int SelectedLanguage
+    {
+        get { return selectedLanguage; }
+    }
+    [SerializeField] private TextMeshProUGUI locationShowShopBTN;
+    [SerializeField] private TextMeshProUGUI locationShowShopsInfo;
+    [SerializeField] private TextMeshProUGUI settingsMenuLanguageTxt;
+    [SerializeField] private TextMeshProUGUI settingsMenuLoginBtn;
+    [SerializeField] private TextMeshProUGUI settingsMenuManageShopsBtn;
+    [SerializeField] private TextMeshProUGUI settingsMenuRegisterBtn;
+    [SerializeField] private TextMeshProUGUI settingsMenuBarberMenuBtn;
+    [SerializeField] private TextMeshProUGUI loginMenuLoginBtn;
+    [SerializeField] private TextMeshProUGUI loginMenuBackBtn;
+    [SerializeField] private TextMeshProUGUI registerMenuRegisterBtn;
+    [SerializeField] private TextMeshProUGUI registerMenuBackBtn;
+    [SerializeField] private TextMeshProUGUI registerMenuNextBtn;
+    [SerializeField] private TextMeshProUGUI barberMenuTimePerCutTxt;
+    [SerializeField] private TextMeshProUGUI barberMenuTimePerCutBtn;
+    [SerializeField] private TextMeshProUGUI barberMenuCheckAppointmentsTxt;
+    [SerializeField] private TextMeshProUGUI barberMenuCheckAppointmentsBtn;
+    [SerializeField] private TextMeshProUGUI barberMenuEditPricesTxt;
+    [SerializeField] private TextMeshProUGUI barberMenuEditPricesBtn;
+    [SerializeField] private TextMeshProUGUI editShopSelectShopTxt;
+    [SerializeField] private TextMeshProUGUI editShopDescriptionBtn;
+    [SerializeField] private TextMeshProUGUI editShopWorkingProgramBtn;
+    [SerializeField] private TextMeshProUGUI editShopPhotosBtn;
+    [SerializeField] private TextMeshProUGUI editShopBarbersBtn;
+    [SerializeField] private TextMeshProUGUI editShopPricesBtn;
+    [SerializeField] private Text timeToCutMenuPlaceholder;
+    [SerializeField] private TextMeshProUGUI timeToCutMenuSubmitBtn;
+    [SerializeField] private TextMeshProUGUI timeToCutMenuInfoTxt;
+    [SerializeField] private TextMeshProUGUI editPricesMenuHaircutBtn;
+    [SerializeField] private TextMeshProUGUI editPricesMenuBeardBtn;
+    [SerializeField] private TextMeshProUGUI editPricesMenuMustacheBtn;
+    [SerializeField] private TextMeshProUGUI editPricesMenuHairColourBtn;
+    [SerializeField] private TextMeshProUGUI editPricesMenuEyebrowBtn;
+    [SerializeField] private TextMeshProUGUI editPricesMenuInfoTxt;
+    [SerializeField] private Text editPricesMenuInputPlaceholder;
+    [SerializeField] private Text editPricesMenuInputUpdateBtn;
+    [SerializeField] private Text editPricesMenuInputBackBtn;
+    [SerializeField] private Text shopMenuEditDescriptionPlaceholder;
+    [SerializeField] private TextMeshProUGUI shopMenuEditDescriptionUpdateBtn;
+    [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramInfoTxt;
+    [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramMondayBtn;
+    [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramTuesdayBtn;
+    [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramWednesdayBtn;
+    [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramThursdayBtn;
+    [SerializeField] private TextMeshProUGUI editShopmenuWorkingProgramFridayBtn;
+    [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramSaturdayBtn;
+    [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramSundayBtn;
+    [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramHoursInfoTxt;
+    [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramHoursOpensAtTxt;
+    [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramHoursClosesAtTxt;
+    [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramHoursUpdateBtn;
+
+    //end of translation
+
     //SHOP 
     [SerializeField] private GameObject shopPrefab;
     [SerializeField] private TextMeshProUGUI shopDescription;
@@ -77,7 +137,8 @@ public class AppManager : MonoBehaviour
     //ERROR INFO //
     [SerializeField] private GameObject errorObj;
     [SerializeField] private TextMeshProUGUI errorTXT;
-    private string generalError = "Something went wrong. Please try again in a few minutes. If the problem continues contact the administrator.";
+    private string generalErrorEng = "Something went wrong. Please try again in a few minutes. If the problem continues contact the administrator.";
+    private string generalErrorRo = "Ceva nu a functionat ! Te rugam sa incerci din nou in cateva minute. Daca problema continua contacteaza un administrator.";
     //END ERROR INFO//
 
 
@@ -122,7 +183,16 @@ public class AppManager : MonoBehaviour
     {
         return timeToCut;
     }
-
+    public void SelectRomanianLanguage()
+    {
+        selectedLanguage = 1;
+        updateLanguageTexts();
+    }
+    public void SelectEnglishLanguage()
+    {
+        selectedLanguage = 2;
+        updateLanguageTexts();
+    }
     public string GetSelectedShopName()
     {
         return selectedShopName;
@@ -176,7 +246,14 @@ public class AppManager : MonoBehaviour
     {
         if (int.TryParse(shopInsertEditPrice.text, out int a) == false)
         {
-            errorTXT.text = "Please insert a correct number.";
+            if (selectedLanguage == 1)
+            {
+                errorTXT.text = "Introdu un numar";
+            }
+            else if (selectedLanguage == 2)
+            {
+                errorTXT.text = "Please insert a real number.";
+            }
             errorObj.SetActive(true);
         }
         List<IMultipartFormSection> form = new List<IMultipartFormSection>();
@@ -188,12 +265,26 @@ public class AppManager : MonoBehaviour
         if (web.isNetworkError || web.isHttpError)
         {
             Debug.Log(web.error);
-            errorTXT.text = "Something went wrong, please try again later.";
+            if (selectedLanguage == 1)
+            {
+                errorTXT.text = "Ceva nu a functionat, incearca din nou mai tarziu.";
+            }
+            else if (selectedLanguage == 2)
+            {
+                errorTXT.text = "Something went wrong, please try again later.";
+            }
             errorObj.SetActive(true);
         }
         else
         {
-            errorTXT.text = "Price updated successfully.";
+            if (selectedLanguage == 1)
+            {
+                errorTXT.text = "Pret actualizat cu succes.";
+            }
+            else if (selectedLanguage == 2)
+            {
+                errorTXT.text = "Price updated successfully.";
+            }
             errorObj.SetActive(true);
         }
     }
@@ -205,7 +296,14 @@ public class AppManager : MonoBehaviour
     {
         if (int.TryParse(barberInsertEditPrice.text, out int a) == false)
         {
-            errorTXT.text = "Please insert a correct number.";
+            if (selectedLanguage == 1)
+            {
+                errorTXT.text = "Introdu un numar real";
+            }
+            else if (selectedLanguage == 2)
+            {
+                errorTXT.text = "Please insert a real number.";
+            }
             errorObj.SetActive(true);
         }
         List<IMultipartFormSection> form = new List<IMultipartFormSection>();
@@ -218,12 +316,26 @@ public class AppManager : MonoBehaviour
         if (web.isNetworkError || web.isHttpError)
         {
             Debug.Log(web.error);
-            errorTXT.text = "Something went wrong, please try again later.";
+            if (selectedLanguage == 1)
+            {
+                errorTXT.text = "Ceva nu a functionat, incearca din nou mai tarziu.";
+            }
+            else if (selectedLanguage == 2)
+            {
+                errorTXT.text = "Something went wrong, please try again later.";
+            }
             errorObj.SetActive(true);
         }
         else
         {
-            errorTXT.text = "Price updated successfully.";
+            if (selectedLanguage == 1)
+            {
+                errorTXT.text = "Pret actualizat cu succes.";
+            }
+            else if (selectedLanguage == 2)
+            {
+                errorTXT.text = "Price updated successfully.";
+            }
             errorObj.SetActive(true);
         }
     }
@@ -373,12 +485,26 @@ public class AppManager : MonoBehaviour
         if (webreq.isNetworkError || webreq.isHttpError)
         {
             Debug.Log(webreq.error);
-            errorTXT.text = "Something went wrong. Please try again in a few minutes. If the problem continues contact the administrator.";
+            if (selectedLanguage == 1)
+            {
+                errorTXT.text = generalErrorRo;
+            }
+            else if (selectedLanguage == 2)
+            {
+                errorTXT.text = generalErrorEng;
+            }
             errorObj.SetActive(true);
         }
         else
         {
-            errorTXT.text = "Shop created ! Check the manage shops menu for more edit options.";
+            if (selectedLanguage == 1)
+            {
+                errorTXT.text = "Salon creat cu succes! Verifica meniul saloanelor pentru mai multe optiuni de editare a salonului.";
+            }
+            else if (selectedLanguage == 2)
+            {
+                errorTXT.text = "Shop created ! Check the manage shops menu for more edit options.";
+            }
             errorObj.SetActive(true);
             createShopName.text = "";
             createShopAddress.text = "";
@@ -401,14 +527,144 @@ public class AppManager : MonoBehaviour
             cityList.Add(list[i]);
         }
     }
-
-    public void CreateShopLocation()
+    public void updateLanguageTexts() //whenever the language is changed all the texts will be updated here.
     {
+        if (selectedLanguage == 1)
+        {
+            loadingScreen.SetActive(true);
+            countyList.Clear();
+            countyDropdown.ClearOptions(); //choosing from which location to show shops
+            CountyAddToList("Alege un judet", "Olt", "Dolj", "Timis");
+            cityList.Clear();
+            cityDropdown.ClearOptions();
+            CityAddToList("Nu ai ales un judet");
+            cityDropdown.AddOptions(cityList);
+            countyDropdown.AddOptions(countyList);
+            locationShowShopBTN.text = "Afiseaza";
+            locationShowShopsInfo.text = "Alege locatia saloanelor.";
+            settingsMenuLanguageTxt.text = "Limba";
+            settingsMenuLoginBtn.text = "Conectare";
+            settingsMenuRegisterBtn.text = "Înregistrare";
+            settingsMenuManageShopsBtn.text = "Saloane";
+            settingsMenuBarberMenuBtn.text = "Meniu Frizer";
+            loginMenuLoginBtn.text = "Conectare";
+            loginMenuBackBtn.text = "Înapoi";
+            registerMenuRegisterBtn.text = "Înregistrare";
+            registerMenuBackBtn.text = "Înapoi";
+            registerMenuNextBtn.text = "Înainte";
+            barberMenuTimePerCutTxt.text = "Modifica timpul necesar pentru o tunsoare";
+            barberMenuTimePerCutBtn.text = "Timp tuns";
+            barberMenuCheckAppointmentsTxt.text = "Verifica programarile tale";
+            barberMenuCheckAppointmentsBtn.text = "Afiseaza programari";
+            barberMenuEditPricesTxt.text = "Modifica preturile serviciilor tale";
+            barberMenuEditPricesBtn.text = "Modifica preturi";
+            editShopSelectShopTxt.text = "Alege ce salon doresti sa modifici";
+            editShopDescriptionBtn.text = "Modifica descrierea";
+            editShopWorkingProgramBtn.text = "Modifica program de munca";
+            editShopPhotosBtn.text = "Modifica poze";
+            editShopPricesBtn.text = "Modifica preturi";
+            editShopBarbersBtn.text = "Modifica angajati";
+            timeToCutMenuPlaceholder.text = "Scrie aici...";
+            timeToCutMenuSubmitBtn.text = "Actualizeaza";
+            timeToCutMenuInfoTxt.text = "Introdu timpul de care ai nevoie intre clienti. \n Timpul necesar pentru realizarea unei tunsori.";
+            editPricesMenuHaircutBtn.text = "Tunsoare";
+            editPricesMenuBeardBtn.text = "Barba";
+            editPricesMenuMustacheBtn.text = "Mustata";
+            editPricesMenuHairColourBtn.text = "Vopsit";
+            editPricesMenuEyebrowBtn.text = "Pensat";
+            editPricesMenuInfoTxt.text = "Pentru ce serviciu doresti sa modifici pretul ?";
+            editPricesMenuInputPlaceholder.text = "Introdu pretul...";
+            editPricesMenuInputUpdateBtn.text = "Actualizeaza";
+            editPricesMenuInputBackBtn.text = "Inapoi";
+            shopMenuEditDescriptionPlaceholder.text = "Apasa aici pentru a scrie descrierea..";
+            shopMenuEditDescriptionUpdateBtn.text = "Actualizeaza";
+            editShopMenuWorkingProgramMondayBtn.text = "Luni";
+            editShopMenuWorkingProgramTuesdayBtn.text = "Marti";
+            editShopMenuWorkingProgramWednesdayBtn.text = "Miercuri";
+            editShopMenuWorkingProgramThursdayBtn.text = "Joi";
+            editShopmenuWorkingProgramFridayBtn.text = "Vineri";
+            editShopMenuWorkingProgramSaturdayBtn.text = "Sambata";
+            editShopMenuWorkingProgramSundayBtn.text = "Duminica";
+            editShopMenuWorkingProgramInfoTxt.text = "Pentru care zi doresti sa modifici programul de lucru ?";
+            editShopMenuWorkingProgramHoursInfoTxt.text = "Alege intre ce ore este deschis salonul";
+            editShopMenuWorkingProgramHoursOpensAtTxt.text = "Se deschide \n la ora ->";
+            editShopMenuWorkingProgramHoursClosesAtTxt.text = "Se inchide \n la ora ->";
+            editShopMenuWorkingProgramHoursUpdateBtn.text = "Actualizeaza";
+
+
+            loadingScreen.SetActive(false);
+        }
+        else if (selectedLanguage == 2)
+        {
+            loadingScreen.SetActive(true);
+            countyList.Clear();
+            countyDropdown.ClearOptions(); //choosing from which location to show shops
+            CountyAddToList("Pick a county", "Olt", "Dolj", "Timis");
+            cityList.Clear();
+            cityDropdown.ClearOptions();
+            CityAddToList("Pick a county first");
+            cityDropdown.AddOptions(cityList);
+            countyDropdown.AddOptions(countyList);
+            locationShowShopBTN.text = "Show";
+            locationShowShopsInfo.text = "Pick the shop's location.";
+            settingsMenuLanguageTxt.text = "Language";
+            settingsMenuLoginBtn.text = "Login";
+            settingsMenuRegisterBtn.text = "Register";
+            settingsMenuManageShopsBtn.text = "Manage Shops";
+            settingsMenuBarberMenuBtn.text = "Barber Menu";
+            loginMenuLoginBtn.text = "Login";
+            loginMenuBackBtn.text = "Back";
+            registerMenuRegisterBtn.text = "Register";
+            registerMenuBackBtn.text = "Back";
+            registerMenuNextBtn.text = "Next";
+            barberMenuTimePerCutTxt.text = "Edit the time needed for you to finish a cut";
+            barberMenuTimePerCutBtn.text = "Time per cut";
+            barberMenuCheckAppointmentsTxt.text = "Check your appointments";
+            barberMenuCheckAppointmentsBtn.text = "Show appointments";
+            barberMenuEditPricesTxt.text = "Edit the price of your services";
+            barberMenuEditPricesBtn.text = "Edit prices";
+            editShopSelectShopTxt.text = "Select which saloon do you want to edit";
+            editShopDescriptionBtn.text = "Edit description";
+            editShopWorkingProgramBtn.text = "Edit working program";
+            editShopPhotosBtn.text = "Edit photos";
+            editShopPricesBtn.text = "Edit prices";
+            editShopBarbersBtn.text = "Edit barbers";
+            timeToCutMenuPlaceholder.text = "Type here...";
+            timeToCutMenuSubmitBtn.text = "Update";
+            timeToCutMenuInfoTxt.text = "Type in the time needed for you to do a cut. \n The time you need to finish your client's haircut.";
+            editPricesMenuHaircutBtn.text = "Haircut";
+            editPricesMenuBeardBtn.text = "Beard";
+            editPricesMenuMustacheBtn.text = "Mustache";
+            editPricesMenuHairColourBtn.text = "Hair Colour";
+            editPricesMenuEyebrowBtn.text = "Eyebrows";
+            editPricesMenuInfoTxt.text = "For which service do you want to edit the price ?";
+            editPricesMenuInputPlaceholder.text = "Enter price...";
+            editPricesMenuInputUpdateBtn.text = "Update";
+            editPricesMenuInputBackBtn.text = "Back";
+            shopMenuEditDescriptionPlaceholder.text = "Click here to write your shop's description.";
+            shopMenuEditDescriptionUpdateBtn.text = "Update";
+            editShopMenuWorkingProgramMondayBtn.text = "Monday";
+            editShopMenuWorkingProgramTuesdayBtn.text = "Tuesday";
+            editShopMenuWorkingProgramWednesdayBtn.text = "Wednesday";
+            editShopMenuWorkingProgramThursdayBtn.text = "Thursday";
+            editShopmenuWorkingProgramFridayBtn.text = "Friday";
+            editShopMenuWorkingProgramSaturdayBtn.text = "Saturday";
+            editShopMenuWorkingProgramSundayBtn.text = "Sunday";
+            editShopMenuWorkingProgramInfoTxt.text = "For which day do you want to edit the working program ?";
+            editShopMenuWorkingProgramHoursInfoTxt.text = "Choose the working program of your shop";
+            editShopMenuWorkingProgramHoursOpensAtTxt.text = "Opens at";
+            editShopMenuWorkingProgramHoursClosesAtTxt.text = "Closes at";
+            editShopMenuWorkingProgramHoursUpdateBtn.text = "Update";
+
+
+
+            loadingScreen.SetActive(false);
+        }
     }
     public void Start()
     {
         countyDropdown.ClearOptions(); //choosing from which location to show shops
-        CountyAddToList("Pick a county", "Olt", "Dolj", "Timis");
+        updateLanguageTexts();
         countyDropdown.AddOptions(countyList);
 
         createShopCountyDropdown.ClearOptions();
@@ -502,12 +758,26 @@ public class AppManager : MonoBehaviour
         if (webreq.isNetworkError || webreq.isHttpError)
         {
             Debug.Log(webreq.error);
-            errorTXT.text = "Something went wrong. Please try again in a few minutes. If the problem continues contact the administrator.";
+            if (selectedLanguage == 1)
+            {
+                errorTXT.text = generalErrorRo;
+            }
+            else if (selectedLanguage == 2)
+            {
+                errorTXT.text = generalErrorEng;
+            }
             errorObj.SetActive(true);
         }
         else
         {
-            errorTXT.text = "Shop's description changed successfully !";
+            if (selectedLanguage == 1)
+            {
+                errorTXT.text = "Descrierea salonului a fost modificata cu succes !";
+            }
+            else if (selectedLanguage == 2)
+            {
+                errorTXT.text = "Shop's description changed successfully !";
+            }
             errorObj.SetActive(true);
         }
     }
@@ -524,7 +794,14 @@ public class AppManager : MonoBehaviour
         yield return webreq.SendWebRequest();
         if(webreq.isHttpError || webreq.isNetworkError)
         {
-            errorTXT.text = generalError;
+            if(selectedLanguage == 1)
+            {
+                errorTXT.text = generalErrorRo;
+            }
+            else if(selectedLanguage == 2)
+            {
+                errorTXT.text = generalErrorEng;
+            }
             errorObj.SetActive(true);
         }
         else
@@ -670,13 +947,26 @@ public class AppManager : MonoBehaviour
         {
             Debug.Log(www.text);
         }
-        mondayHours.text = "Monday: " + www.text.Split('\t')[1];
-        tuesdayHours.text = "Tuesday: " + www.text.Split('\t')[2];
-        wednesdayHours.text = "Wednesday: " + www.text.Split('\t')[3];
-        thursdayHours.text = "Thursday: " + www.text.Split('\t')[4];
-        fridayHours.text = "Friday: " + www.text.Split('\t')[5];
-        saturdayHours.text = "Saturday: " + www.text.Split('\t')[6];
-        sundayHours.text = "Sunday: " + www.text.Split('\t')[7];
+        if (selectedLanguage == 1)
+        {
+            mondayHours.text = "Luni: " + www.text.Split('\t')[1];
+            tuesdayHours.text = "Marti: " + www.text.Split('\t')[2];
+            wednesdayHours.text = "Miercuri: " + www.text.Split('\t')[3];
+            thursdayHours.text = "Joi: " + www.text.Split('\t')[4];
+            fridayHours.text = "Vineri: " + www.text.Split('\t')[5];
+            saturdayHours.text = "Sambata: " + www.text.Split('\t')[6];
+            sundayHours.text = "Duminica: " + www.text.Split('\t')[7];
+        }
+        else if (selectedLanguage == 2)
+        {
+            mondayHours.text = "Monday: " + www.text.Split('\t')[1];
+            tuesdayHours.text = "Tuesday: " + www.text.Split('\t')[2];
+            wednesdayHours.text = "Wednesday: " + www.text.Split('\t')[3];
+            thursdayHours.text = "Thursday: " + www.text.Split('\t')[4];
+            fridayHours.text = "Friday: " + www.text.Split('\t')[5];
+            saturdayHours.text = "Saturday: " + www.text.Split('\t')[6];
+            sundayHours.text = "Sunday: " + www.text.Split('\t')[7];
+        }
         for (int i = 0; i < 8; i++) // daca nu e nicio ora setata nu se lucreaza in ziua aia
         {
             if (www.text.Split('\t')[i] == null || www.text.Split('\t')[i] == "")
@@ -684,25 +974,74 @@ public class AppManager : MonoBehaviour
                 switch (i)
                 {
                     case 1:
-                        mondayHours.text = "Monday: Not working";
+                        if(selectedLanguage == 1)
+                        {
+                            mondayHours.text = "Luni: Inchis.";
+                        }
+                        else if(selectedLanguage == 2)
+                        {
+                            mondayHours.text = "Monday: Not working";
+                        }
                         break;
                     case 2:
-                        tuesdayHours.text = "Tuesday: Not working";
+                        if (selectedLanguage == 1)
+                        {
+                            tuesdayHours.text = "Marti: Inchis.";
+                        }
+                        else if (selectedLanguage == 2)
+                        {
+                            tuesdayHours.text = "Tuesday: Not working";
+                        }
                         break;
                     case 3:
-                        wednesdayHours.text = "Wednesday: Not working";
+                        if (selectedLanguage == 1)
+                        {
+                            wednesdayHours.text = "Miercuri: Inchis.";
+                        }
+                        else if (selectedLanguage == 2)
+                        {
+                            wednesdayHours.text = "Wednesday: Not working";
+                        }
                         break;
                     case 4:
-                        thursdayHours.text = "Thursday: Not working";
+                        if (selectedLanguage == 1)
+                        {
+                            thursdayHours.text = "Joi: Inchis.";
+                        }
+                        else if (selectedLanguage == 2)
+                        {
+                            thursdayHours.text = "Thursday: Not working";
+                        }
                         break;
                     case 5:
-                        fridayHours.text = "Friday: Not working";
+                        if (selectedLanguage == 1)
+                        {
+                            fridayHours.text = "Vineri: Inchis.";
+                        }
+                        else if (selectedLanguage == 2)
+                        {
+                            fridayHours.text = "Friday: Not working";
+                        }
                         break;
                     case 6:
-                        saturdayHours.text = "Saturday: Not working";
+                        if (selectedLanguage == 1)
+                        {
+                            saturdayHours.text = "Sambata: Inchis.";
+                        }
+                        else if (selectedLanguage == 2)
+                        {
+                            saturdayHours.text = "Saturday: Not working";
+                        }
                         break;
                     case 7:
-                        sundayHours.text = "Sunday: Not working";
+                        if (selectedLanguage == 1)
+                        {
+                            sundayHours.text = "Duminica: Inchis.";
+                        }
+                        else if (selectedLanguage == 2)
+                        {
+                            sundayHours.text = "Sunday: Not working";
+                        }
                         break;
                 }
             }
@@ -976,15 +1315,32 @@ public class AppManager : MonoBehaviour
         {
             case 1:
                 createShopCityDropdown.interactable = true;
-                List<string> cityOltOptions = new List<string> { "Pick a city", "Caracal", "Farcasele", "Slatina", "Corabia" };
-                createShopCityDropdown.ClearOptions();
-                createShopCityDropdown.AddOptions(cityOltOptions);
+                if (selectedLanguage == 1)
+                {
+                    List<string> cityOltOptions = new List<string> { "Alege un oras", "Caracal", "Farcasele", "Slatina", "Corabia" };
+                    createShopCityDropdown.AddOptions(cityOltOptions);                    
+                    createShopCityDropdown.ClearOptions();
+                }
+                else if (selectedLanguage == 2)
+                {
+                    List<string> cityOltOptions = new List<string> { "Pick a city", "Caracal", "Farcasele", "Slatina", "Corabia" };
+                    createShopCityDropdown.ClearOptions();
+                    createShopCityDropdown.AddOptions(cityOltOptions);
+                }
                 break;
             case 2:
                 createShopCityDropdown.interactable = true;
                 createShopCityDropdown.ClearOptions();
-                List<string> cityDoljOptions = new List<string> { "Pick a city","Craiova", "Radovan", "Gogosu", "Gura Racului" };
-                createShopCityDropdown.AddOptions(cityDoljOptions);
+                if (selectedLanguage == 1)
+                {
+                    List<string> cityDoljOptions = new List<string> { "Alege un oras", "Craiova", "Radovan", "Gogosu", "Gura Racului" };
+                    createShopCityDropdown.AddOptions(cityDoljOptions);
+                }
+                else if (selectedLanguage == 2)
+                {
+                    List<string> cityDoljOptions = new List<string> { "Pick a city","Craiova", "Radovan", "Gogosu", "Gura Racului" };
+                    createShopCityDropdown.AddOptions(cityDoljOptions);
+                }
                 break;
         }
     }
@@ -995,16 +1351,34 @@ public class AppManager : MonoBehaviour
             case 1:
                 cityDropdown.interactable = true;
                 cityList.Clear();
-                CityAddToList("Pick a city", "Caracal", "Slatina", "Grojdibodu", "Conacu Piatra-Olt");
-                cityDropdown.ClearOptions();
-                cityDropdown.AddOptions(cityList);
+                if(selectedLanguage == 1)
+                {
+                    CityAddToList("Alege un oras", "Caracal", "Slatina", "Grojdibodu", "Conacu Piatra-Olt");
+                    cityDropdown.ClearOptions();
+                    cityDropdown.AddOptions(cityList);
+                }
+                else if(selectedLanguage == 2)
+                {
+                    CityAddToList("Pick a city", "Caracal", "Slatina", "Grojdibodu", "Conacu Piatra-Olt");
+                    cityDropdown.ClearOptions();
+                    cityDropdown.AddOptions(cityList);
+                }
                 break;
             case 2:
                 cityDropdown.interactable = true;
                 cityList.Clear();
-                CityAddToList("Pick a city", "Craiova", "Radovan", "Gura Racului", "Gogosu");
-                cityDropdown.ClearOptions();
-                cityDropdown.AddOptions(cityList);
+                if (selectedLanguage == 1)
+                {
+                    CityAddToList("Alege un oras", "Craiova", "Radovan", "Gura Racului", "Gogosu");
+                    cityDropdown.ClearOptions();
+                    cityDropdown.AddOptions(cityList);
+                }
+                else if (selectedLanguage == 2)
+                {
+                    CityAddToList("Pick a city", "Craiova", "Radovan", "Gura Racului", "Gogosu");
+                    cityDropdown.ClearOptions();
+                    cityDropdown.AddOptions(cityList);
+                }
                 break;
                 
         }
