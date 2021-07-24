@@ -128,6 +128,8 @@ public class AppManager : MonoBehaviour
 
     [SerializeField] private Dropdown countyDropdown;
     [SerializeField] private Dropdown cityDropdown;
+    private string selectedCounty;
+    private string selectedCity;
     private List<string> countyList = new List<string>();
     private List<string> cityList = new List<string>();
     private int uploadedImageNumber; //the number of the uploading image
@@ -369,6 +371,7 @@ public class AppManager : MonoBehaviour
     }
     IEnumerator ShowBarbersEnumerator()
     {
+        loadingScreen.SetActive(true);
         for (int i = 0; i < 8; i++)
         {
             WWWForm form = new WWWForm();
@@ -434,6 +437,7 @@ public class AppManager : MonoBehaviour
             barber.SetActive(true);
             barberList.Add(barber);
         }
+        loadingScreen.SetActive(false);
     }
     //select day for changing its working hours
     public void Monday()
@@ -757,7 +761,8 @@ public class AppManager : MonoBehaviour
 
         afterLogin();
         countyDropdown.onValueChanged.AddListener(delegate { CountyPicked(countyDropdown); });
-        
+        cityDropdown.onValueChanged.AddListener(delegate { CityPicked(cityDropdown); });
+
         createShopCountyDropdown.onValueChanged.AddListener(delegate { CreateShopCountyPicked(createShopCountyDropdown); });
         whatImageToUpload.onValueChanged.AddListener(delegate { WhatImageToUpload(whatImageToUpload); });
 
@@ -790,8 +795,8 @@ public class AppManager : MonoBehaviour
         {
             WWWForm form = new WWWForm();
             form.AddField("whatToPick", whatToPick);
-            form.AddField("city", cityDropdown.options[cityDropdown.value].text);
-            form.AddField("county", countyDropdown.options[countyDropdown.value].text);
+            form.AddField("city", selectedCity);
+            form.AddField("county", selectedCounty);
 
             WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/showShops.php", form);
             yield return www;
@@ -1429,6 +1434,48 @@ public class AppManager : MonoBehaviour
                 break;
         }
     }
+    public void CityPicked(Dropdown cityDropdown)
+    {
+        if (selectedCounty == countyList[1])
+        {
+            switch (cityDropdown.value)
+            {
+                case 1:
+                    selectedCity = cityList[1];
+                    break;
+                case 2:
+                    selectedCity = cityList[2];
+                    break;
+                case 3:
+                    selectedCity = cityList[3];
+                    break;
+                case 4:
+                    selectedCity = cityList[4];
+                    break;
+            }
+        }
+        else if (selectedCounty == countyList[2])
+        {
+            switch (cityDropdown.value)
+            {
+                case 1:
+                    selectedCity = cityList[1];
+                    break;
+                case 2:
+                    selectedCity = cityList[2];
+                    break;
+                case 3:
+                    selectedCity = cityList[3];
+                    break;
+                case 4: 
+                    selectedCity = cityList[4];
+                    break;
+                case 5:
+                    selectedCity = cityList[5];
+                    break;
+            }
+        }
+    }
     public void CountyPicked(Dropdown countyPicked)
     {
         switch (countyPicked.value)
@@ -1441,12 +1488,14 @@ public class AppManager : MonoBehaviour
                     CityAddToList("Alege un oras", "Caracal", "Slatina", "Grojdibodu", "Conacu Piatra-Olt");
                     cityDropdown.ClearOptions();
                     cityDropdown.AddOptions(cityList);
+                    selectedCounty = countyList[1];
                 }
                 else if(selectedLanguage == 2)
                 {
                     CityAddToList("Pick a city", "Caracal", "Slatina", "Grojdibodu", "Conacu Piatra-Olt");
                     cityDropdown.ClearOptions();
                     cityDropdown.AddOptions(cityList);
+                    selectedCounty = countyList[1];
                 }
                 break;
             case 2:
@@ -1457,12 +1506,14 @@ public class AppManager : MonoBehaviour
                     CityAddToList("Alege un oras", "Craiova", "Radovan", "Gura Racului", "Gogosu");
                     cityDropdown.ClearOptions();
                     cityDropdown.AddOptions(cityList);
+                    selectedCounty = countyList[2];
                 }
                 else if (selectedLanguage == 2)
                 {
                     CityAddToList("Pick a city", "Craiova", "Radovan", "Gura Racului", "Gogosu");
                     cityDropdown.ClearOptions();
                     cityDropdown.AddOptions(cityList);
+                    selectedCounty = countyList[2];
                 }
                 break;
                 

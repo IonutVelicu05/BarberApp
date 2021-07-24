@@ -7,6 +7,7 @@ using System;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+using Unity.Notifications.Android;
 
 public class Appointments : MonoBehaviour
 {
@@ -111,6 +112,13 @@ public class Appointments : MonoBehaviour
     private string clientMentionsWrite;
 
     //------end-------
+    //notifications
+    [SerializeField] private Notifications notificationsClass;
+    private AndroidNotification notification;
+    private DateTime notificationDate;
+
+
+    //
 
     //show appointment to the barber ~~~ DAYS ~~~~
     [SerializeField] private GameObject appointmentDayPrefab;
@@ -189,6 +197,15 @@ public class Appointments : MonoBehaviour
         mustacheServiceButton = servicesBG.transform.Find("MustacheButton").gameObject;
         colourServiceButton = servicesBG.transform.Find("ColourButton").gameObject;
         eyebrowServiceButton = servicesBG.transform.Find("EyebrowButton").gameObject;
+
+        //Create a channel to send notifications
+        var channel = new AndroidNotificationChannel()
+        {
+            Id = "channel_id",
+            Name = "Notifications Channel",
+            Importance = Importance.Default,
+            Description = "Reminder notifications",
+        };
     }
 
     public void CheckForSelectedTime()
@@ -465,6 +482,7 @@ public class Appointments : MonoBehaviour
                 }
             }
         }
+        CreateAppointmentDays();
     }
     public void CheckBarberAppointmentsTime()
     {
@@ -631,6 +649,10 @@ public class Appointments : MonoBehaviour
             {
                 day.GetComponent<Image>().color = new Color(1f, 0f, 0f, 1f);
             }
+            else if(barberOccupiedDays[i] == false)
+            {
+                day.GetComponent<Image>().color = new Color(0f, 0.65f, 0f, 1f);
+            }
         }
         loadingScreen.SetActive(false);
     }
@@ -659,7 +681,6 @@ public class Appointments : MonoBehaviour
         else if (appmanagerClass.SelectedLanguage == 1)
         {
             selectDateInfoTxt.text = "Alege o data pentru programare.";
-            Debug.Log("loba 1");
         }
         //if the list is not empty destroy every object in that list
         if (daysObjects.Count > 0)
@@ -1150,10 +1171,13 @@ public class Appointments : MonoBehaviour
                     if (appmanagerClass.SelectedLanguage == 2)
                     {
                         errorInfoTXT.text = "Appointment successfully created !";
+                        notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
                     }
                     else if (appmanagerClass.SelectedLanguage == 1)
                     {
                         errorInfoTXT.text = "Programare creata cu succes !";
+                        notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
+                        Debug.Log("notificare trimisea");
                     }
                     errorInfoObj.SetActive(true);
                 }
@@ -1230,10 +1254,19 @@ public class Appointments : MonoBehaviour
                     if (appmanagerClass.SelectedLanguage == 2)
                     {
                         errorInfoTXT.text = "Appointment successfully created !";
+                        notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
+
                     }
                     else if (appmanagerClass.SelectedLanguage == 1)
                     {
                         errorInfoTXT.text = "Programare creata cu succes !";
+                        notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
+                        notification.Title = "Hey! Did you forget?";
+                        notification.Text = "You have an appointment soon !";
+                        //notificationDate = new DateTime()
+                        //notification.FireTime = notificationDate;
+                        //AndroidNotificationCenter.SendNotification(notification, "channel_id");
+                        Debug.Log("notificare trimisea");
                     }
                     errorInfoObj.SetActive(true);
                 }

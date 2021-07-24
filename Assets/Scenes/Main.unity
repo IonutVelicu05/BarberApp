@@ -22285,9 +22285,23 @@ MonoBehaviour:
   checkIfLoggedInBTN: {fileID: 1611540529}
   errorInfoTXT: {fileID: 2146743402}
   selectDateInfoTxt: {fileID: 863758358}
+  notificationsClass: {fileID: 744176104}
   appointmentDayPrefab: {fileID: 574784415}
   occupiedAppointmentPrefab: {fileID: 1720519102}
   occupiedAppointmentInfo: {fileID: 1696706845}
+--- !u!114 &744176104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 744176100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c5067611ec773040a4534bc9cb00369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  appointmentsClass: {fileID: 744176103}
 --- !u!1 &749234385
 GameObject:
   m_ObjectHideFlags: 0
@@ -38801,6 +38815,30 @@ MonoBehaviour:
           m_BoolArgument: 1
         m_CallState: 2
       - m_Target: {fileID: 695683912}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 395163429}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1094383807}
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: SetActive
         m_Mode: 6
@@ -59677,7 +59715,7 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 744176103}
         m_TargetAssemblyTypeName: Appointments, Assembly-CSharp
-        m_MethodName: CreateAppointmentDays
+        m_MethodName: CheckBarberAppointmentsDays
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
