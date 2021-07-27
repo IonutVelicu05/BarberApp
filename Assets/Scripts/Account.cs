@@ -3,7 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Networking;
 
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+
+[System.Serializable]
 public class Account : MonoBehaviour
 {
     [SerializeField]
@@ -46,7 +51,57 @@ public class Account : MonoBehaviour
     private int shopsToCreate; //number of shops the user can still create
     private string worksAt;
     [SerializeField] private AppManager appmanager;
+    private bool tempAccount = true;
+    private string password = "";
 
+    public void Save()
+    {
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file = File.Create(Application.persistentDataPath + "/sombapula.pula");
+        bf.Serialize(file, accountUsername);
+        bf.Serialize(file, tempAccount);
+        bf.Serialize(file, password);
+        file.Close();
+    }
+    public FileStream Load()
+    {
+        if (File.Exists(Application.persistentDataPath + "/sombapula.pula"))
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(Application.persistentDataPath + "/sombapula.pula", FileMode.Open);
+            accountUsername = bf.Deserialize(file).ToString();
+            tempAccount = bool.Parse(bf.Deserialize(file).ToString());
+            password = bf.Deserialize(file).ToString();
+            Debug.Log("load done, tempacc=" + tempAccount + " user = " + accountUsername);
+            file.Close();
+            return file;
+        }
+        else
+        {
+            return null;
+        }
+    }
+    private void Start()
+    {
+        Load();
+        if(tempAccount == true && accountUsername == null)
+        {
+            int randomNumber = Mathf.RoundToInt(Random.Range(000000f, 999999f));
+            accountUsername = "user" + randomNumber;
+            profileUsername.text = accountUsername;
+            Save();
+        }
+        else if(tempAccount == true && accountUsername != null)
+        {
+            profileUsername.text = accountUsername;
+        }
+        else if(tempAccount == false)
+        {
+            usernameField.text = accountUsername;
+            passwordField.text = password;
+            LoginAccount();
+        }
+    }
     public string WorksAt
     {
         get { return worksAt; }
@@ -264,6 +319,8 @@ public class Account : MonoBehaviour
             profileFirstName.text = firstName;
             profileLastName.text = lastName;
             loadingScreen.SetActive(false);
+            tempAccount = false;
+            Save();
         }
         else if(www.text[0] == '1')
         {
@@ -302,6 +359,8 @@ public class Account : MonoBehaviour
             profileFirstName.text = firstName;
             profileLastName.text = lastName;
             loadingScreen.SetActive(false);
+            tempAccount = false;
+            Save();
         }
         else if(www.text[0] == '2')
         {
