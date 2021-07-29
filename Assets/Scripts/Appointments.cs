@@ -45,7 +45,6 @@ public class Appointments : MonoBehaviour
     private GameObject daysScrollView;
     private GameObject closeAppointmentBTN;
     private GameObject backFromHoursBTN;
-    private GameObject nextToInsertClientNameBTN;
     private GameObject nextToServicesBTN;
     private GameObject servicesBG;
     private GameObject backToHoursBTN;
@@ -106,7 +105,6 @@ public class Appointments : MonoBehaviour
     [SerializeField] private GameObject clientMentionsObj;
     [SerializeField] private InputField clientMentionInputField;
     [SerializeField] private GameObject errorInfoObj;
-    [SerializeField] private GameObject checkIfLoggedInBTN;
     [SerializeField] private TextMeshProUGUI errorInfoTXT;
     [SerializeField] private TextMeshProUGUI selectDateInfoTxt;
     private string clientMentionsWrite;
@@ -141,6 +139,8 @@ public class Appointments : MonoBehaviour
     private TextMeshProUGUI occupiedAppointmentMinute;
     private TextMeshProUGUI occupiedAppointmentPrice;
     [SerializeField] private TextMeshProUGUI occupiedAppointmentInfo;
+    [SerializeField] private TextMeshProUGUI barberMenuCurrentMonth;
+    private int barberMenuCurrentMonthNr = DateTime.Now.Month;
     private int occupiedAppointmentCounter = 0; //increases for every appointment that has to be shown
     //------end-------
     //DELETE THE APPOINTMENT ~~BARBER~~
@@ -163,11 +163,16 @@ public class Appointments : MonoBehaviour
         daysScrollView.SetActive(true);
         nextMonthDateBTN.SetActive(true);
         previousMonthDateBTN.SetActive(true);
-        checkIfLoggedInBTN.SetActive(false);
         clientMentionsObj.SetActive(false);
         checkHoursBTN.SetActive(true);
         nextToServicesBTN.SetActive(false);
-        if(appmanagerClass.SelectedLanguage == 1)
+        createAppointmentBTN.SetActive(false);
+        foreach(GameObject obj in minuteObjects)
+        {
+            Destroy(obj);
+        }
+        minuteObjects.Clear();
+        if (appmanagerClass.SelectedLanguage == 1)
         {
             selectDateInfoTxt.text = "Alege o data pentru programare";
         }
@@ -188,7 +193,6 @@ public class Appointments : MonoBehaviour
         daysScrollView = calendarBG.transform.Find("DaysScrollView").gameObject;
         closeAppointmentBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("CloseAppointmentMenu").gameObject;
         backFromHoursBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("BackBTN(Hours)").gameObject;
-        nextToInsertClientNameBTN = selectedDateBG.transform.Find("CheckIfLoggedIn").gameObject;
         nextToServicesBTN = selectedDateBG.transform.Find("NextToServicesBTN").gameObject;
         servicesBG = selectedDateBG.transform.Find("BarberServicesBG").gameObject;
         backToHoursBTN = servicesBG.transform.Find("BackToHoursBTN").gameObject;
@@ -197,51 +201,8 @@ public class Appointments : MonoBehaviour
         mustacheServiceButton = servicesBG.transform.Find("MustacheButton").gameObject;
         colourServiceButton = servicesBG.transform.Find("ColourButton").gameObject;
         eyebrowServiceButton = servicesBG.transform.Find("EyebrowButton").gameObject;
-
-        //Create a channel to send notifications
-        var channel = new AndroidNotificationChannel()
-        {
-            Id = "channel_id",
-            Name = "Notifications Channel",
-            Importance = Importance.Default,
-            Description = "Reminder notifications",
-        };
     }
 
-    public void CheckForSelectedTime()
-    {
-        string hour = selectedHour.ToString();
-        string minute = selectedMinute.ToString();
-        if (accountClass.IsLogged)
-        {
-            if (hour != null && minute != null)
-            {
-                createAppointmentBTN.GetComponent<Button>().interactable = true;
-            }
-        }
-        else
-        {
-            if (hour != null && minute != null)
-            {
-                nextToInsertClientNameBTN.GetComponent<Button>().interactable = true;
-            }
-        }
-    }
-
-    public void CheckIfUserIsLoggedIn()
-    {
-        if (accountClass.IsLogged)
-        {
-            Debug.Log("e logat");
-            nextToInsertClientNameBTN.SetActive(false);
-            createAppointmentBTN.SetActive(true);
-        }
-        else
-        {
-            Debug.Log("nu e logat");
-            nextToInsertClientNameBTN.SetActive(true);
-        }
-    }
     public void NextToServices()
     {
         servicesBG.SetActive(true);
@@ -257,15 +218,180 @@ public class Appointments : MonoBehaviour
             selectDateInfoTxt.text = "Select what services do you want.";
         }
     }
+    public void barberMenuNextMonth()
+    {
+        barberMenuCurrentMonthNr++;
+        barberMenuUpdateMonth();
+        CheckBarberAppointmentsDays();
+    }
+    public void barberMenuPreviousMonth()
+    {
+        barberMenuCurrentMonthNr--;
+        barberMenuUpdateMonth();
+        CheckBarberAppointmentsDays();
+    }
+    public void barberMenuUpdateMonth()
+    {
+        switch (barberMenuCurrentMonthNr)
+        {
+            case 1:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "Ianuarie";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "January";
+                }
+                break;
+            case 2:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "Februarie";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "February";
+                }
+                break;
+            case 3:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "Martie";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "March";
+                }
+                break;
+            case 4:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "Aprilie";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "April";
+                }
+                break;
+            case 5:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "Mai";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "May";
+                }
+                break;
+            case 6:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "Iunie";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "June";
+                }
+                break;
+            case 7:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "Iulie";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "July";
+                }
+                break;
+            case 8:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "August";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "August";
+                }
+                break;
+            case 9:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "Septembrie";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "September";
+                }
+                break;
+            case 10:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "Octombrie";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "October";
+                }
+                break;
+            case 11:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "Noiembrie";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "November";
+                }
+                break;
+            case 12:
+                if (appmanagerClass.SelectedLanguage == 1)
+                {
+                    barberMenuCurrentMonth.text = "Decembrie";
+                }
+                else if (appmanagerClass.SelectedLanguage == 2)
+                {
+                    barberMenuCurrentMonth.text = "December";
+                }
+                break;
+        }
+    }
     public void BackToHours()
     {
+        createAppointmentBTN.SetActive(false);
         servicesBG.SetActive(false);
         nextToServicesBTN.SetActive(true);
         backFromHoursBTN.SetActive(true);
         clientMentionsObj.SetActive(true);
-        checkIfLoggedInBTN.SetActive(false);
-        createAppointmentBTN.SetActive(false);
-        if(appmanagerClass.SelectedLanguage == 1)
+        totalPrice = 0;
+        totalServicesPrice.text = totalPrice.ToString();
+        if(haircutService == true)
+        {
+            totalPrice += barberHaircutPrice;
+            selectHaircutService();
+        }
+        if (beardService == true)
+        {
+            totalPrice += barberBeardPrice;
+            selectBeardService();
+        }
+        if (mustacheService == true)
+        {
+            totalPrice += barberMustachePrice;
+            selectMustacheService();
+        }
+        if (colourService == true)
+        {
+            totalPrice += barberColourPrice;
+            selectColourService();
+        }
+        if (eyebrowService == true)
+        {
+            totalPrice += barberEyebrowPrice;
+            selectEyebrowService();
+        }
+
+        if (appmanagerClass.SelectedLanguage == 1)
         {
             selectDateInfoTxt.text = "Alege o ora pentru programare.";
         }
@@ -299,6 +425,10 @@ public class Appointments : MonoBehaviour
         {
             haircutServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
             totalPrice -= barberHaircutPrice;
+            if(totalPrice == 0)
+            {
+                createAppointmentBTN.SetActive(false);
+            }
             if (appmanagerClass.SelectedLanguage == 2)
             {
                 totalServicesPrice.text = "Price: " + totalPrice;
@@ -308,7 +438,7 @@ public class Appointments : MonoBehaviour
                 totalServicesPrice.text = "Pret: " + totalPrice;
             }
         }
-        CheckIfUserIsLoggedIn(); //cand e selectat unul dintre servicii sa verifice daca e useru logat sau nu mancamiar pl
+        createAppointmentBTN.SetActive(true);
     }
     public void selectBeardService()
     {
@@ -330,6 +460,10 @@ public class Appointments : MonoBehaviour
         {
             beardServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
             totalPrice -= barberBeardPrice;
+            if (totalPrice == 0)
+            {
+                createAppointmentBTN.SetActive(false);
+            }
             if (appmanagerClass.SelectedLanguage == 2)
             {
                 totalServicesPrice.text = "Price: " + totalPrice;
@@ -339,7 +473,7 @@ public class Appointments : MonoBehaviour
                 totalServicesPrice.text = "Pret: " + totalPrice;
             }
         }
-        CheckIfUserIsLoggedIn();
+        createAppointmentBTN.SetActive(true);
     }
     public void selectMustacheService()
     {
@@ -361,6 +495,10 @@ public class Appointments : MonoBehaviour
         {
             mustacheServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
             totalPrice -= barberMustachePrice;
+            if (totalPrice == 0)
+            {
+                createAppointmentBTN.SetActive(false);
+            }
             if (appmanagerClass.SelectedLanguage == 2)
             {
                 totalServicesPrice.text = "Price: " + totalPrice;
@@ -370,7 +508,7 @@ public class Appointments : MonoBehaviour
                 totalServicesPrice.text = "Pret: " + totalPrice;
             }
         }
-        CheckIfUserIsLoggedIn();
+        createAppointmentBTN.SetActive(true);
     }
     public void selectColourService()
     {
@@ -392,6 +530,10 @@ public class Appointments : MonoBehaviour
         {
             colourServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
             totalPrice -= barberColourPrice;
+            if (totalPrice == 0)
+            {
+                createAppointmentBTN.SetActive(false);
+            }
             if (appmanagerClass.SelectedLanguage == 2)
             {
                 totalServicesPrice.text = "Price: " + totalPrice;
@@ -401,7 +543,7 @@ public class Appointments : MonoBehaviour
                 totalServicesPrice.text = "Pret: " + totalPrice;
             }
         }
-        CheckIfUserIsLoggedIn();
+        createAppointmentBTN.SetActive(true);
     }
     public void selectEyebrowService()
     {
@@ -423,6 +565,10 @@ public class Appointments : MonoBehaviour
         {
             eyebrowServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
             totalPrice -= barberEyebrowPrice;
+            if (totalPrice == 0)
+            {
+                createAppointmentBTN.SetActive(false);
+            }
             if (appmanagerClass.SelectedLanguage == 2)
             {
                 totalServicesPrice.text = "Price: " + totalPrice;
@@ -432,28 +578,7 @@ public class Appointments : MonoBehaviour
                 totalServicesPrice.text = "Pret: " + totalPrice;
             }
         }
-        CheckIfUserIsLoggedIn();
-    }
-    public void NextToInsertClientName() //after selecting the hour and minute click the button to insert client name if user is not logged in
-    {
-        clientNameInsertObj.SetActive(true);
-        nextToInsertClientNameBTN.SetActive(false);
         createAppointmentBTN.SetActive(true);
-    }
-    public void CloseInsertClientName() //when clicking the close button to close the menu to insert a client name when user not logged in
-    {
-        minutesScrollView.SetActive(false);
-        clientMentionsObj.SetActive(false);
-        hoursScrollView.SetActive(false);
-        daysScrollView.SetActive(true);
-        nextToInsertClientNameBTN.SetActive(false);
-        checkHoursBTN.SetActive(true);
-        createAppointmentBTN.SetActive(false);
-        clientNameInsertObj.SetActive(false);
-        nextMonthDateBTN.SetActive(true);
-        previousMonthDateBTN.SetActive(true);
-        servicesBG.SetActive(false);
-        closeAppointmentBTN.SetActive(true);
     }
     public void CheckBarberAppointmentsDays() //check which days are occupied
     {
@@ -463,11 +588,15 @@ public class Appointments : MonoBehaviour
     {
         WWWForm form = new WWWForm();
         form.AddField("barberName", accountClass.BarberName);
-        form.AddField("currentMonth", currentMonth);
+        form.AddField("currentMonth", barberMenuCurrentMonthNr);
         form.AddField("currentYear", currentYear);
         WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/checkbarberappdays.php", form);
         yield return www;
         string[] days = new string[33];
+        for(int i = 0; i < barberOccupiedDays.Length; i++)
+        {
+            barberOccupiedDays[i] = false;
+        }
         for (int i = 0; i < www.text.Split('\t').Length; i++)
         {
             days[i] = www.text.Split('\t')[i];
@@ -496,7 +625,7 @@ public class Appointments : MonoBehaviour
         {
             WWWForm form = new WWWForm();
             form.AddField("barberName", accountClass.BarberName);
-            form.AddField("currentMonth", currentMonth);
+            form.AddField("currentMonth", barberMenuCurrentMonthNr);
             form.AddField("currentYear", currentYear);
             form.AddField("selectedDay", selectedAppointmentDay);
             form.AddField("wtp", WTP);
@@ -575,6 +704,12 @@ public class Appointments : MonoBehaviour
                 errorInfoObj.SetActive(true);
             }
             Destroy(selectedAppointment);
+            occupiedAppointments.Remove(selectedAppointment);
+            if (occupiedAppointments.Count < 1)
+            {
+                barberOccupiedDays[int.Parse(selectedAppointmentDay)] = false;
+                CreateAppointmentDays();
+            }
         }
         else
         {
@@ -1060,7 +1195,6 @@ public class Appointments : MonoBehaviour
         backFromHoursBTN.SetActive(true);
         nextMonthDateBTN.SetActive(false);
         previousMonthDateBTN.SetActive(false);
-        //checkIfLoggedInBTN.SetActive(true);
         nextToServicesBTN.SetActive(true);
         checkHoursBTN.SetActive(false);
         clientMentionsObj.SetActive(true);
@@ -1139,163 +1273,74 @@ public class Appointments : MonoBehaviour
     }
     IEnumerator CreateAppointmentEnumerator()
     {
-        if (accountClass.IsLogged)
+        WWWForm form = new WWWForm();
+        form.AddField("barberName", barberFirstName + barberLastName);
+        form.AddField("clientName", accountClass.AccountUsername);
+        form.AddField("day", selectedDayObj.name);
+        form.AddField("month", currentMonth);
+        form.AddField("year", currentYear);
+        form.AddField("hour", selectedHour);
+        form.AddField("minute", selectedMinute);
+        form.AddField("mentions", clientMentionInputField.text);
+        form.AddField("totalprice", totalPrice);
+        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/createappointment.php", form);
+        yield return www;
+        /*
+        daysScrollView.SetActive(true);
+        hoursScrollView.SetActive(false);
+        minutesScrollView.SetActive(false);
+        closeAppointmentBTN.SetActive(true);
+        backFromHoursBTN.SetActive(false);
+        nextMonthDateBTN.SetActive(true);
+        previousMonthDateBTN.SetActive(true);
+        checkHoursBTN.SetActive(true);
+        createAppointmentBTN.SetActive(false);
+        appointmentMenu.SetActive(false);
+        clientMentionsObj.SetActive(false);
+        fullAppointmentMenu.SetActive(false);
+        servicesBG.SetActive(false);
+        */
+        BackToHours();
+        BackToCalendar();
+        if (www.text[0] == '0')
         {
+            if (appmanagerClass.SelectedLanguage == 2)
             {
-                WWWForm form = new WWWForm();
-                form.AddField("barberName", barberFirstName + barberLastName);
-                form.AddField("clientName", accountClass.AccountUsername);
-                form.AddField("day", selectedDayObj.name);
-                form.AddField("month", currentMonth);
-                form.AddField("year", currentYear);
-                form.AddField("hour", selectedHour);
-                form.AddField("minute", selectedMinute);
-                form.AddField("mentions", clientMentionInputField.text);
-                form.AddField("totalprice", totalPrice);
-                WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/createappointment.php", form);
-                yield return www;
-                daysScrollView.SetActive(true);
-                hoursScrollView.SetActive(false);
-                minutesScrollView.SetActive(false);
-                closeAppointmentBTN.SetActive(true);
-                backFromHoursBTN.SetActive(false);
-                nextMonthDateBTN.SetActive(true);
-                previousMonthDateBTN.SetActive(true);
-                checkHoursBTN.SetActive(true);
-                createAppointmentBTN.SetActive(false);
-                appointmentMenu.SetActive(false);
-                clientMentionsObj.SetActive(false);
-                fullAppointmentMenu.SetActive(false);
-                if (www.text[0] == '0')
-                {
-                    if (appmanagerClass.SelectedLanguage == 2)
-                    {
-                        errorInfoTXT.text = "Appointment successfully created !";
-                        notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
-                    }
-                    else if (appmanagerClass.SelectedLanguage == 1)
-                    {
-                        errorInfoTXT.text = "Programare creata cu succes !";
-                        notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
-                        Debug.Log("notificare trimisea");
-                    }
-                    errorInfoObj.SetActive(true);
-                }
-                else if (www.text[0] == '3')
-                {
-                    if (appmanagerClass.SelectedLanguage == 2)
-                    {
-                        errorInfoTXT.text = "There is already an appointment for created on this date and hour. Try selecting another hour/minute.";
-                    }
-                    else if (appmanagerClass.SelectedLanguage == 1)
-                    {
-                        errorInfoTXT.text = "Deja exista o programare creata pentru aceasta zi si ora. Incearca sa selectezi alta ora.";
-                    }
-                    errorInfoObj.SetActive(true);
-                }
-                else
-                {
-                    Debug.Log(www.text);
-                    if (appmanagerClass.SelectedLanguage == 2)
-                    {
-                        errorInfoTXT.text = "Something went wrong! Failed to create your appointment. Try again in a few minutes.";
-                    }
-                    else if (appmanagerClass.SelectedLanguage == 1)
-                    {
-                        errorInfoTXT.text = "Ceva nu a functionat. Programarea nu a fost creata. Incearca din nou in cateva minute.";
-                    }
-                    errorInfoObj.SetActive(true);
-                }
+                errorInfoTXT.text = "Appointment successfully created !";
+                notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
             }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Programare creata cu succes !";
+                notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
+                Debug.Log("notificare trimisea");
+            }
+            errorInfoObj.SetActive(true);
+        }
+        else if (www.text[0] == '3')
+        {
+            if (appmanagerClass.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "There is already an appointment for created on this date and hour. Try selecting another hour/minute.";
+            }
+            else if (appmanagerClass.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Deja exista o programare creata pentru aceasta zi si ora. Incearca sa selectezi alta ora.";
+            }
+            errorInfoObj.SetActive(true);
         }
         else
         {
-            if (clientNameInputField.text == null || clientNameInputField.text == "")
+            Debug.Log(www.text);
+            if (appmanagerClass.SelectedLanguage == 2)
             {
-                if (appmanagerClass.SelectedLanguage == 2)
-                {
-                    errorInfoTXT.text = "Please insert a real name so the barber will know you";
-                }
-                else if (appmanagerClass.SelectedLanguage == 1)
-                {
-                    errorInfoTXT.text = "Introdu un nume real pentru ca frizerul sa te cunoasca.";
-                }
-                errorInfoObj.SetActive(true);
+                errorInfoTXT.text = "Something went wrong! Failed to create your appointment. Try again in a few minutes.";
             }
-            else
+            else if (appmanagerClass.SelectedLanguage == 1)
             {
-                WWWForm form = new WWWForm();
-                form.AddField("barberName", barberFirstName + barberLastName);
-                form.AddField("clientName", clientNameInputField.text);
-                form.AddField("day", selectedDayObj.name);
-                form.AddField("month", currentMonth);
-                form.AddField("year", currentYear);
-                form.AddField("hour", selectedHour);
-                form.AddField("minute", selectedMinute);
-                form.AddField("mentions", clientMentionInputField.text);
-                form.AddField("totalprice", totalPrice);
-                WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/createappointment.php", form);
-                yield return www;
-                daysScrollView.SetActive(true);
-                hoursScrollView.SetActive(false);
-                minutesScrollView.SetActive(false);
-                closeAppointmentBTN.SetActive(true);
-                backFromHoursBTN.SetActive(false);
-                nextMonthDateBTN.SetActive(true);
-                previousMonthDateBTN.SetActive(true);
-                checkHoursBTN.SetActive(true);
-                createAppointmentBTN.SetActive(false);
-                appointmentMenu.SetActive(false);
-                clientMentionsObj.SetActive(false);
-                fullAppointmentMenu.SetActive(false);
-                clientNameInsertObj.SetActive(false);
-                if (www.text[0] == '0')
-                {
-                    if (appmanagerClass.SelectedLanguage == 2)
-                    {
-                        errorInfoTXT.text = "Appointment successfully created !";
-                        notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
-
-                    }
-                    else if (appmanagerClass.SelectedLanguage == 1)
-                    {
-                        errorInfoTXT.text = "Programare creata cu succes !";
-                        notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
-                        notification.Title = "Hey! Did you forget?";
-                        notification.Text = "You have an appointment soon !";
-                        //notificationDate = new DateTime()
-                        //notification.FireTime = notificationDate;
-                        //AndroidNotificationCenter.SendNotification(notification, "channel_id");
-                        Debug.Log("notificare trimisea");
-                    }
-                    errorInfoObj.SetActive(true);
-                }
-                else if (www.text[0] == '3')
-                {
-                    if (appmanagerClass.SelectedLanguage == 2)
-                    {
-                        errorInfoTXT.text = "There is already an appointment for created on this date and hour. Try selecting another hour/minute.";
-                    }
-                    else if (appmanagerClass.SelectedLanguage == 1)
-                    {
-                        errorInfoTXT.text = "Deja exista o programare creata pentru aceasta zi si ora. Incearca sa selectezi alta ora.";
-                    }
-                    errorInfoObj.SetActive(true);
-                }
-                else
-                {
-                    Debug.Log(www.text);
-                    if (appmanagerClass.SelectedLanguage == 2)
-                    {
-                        errorInfoTXT.text = "Something went wrong! Failed to create your appointment. Try again in a few minutes.";
-                    }
-                    else if (appmanagerClass.SelectedLanguage == 1)
-                    {
-                        errorInfoTXT.text = "Ceva nu a functionat. Programarea nu a fost creata. Incearca din nou in cateva minute.";
-                    }
-                    errorInfoObj.SetActive(true);
-                }
+                errorInfoTXT.text = "Ceva nu a functionat. Programarea nu a fost creata. Incearca din nou in cateva minute.";
             }
+            errorInfoObj.SetActive(true);
         }
     }
     public void ClearErrorInfo()

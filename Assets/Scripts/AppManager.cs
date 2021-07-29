@@ -90,7 +90,6 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI appointmentMenuNextToServicesBackBtn;
     [SerializeField] private TextMeshProUGUI appointmentMenuMentionsInfoTxt;
     [SerializeField] private Text appointmentMenuMentionsPlaceholder;
-    [SerializeField] private TextMeshProUGUI appointmentMenuNextToNameBtn;
     [SerializeField] private TextMeshProUGUI appointmentMenuInsertNameInfoTxt;
     [SerializeField] private Text appointmentMenuInsertNamePlaceholder;
     [SerializeField] private TextMeshProUGUI appointmentMenuCreateAppointmentBtn;
@@ -473,7 +472,6 @@ public class AppManager : MonoBehaviour
     {
         loginButton.SetActive(!account.IsLogged);
         manageShopButton.SetActive(account.IsBoss);
-        adminButton.SetActive(account.IsAdmin);
         registerButton.SetActive(!account.IsLogged);
         registerMenu.SetActive(false);
         loginMenu.SetActive(false);
@@ -644,7 +642,6 @@ public class AppManager : MonoBehaviour
             appointmentMenuMentionsPlaceholder.text = "Scrie aici..";
             appointmentMenuInsertNameInfoTxt.text = "Introdu mai jos numele care va fi afisat frizerului pentru programare.";
             appointmentMenuInsertNamePlaceholder.text = "Scrie aici...";
-            appointmentMenuNextToNameBtn.text = "Inainte";
             appointmentMenuHaircutServiceBtn.text = "Tunsoare";
             appointmentMenuBeardServiceBtn.text = "Barba";
             appointmentMenuMustacheServiceBtn.text = "Mustata";
@@ -737,7 +734,6 @@ public class AppManager : MonoBehaviour
             appointmentMenuMentionsPlaceholder.text = "Type here..";
             appointmentMenuInsertNameInfoTxt.text = "Enter below the name that will be shown to the barber for this appointment.";
             appointmentMenuInsertNamePlaceholder.text = "Type here...";
-            appointmentMenuNextToNameBtn.text = "Next";
             appointmentMenuHaircutServiceBtn.text = "Haircut";
             appointmentMenuBeardServiceBtn.text = "Beard";
             appointmentMenuMustacheServiceBtn.text = "Mustache";

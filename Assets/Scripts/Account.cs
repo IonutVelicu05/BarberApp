@@ -33,7 +33,6 @@ public class Account : MonoBehaviour
     [SerializeField] private GameObject settingsMenu;
     [SerializeField] private GameObject loadingScreen;
     private string accountUsername;
-    private bool isAdmin;
     private string firstName;
     private string lastName;
     private int fiveStarReviews;
@@ -72,6 +71,8 @@ public class Account : MonoBehaviour
             accountUsername = bf.Deserialize(file).ToString();
             tempAccount = bool.Parse(bf.Deserialize(file).ToString());
             password = bf.Deserialize(file).ToString();
+            usernameField.text = accountUsername;
+            passwordField.text = password;
             Debug.Log("load done, tempacc=" + tempAccount + " user = " + accountUsername);
             file.Close();
             return file;
@@ -137,10 +138,6 @@ public class Account : MonoBehaviour
     public bool IsBoss
     {
         get { return isBoss; }
-    }
-    public bool IsAdmin
-    {
-        get { return isAdmin; }
     }
     public bool IsLogged
     {
@@ -258,44 +255,31 @@ public class Account : MonoBehaviour
     {
         loadingScreen.SetActive(true);
         WWWForm form = new WWWForm();
-        form.AddField("username", usernameField.text);
-        form.AddField("password", passwordField.text);
+        if(tempAccount == true)
+        {
+            accountUsername = usernameField.text;
+            password = passwordField.text;
+        }
+        form.AddField("username", accountUsername);
+        form.AddField("password", password);
         WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/login.php", form);
 
         yield return www;
-        if(usernameField.text.Length < 1 || passwordField.text.Length < 1)
+        if (www.text[0] == '0')
         {
-            if(appmanager.SelectedLanguage == 1)
-            {
-                errorInfoTXT.text = "Nu ai introdus niciun nume de utilizator sau parola. Incearca din nou.";
-                errorInfoObj.SetActive(true);
-                loadingScreen.SetActive(false);
-            }
-            else if(appmanager.SelectedLanguage == 2)
-            {
-                errorInfoTXT.text = "You did not enter a username or a password. Try again.";
-                errorInfoObj.SetActive(true);
-                loadingScreen.SetActive(false);
-            }
-        }
-        else if (www.text[0] == '0')
-        {
-            if (appmanager.SelectedLanguage == 2)
+            if (appmanager.SelectedLanguage == 2 && tempAccount == true)
             {
                 errorInfoTXT.text = "Login succesful !";
+                errorInfoObj.SetActive(true);
             }
-            else if (appmanager.SelectedLanguage == 1)
+            else if (appmanager.SelectedLanguage == 1 && tempAccount == true)
             {
                 errorInfoTXT.text = "Conectare reusita !";
+                errorInfoObj.SetActive(true);
             }
-            errorInfoObj.SetActive(true);
             accountUsername = www.text.Split('\t')[1];
             isLogged = true;
             bool.TryParse(www.text.Split('\t')[2], out isBoss);
-            if(accountUsername == "test")
-            {
-                isAdmin = true;
-            }
             int.TryParse(www.text.Split('\t')[3], out fiveStarReviews);
             int.TryParse(www.text.Split('\t')[4], out fourStarReviews);
             int.TryParse(www.text.Split('\t')[5], out threeStarReviews);
@@ -324,22 +308,19 @@ public class Account : MonoBehaviour
         }
         else if(www.text[0] == '1')
         {
-            if (appmanager.SelectedLanguage == 2)
+            if (appmanager.SelectedLanguage == 2 && tempAccount == true)
             {
                 errorInfoTXT.text = "Login succesful !";
+                errorInfoObj.SetActive(true);
             }
-            else if (appmanager.SelectedLanguage == 1)
+            else if (appmanager.SelectedLanguage == 1 && tempAccount == true)
             {
                 errorInfoTXT.text = "Conectare reusita !";
+                errorInfoObj.SetActive(true);
             }
-            errorInfoObj.SetActive(true);
             accountUsername = www.text.Split('\t')[1];
             isLogged = true;
             bool.TryParse(www.text.Split('\t')[2], out isBoss);
-            if (accountUsername == "test")
-            {
-                isAdmin = true;
-            }
             int.TryParse(www.text.Split('\t')[3], out fiveStarReviews);
             int.TryParse(www.text.Split('\t')[4], out fourStarReviews);
             int.TryParse(www.text.Split('\t')[5], out threeStarReviews);
