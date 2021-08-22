@@ -1307,12 +1307,15 @@ public class Appointments : MonoBehaviour
             if (appmanagerClass.SelectedLanguage == 2)
             {
                 errorInfoTXT.text = "Appointment successfully created !";
-                notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
+                errorInfoObj.SetActive(true);
+                notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1, barberFirstName, barberLastName);
+                Debug.Log("appointment luna: " + currentMonth + " ziua: " + selectedDayObj.name + " ora: " + selectedHour + "minute: " + selectedMinute);
             }
             else if (appmanagerClass.SelectedLanguage == 1)
             {
                 errorInfoTXT.text = "Programare creata cu succes !";
-                notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1);
+                errorInfoObj.SetActive(true);
+                notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1, barberFirstName, barberLastName);
                 Debug.Log("notificare trimisea");
             }
             errorInfoObj.SetActive(true);
@@ -1322,10 +1325,12 @@ public class Appointments : MonoBehaviour
             if (appmanagerClass.SelectedLanguage == 2)
             {
                 errorInfoTXT.text = "There is already an appointment for created on this date and hour. Try selecting another hour/minute.";
+                errorInfoObj.SetActive(true);
             }
             else if (appmanagerClass.SelectedLanguage == 1)
             {
                 errorInfoTXT.text = "Deja exista o programare creata pentru aceasta zi si ora. Incearca sa selectezi alta ora.";
+                errorInfoObj.SetActive(true);
             }
             errorInfoObj.SetActive(true);
         }
@@ -1335,6 +1340,7 @@ public class Appointments : MonoBehaviour
             if (appmanagerClass.SelectedLanguage == 2)
             {
                 errorInfoTXT.text = "Something went wrong! Failed to create your appointment. Try again in a few minutes.";
+
             }
             else if (appmanagerClass.SelectedLanguage == 1)
             {
