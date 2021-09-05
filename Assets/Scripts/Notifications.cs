@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 public class Notifications : MonoBehaviour
 {
+    [SerializeField] private TMPro.TextMeshProUGUI title;
     [SerializeField] private Appointments appointmentsClass;
     [SerializeField] private AppManager appmanagerClass;
     [SerializeField] private Account accountClass;
@@ -26,8 +27,12 @@ public class Notifications : MonoBehaviour
     [SerializeField] private TMPro.TextMeshProUGUI barberName;
     [SerializeField] private GameObject reviewMenu;
     [SerializeField] private InputField reviewInputField;
-    // Start is called before the first frame update
+    private string notificationToken;
 
+    public string NotificationToken
+    {
+        get { return notificationToken; }
+    }
     public void SubmitReview()
     {
         StartCoroutine(SubmitReviewEnum());
@@ -69,11 +74,28 @@ public class Notifications : MonoBehaviour
             errorObj.SetActive(true);
         }
     }
+    [SerializeField] TMPro.TextMeshProUGUI notificationTokenTxt;
+    public void OnTokenReceived(object sender, Firebase.Messaging.TokenReceivedEventArgs token)
+    {
+        Debug.Log("Received Registration Token: " + token.Token);
+        notificationToken = token.Token;
+       notificationTokenTxt.text = notificationToken;
+    }
+
+    public void OnMessageReceived(object sender, Firebase.Messaging.MessageReceivedEventArgs e)
+    {
+        Debug.Log("Received a new message from: " + e.Message.From);
+        notificationTokenTxt.text = "Mesaj: " + e.Message.Data;
+    }
     void Start()
     {
+        Firebase.Messaging.FirebaseMessaging.TokenReceived += OnTokenReceived;
+        Firebase.Messaging.FirebaseMessaging.MessageReceived += OnMessageReceived;
         var lastNotification = AndroidNotificationCenter.GetLastNotificationIntent();
-        if(lastNotification != null)
+        if(lastNotification.Channel == "review_ch")
         {
+            errorTxt.text = lastNotification.Channel;
+            errorObj.SetActive(true);
             reviewBarberFirstName = lastNotification.Notification.IntentData.Split('\t')[0];
             reviewBarberLastName = lastNotification.Notification.IntentData.Split('\t')[1];
             if (appmanagerClass.SelectedLanguage == 1)
@@ -106,18 +128,22 @@ public class Notifications : MonoBehaviour
         AndroidNotificationCenter.RegisterNotificationChannel(channel);
         AndroidNotificationCenter.RegisterNotificationChannel(reviewChannel);
     }
-
     public void SendNotification(int year, int month, int day, int hour, int minute, int clientOrBarber, string barberFirstname, string barberLastname)
     {
-        //1 = client ;; 2 = barber
         reviewNotification.IntentData = barberFirstname + "\t" + barberLastname;
         notificationMinute = minute;
         notificationHour = hour;
-        if (clientOrBarber == 1)
+        if (appmanagerClass.SelectedLanguage == 1)
         {
-            reminderNotification.Title = "Hey! Did you forget?"; //title of the notification 
-            reminderNotification.Text = "You have a saloon appointment at " + hour + ":" + minute; // text of notification, appears under the title
-            Debug.Log("asta e minutu : " + minute);
+            reminderNotification.Title = "Ai o programare in curand !"; //title of the notification 
+            if(minute < 10)
+            {
+                reminderNotification.Text = "Ai o programare la salon la " + hour + ":0" + minute; // text of notification, appears under the title
+            }
+            else
+            {
+                reminderNotification.Text = "Ai o programare la salon la " + hour + ":" + minute; // text of notification, appears under the title
+            }
             if(minute < minutesBeforeAppointment) // daca e mai putin decat timpu pus de mn
             {
                 notificationMinute = 60 + minute - minutesBeforeAppointment;//se face calcul sa dea notificarea cu o ora inapoi si minute
@@ -134,23 +160,56 @@ public class Notifications : MonoBehaviour
             notificationMinute = minute;
             notificationHour = hour;
             //REVIEW NOTIFICATION
-            reviewNotification.Title = "Hey! Hope you are doing great !";
-            reviewNotification.Text = "Can you tell us how was your experience? Come and leave a review !";
-            Debug.Log("minuteafter = " + minutesAfterAppointment);
+            reviewNotification.Title = "Hey! Speram ca ti-a placut la salon.";
+            reviewNotification.Text = "Cum a fost experienta ta la salon? Lasa un review !";
             notificationMinute += minutesAfterAppointment;
             if(notificationMinute > 60)
             {
                 notificationMinute -= 60;
                 notificationHour++;
             }
-            Debug.Log("review luna: " + month + " ziua:" + day + " ora: " + notificationHour + " minute: " + notificationMinute);
             dateOfNotification = dateOfNotification = new DateTime(year, month, day, notificationHour, notificationMinute, 5);
             reviewNotification.FireTime = dateOfNotification;
             AndroidNotificationCenter.SendNotification(reviewNotification, "review_ch");
         }
-        else if(clientOrBarber == 2)
+        else if(appmanagerClass.SelectedLanguage == 2)
         {
-
+            reminderNotification.Title = "You have an appointment soon !"; //title of the notification 
+            if (minute < 10)
+            {
+                reminderNotification.Text = "You have a saloon appointment at " + hour + ":0" + minute; // text of notification, appears under the title
+            }
+            else
+            {
+                reminderNotification.Text = "You have a saloon appointment at " + hour + ":" + minute; // text of notification, appears under the title
+            }
+            if (minute < minutesBeforeAppointment) // daca e mai putin decat timpu pus de mn
+            {
+                notificationMinute = 60 + minute - minutesBeforeAppointment;//se face calcul sa dea notificarea cu o ora inapoi si minute
+                notificationHour--; //se da notificarea cu o ora inapoi
+            }
+            else
+            {
+                notificationMinute -= minutesBeforeAppointment; //min la care vine notificarea e min ales - min setat de mine
+            }
+            dateOfNotification = new DateTime(year, month, day, notificationHour, notificationMinute, 5); //the moment when the notification will show
+            reminderNotification.FireTime = dateOfNotification; //set the notification to show at that date and time
+            AndroidNotificationCenter.SendNotification(reminderNotification, "reminder_ch"); //send the notification
+            Debug.Log(reviewNotification.IntentData + "intent");
+            notificationMinute = minute;
+            notificationHour = hour;
+            //REVIEW NOTIFICATION
+            reviewNotification.Title = "Hey! Hope you are doing great !";
+            reviewNotification.Text = "How was your experience at the saloon? Come and leave a review !";
+            notificationMinute += minutesAfterAppointment;
+            if (notificationMinute > 60)
+            {
+                notificationMinute -= 60;
+                notificationHour++;
+            }
+            dateOfNotification = dateOfNotification = new DateTime(year, month, day, notificationHour, notificationMinute, 5);
+            reviewNotification.FireTime = dateOfNotification;
+            AndroidNotificationCenter.SendNotification(reviewNotification, "review_ch");
         }
     }
     public void OneStarRating()

@@ -24,7 +24,6 @@ public class Account : MonoBehaviour
     [SerializeField] private GameObject secondFields;
     [SerializeField] private GameObject registerButton;
     [SerializeField] private GameObject nextButton;
-    [SerializeField] private GameObject registerError;
     [SerializeField] private TextMeshProUGUI profileFirstName;
     [SerializeField] private TextMeshProUGUI profileLastName;
     [SerializeField] private TextMeshProUGUI profileUsername;
@@ -50,31 +49,78 @@ public class Account : MonoBehaviour
     private int shopsToCreate; //number of shops the user can still create
     private string worksAt;
     private AppManager appmanager;
+    private Notifications notificationClass;
     private bool tempAccount = true;
     private string password = "";
 
     public void Save()
     {
         BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(Application.persistentDataPath + "/sombapula.pula");
+        FileStream file = File.Create(Application.persistentDataPath + "/userprofile.data");
         bf.Serialize(file, accountUsername);
         bf.Serialize(file, tempAccount);
         bf.Serialize(file, password);
         file.Close();
     }
+    public void Logout()
+    {
+        isLogged = false;
+        if(File.Exists(Application.persistentDataPath + "/userprofile.data"))
+        {
+            File.Delete(Application.persistentDataPath + "/userprofile.data");
+        }
+        int randomNumber = Mathf.RoundToInt(Random.Range(000000f, 999999f));
+        accountUsername = "user" + randomNumber;
+        if(appmanager.SelectedLanguage == 1)
+        {
+            profileUsername.text = "Nume utilizator: " + accountUsername;
+            profileFirstName.text = "Prenume: ";
+            profileLastName.text = "Nume: ";
+        }
+        else if(appmanager.SelectedLanguage == 2)
+        {
+            profileUsername.text = "Username: " + accountUsername;
+            profileFirstName.text = "Firstname: ";
+            profileLastName.text = "Lastname: ";
+        }
+        firstName = "";
+        lastName = "";
+        fiveStarReviews = 0;
+        fourStarReviews = 0;
+        threeStarReviews = 0;
+        twoStarReviews = 0;
+        oneStarReviews = 0;
+        isBoss = false;
+        isLogged = false;
+        shopNameOfUser = "";
+        isEmployed = false;
+        personalCode = 0;
+        timeToCut = 0;
+        shopsCreated = 0; 
+        shopsToCreate = 0;
+        worksAt = "";
+        appmanager.afterLogin();
+        tempAccount = true;
+    }
     public FileStream Load()
     {
-        if (File.Exists(Application.persistentDataPath + "/sombapula.pula"))
+        if (File.Exists(Application.persistentDataPath + "/userprofile.data"))
         {
             BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(Application.persistentDataPath + "/sombapula.pula", FileMode.Open);
+            FileStream file = File.Open(Application.persistentDataPath + "/userprofile.data", FileMode.Open);
             accountUsername = bf.Deserialize(file).ToString();
             tempAccount = bool.Parse(bf.Deserialize(file).ToString());
             password = bf.Deserialize(file).ToString();
             usernameField.text = accountUsername;
             passwordField.text = password;
-            profileUsername.text = accountUsername;
-            Debug.Log("load done, tempacc=" + tempAccount + " user = " + accountUsername);
+            if (appmanager.SelectedLanguage == 1)
+            {
+                profileUsername.text = "Nume utilizator: " + accountUsername;
+            }
+            else if (appmanager.SelectedLanguage == 2)
+            {
+                profileUsername.text = "Username: " + accountUsername;
+            }
             file.Close();
             return file;
         }
@@ -86,13 +132,13 @@ public class Account : MonoBehaviour
     private void Start()
     {
         appmanager = gameObject.GetComponent<AppManager>();
+        notificationClass = gameObject.GetComponent<Notifications>();
         Load();
         if(tempAccount == false)
         {
             usernameField.text = accountUsername;
             passwordField.text = password;
             LoginAccount();
-            Debug.Log("temp e fals");
         }
         else if(tempAccount == true)
         {
@@ -100,7 +146,14 @@ public class Account : MonoBehaviour
             {
                 int randomNumber = Mathf.RoundToInt(Random.Range(000000f, 999999f));
                 accountUsername = "user" + randomNumber;
-                profileUsername.text = accountUsername;
+                if(appmanager.SelectedLanguage == 1)
+                {
+                    profileUsername.text = "Nume utilizator: " + accountUsername;
+                }
+                else if(appmanager.SelectedLanguage == 2)
+                {
+                    profileUsername.text = "Username: " + accountUsername;
+                }
                 Save();
                 Debug.Log("second if");
             }
@@ -125,6 +178,7 @@ public class Account : MonoBehaviour
     public int ShopsCreated
     {
         get { return shopsCreated; }
+        set { shopsCreated = value; }
     }
     public int ShopsToCreate
     {
@@ -215,7 +269,10 @@ public class Account : MonoBehaviour
         form.Add(new MultipartFormDataSection("email", registerEmail.text));
         form.Add(new MultipartFormDataSection("firstName", registerFirstName.text));
         form.Add(new MultipartFormDataSection("lastName", registerLastName.text));
-
+        if(notificationClass.NotificationToken != null || notificationClass.NotificationToken != "")
+        {
+            form.Add(new MultipartFormDataSection("notificationToken", notificationClass.NotificationToken));
+        }
         UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/register.php", form);
         yield return webreq.SendWebRequest();
         if (webreq.downloadHandler.text[0] == '0')
@@ -271,73 +328,6 @@ public class Account : MonoBehaviour
         }
         appmanager.afterLogin();
     }
-    public void RegisterAccount3()
-    {
-        StartCoroutine(RegisterAccountEnum());
-    }
-    IEnumerator RegisterAccountEnum()
-    {
-        WWWForm form = new WWWForm();
-        form.AddField("username", registerUsername.text);
-        form.AddField("password", registerPassword.text);
-        form.AddField("email", registerEmail.text);
-        form.AddField("firstName", registerFirstName.text);
-        form.AddField("lastName", registerLastName.text);
-        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/register.php", form);
-        yield return www;
-        if(www.text[0] == '0')
-        {
-            registerUsername.text = "";
-            registerPassword.text = "";
-            registerEmail.text = "";
-            if(appmanager.SelectedLanguage == 2)
-            {
-                errorInfoTXT.text = "Account created successfully ! You can now login.";
-            }
-            else if(appmanager.SelectedLanguage == 1)
-            {
-                errorInfoTXT.text = "Contul a fost creat cu succes! Te poti conecta.";
-            }
-            errorInfoObj.SetActive(true);
-        }
-        else if(www.text[0] == '1')
-        {
-            if(appmanager.SelectedLanguage == 2)
-            {
-                errorInfoTXT.text = "There is a problem with the server's connection. Please try again. If the problem continues contact an administrator.";
-            }
-            else if(appmanager.SelectedLanguage == 1)
-            {
-                errorInfoTXT.text = "A intervenit o problema cu conexiunea serverului. Te rugam sa incerci din nou. Daca problema persista contacteaza un administrator.";
-            }
-            errorInfoObj.SetActive(true);
-        }
-        else if(www.text[0] == '2')
-        {
-            if (appmanager.SelectedLanguage == 2)
-            {
-                errorInfoTXT.text = "There is already an account created with that name. Try another one.";
-            }
-            else if (appmanager.SelectedLanguage == 1)
-            {
-                errorInfoTXT.text = "Exista deja un cont creat cu acest nume. Incearca altul.";
-            }
-            errorInfoObj.SetActive(true);
-        }
-        else
-        {
-            if (appmanager.SelectedLanguage == 2)
-            {
-                errorInfoTXT.text = "Something went wrong. Please try again later. If the problem continues contact an administrator.";
-            }
-            else if (appmanager.SelectedLanguage == 1)
-            {
-                errorInfoTXT.text = "Ceva nu a functionat. Te rugam sa incerci din nou mai tarziu. Daca problema continua contacteaza un administrator.";
-            }
-            errorInfoObj.SetActive(true);
-        }
-        appmanager.afterLogin();
-    }
     public void LoginAccount()
     {
         StartCoroutine(LoginEnumerator());
@@ -353,6 +343,10 @@ public class Account : MonoBehaviour
         }
         form.AddField("username", accountUsername);
         form.AddField("password", password);
+        if(notificationClass.NotificationToken != null || notificationClass.NotificationToken != "")
+        {
+            //form.AddField("newToken", notificationClass.NotificationToken);
+        }
         WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/login.php", form);
         
         yield return www;
@@ -388,7 +382,6 @@ public class Account : MonoBehaviour
             personalCode = int.Parse(www.text.Split('\t')[13]);
             shopsCreated = int.Parse(www.text.Split('\t')[14]);
             shopsToCreate = int.Parse(www.text.Split('\t')[15]);
-            Debug.Log("shopsCreated = " + shopsCreated + " shopstocr = " + shopsToCreate);
             appmanager.afterLogin();
             if(appmanager.SelectedLanguage == 1)
             {
@@ -405,6 +398,7 @@ public class Account : MonoBehaviour
             loadingScreen.SetActive(false);
             tempAccount = false;
             Save();
+            Firebase.Messaging.FirebaseMessaging.SubscribeAsync("/barber/" + accountUsername);
         }
         else if(www.text[0] == '1')
         {
@@ -451,6 +445,7 @@ public class Account : MonoBehaviour
             loadingScreen.SetActive(false);
             tempAccount = false;
             Save();
+            Firebase.Messaging.FirebaseMessaging.SubscribeAsync("/topics/all");
         }
         else if(www.text[0] == '2')
         {
@@ -474,6 +469,7 @@ public class Account : MonoBehaviour
             else if (appmanager.SelectedLanguage == 1)
             {
                 errorInfoTXT.text = "Ceva nu a functionat ! Te rugam sa incerci din nou. Daca problema persista contacteaza un administrator.";
+                Debug.Log(www.text);
             }
             errorInfoObj.SetActive(true);
             loadingScreen.SetActive(false);

@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 45608501858845960}
   - component: {fileID: 2823922496958728437}
   - component: {fileID: 718938161}
-  - component: {fileID: 718938162}
   - component: {fileID: 718938165}
   m_Layer: 0
   m_Name: AppManager
@@ -52,7 +51,127 @@ MonoBehaviour:
   loginMenu: {fileID: 0}
   manageShopMenu: {fileID: 0}
   adminMenu: {fileID: 0}
+  registerButton: {fileID: 0}
+  registerMenu: {fileID: 0}
+  barberMenuBTN: {fileID: 0}
   backBTN: {fileID: 0}
+  profileMenu: {fileID: 0}
+  settingsMenu: {fileID: 0}
+  locationPickMenu: {fileID: 0}
+  appointments: {fileID: 0}
+  pageTitle: {fileID: 0}
+  locationShowShopBTN: {fileID: 0}
+  locationShowShopsInfo: {fileID: 0}
+  settingsMenuLanguageTxt: {fileID: 0}
+  settingsMenuLoginBtn: {fileID: 0}
+  settingsMenuManageShopsBtn: {fileID: 0}
+  settingsMenuRegisterBtn: {fileID: 0}
+  settingsMenuBarberMenuBtn: {fileID: 0}
+  settingsMenuCreateShopBtn: {fileID: 0}
+  loginMenuLoginBtn: {fileID: 0}
+  loginMenuBackBtn: {fileID: 0}
+  registerMenuRegisterBtn: {fileID: 0}
+  registerMenuBackBtn: {fileID: 0}
+  registerMenuNextBtn: {fileID: 0}
+  barberMenuTimePerCutTxt: {fileID: 0}
+  barberMenuTimePerCutBtn: {fileID: 0}
+  barberMenuCheckAppointmentsTxt: {fileID: 0}
+  barberMenuCheckAppointmentsBtn: {fileID: 0}
+  barberMenuEditPricesTxt: {fileID: 0}
+  barberMenuEditPricesBtn: {fileID: 0}
+  editShopSelectShopTxt: {fileID: 0}
+  editShopDescriptionBtn: {fileID: 0}
+  editShopWorkingProgramBtn: {fileID: 0}
+  editShopPhotosBtn: {fileID: 0}
+  editShopBarbersBtn: {fileID: 0}
+  editShopPricesBtn: {fileID: 0}
+  timeToCutMenuPlaceholder: {fileID: 0}
+  timeToCutMenuSubmitBtn: {fileID: 0}
+  timeToCutMenuInfoTxt: {fileID: 0}
+  editPricesMenuHaircutBtn: {fileID: 0}
+  editPricesMenuBeardBtn: {fileID: 0}
+  editPricesMenuMustacheBtn: {fileID: 0}
+  editPricesMenuHairColourBtn: {fileID: 0}
+  editPricesMenuEyebrowBtn: {fileID: 0}
+  editPricesMenuInfoTxt: {fileID: 0}
+  editPricesMenuInputPlaceholder: {fileID: 0}
+  editPricesMenuInputUpdateBtn: {fileID: 0}
+  editPricesMenuInputBackBtn: {fileID: 0}
+  shopMenuEditDescriptionPlaceholder: {fileID: 0}
+  shopMenuEditDescriptionUpdateBtn: {fileID: 0}
+  editShopMenuWorkingProgramInfoTxt: {fileID: 0}
+  editShopMenuWorkingProgramMondayBtn: {fileID: 0}
+  editShopMenuWorkingProgramTuesdayBtn: {fileID: 0}
+  editShopMenuWorkingProgramWednesdayBtn: {fileID: 0}
+  editShopMenuWorkingProgramThursdayBtn: {fileID: 0}
+  editShopmenuWorkingProgramFridayBtn: {fileID: 0}
+  editShopMenuWorkingProgramSaturdayBtn: {fileID: 0}
+  editShopMenuWorkingProgramSundayBtn: {fileID: 0}
+  editShopMenuWorkingProgramHoursInfoTxt: {fileID: 0}
+  editShopMenuWorkingProgramHoursOpensAtTxt: {fileID: 0}
+  editShopMenuWorkingProgramHoursClosesAtTxt: {fileID: 0}
+  editShopMenuWorkingProgramHoursUpdateBtn: {fileID: 0}
+  editShopMenuPhotosInfoTxt: {fileID: 0}
+  editShopMenuSelectPhotosBtn: {fileID: 0}
+  editShopMenuUpdatePhotosBtn: {fileID: 0}
+  salonMenuInfoBtn: {fileID: 0}
+  salonMenuBarberBtn: {fileID: 0}
+  salonMenuBarberFirstName: {fileID: 0}
+  salonMenuBarberLastName: {fileID: 0}
+  appointmentMenuCheckHoursBtn: {fileID: 0}
+  appointmentMenuCheckHoursBackBtn: {fileID: 0}
+  appointmentMenuNextToServicesBtn: {fileID: 0}
+  appointmentMenuNextToServicesBackBtn: {fileID: 0}
+  appointmentMenuMentionsInfoTxt: {fileID: 0}
+  appointmentMenuMentionsPlaceholder: {fileID: 0}
+  appointmentMenuInsertNameInfoTxt: {fileID: 0}
+  appointmentMenuInsertNamePlaceholder: {fileID: 0}
+  appointmentMenuCreateAppointmentBtn: {fileID: 0}
+  appointmentMenuHaircutServiceBtn: {fileID: 0}
+  appointmentMenuBeardServiceBtn: {fileID: 0}
+  appointmentMenuMustacheServiceBtn: {fileID: 0}
+  appointmentMenuHairColourBtn: {fileID: 0}
+  appointmentMenuEyebrowBtn: {fileID: 0}
+  appointmentMenuBackToHourBtn: {fileID: 0}
+  shopPrefab: {fileID: 0}
+  shopDescription: {fileID: 0}
+  ShopDescriptionField: {fileID: 0}
+  openWorkingHourPrefab: {fileID: 0}
+  openWorkingMinutePrefab: {fileID: 0}
+  closeWorkingHourPrefab: {fileID: 0}
+  closeWorkingMinutePrefab: {fileID: 0}
+  mondayHours: {fileID: 0}
+  tuesdayHours: {fileID: 0}
+  wednesdayHours: {fileID: 0}
+  thursdayHours: {fileID: 0}
+  fridayHours: {fileID: 0}
+  saturdayHours: {fileID: 0}
+  sundayHours: {fileID: 0}
+  shopPhoto: {fileID: 0}
+  loadingScreen: {fileID: 0}
+  shopMenu: {fileID: 0}
+  imageFromPhoneName: {fileID: 0}
+  whatImageToUpload: {fileID: 0}
+  editDescriptionHint: {fileID: 0}
+  editDescriptionRoBtn: {fileID: 0}
+  editDescriptionEnBtn: {fileID: 0}
+  countyDropdown: {fileID: 0}
+  cityDropdown: {fileID: 0}
+  manageShopPrefab: {fileID: 0}
+  shopInsertEditPrice: {fileID: 0}
+  EditGeneralPricesBTN: {fileID: 0}
+  EditBarberPricesBTN: {fileID: 0}
+  barberInsertEditPrice: {fileID: 0}
+  errorObj: {fileID: 0}
+  errorTXT: {fileID: 0}
+  barberPrefab: {fileID: 0}
+  createShopName: {fileID: 0}
+  createShopAddress: {fileID: 0}
+  createShopMenuBTN: {fileID: 0}
+  createShopCityDropdown: {fileID: 0}
+  createShopCountyDropdown: {fileID: 0}
+  createShopGeneralPrices: {fileID: 0}
+  TitleText: {fileID: 0}
 --- !u!114 &718938161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67,20 +186,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   usernameField: {fileID: 0}
   passwordField: {fileID: 0}
---- !u!114 &718938162
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 90035753613596799}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53b2aa2b31d865740886b899f7935803, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  usernameField: {fileID: 0}
-  passwordField: {fileID: 0}
+  isBossToggle: {fileID: 0}
+  shopNameField: {fileID: 0}
+  shopAddressField: {fileID: 0}
+  countyDropdown: {fileID: 0}
+  cityDropdown: {fileID: 0}
 --- !u!114 &718938165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,4 +205,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   usernameField: {fileID: 0}
   passwordField: {fileID: 0}
-  appmanager: {fileID: 2823922496958728437}
+  registerUsername: {fileID: 0}
+  registerPassword: {fileID: 0}
+  registerEmail: {fileID: 0}
+  registerFirstName: {fileID: 0}
+  registerLastName: {fileID: 0}
+  firstFields: {fileID: 0}
+  secondFields: {fileID: 0}
+  registerButton: {fileID: 0}
+  nextButton: {fileID: 0}
+  registerError: {fileID: 0}
+  profileFirstName: {fileID: 0}
+  profileLastName: {fileID: 0}
+  profileUsername: {fileID: 0}
+  errorInfoObj: {fileID: 0}
+  errorInfoTXT: {fileID: 0}
+  settingsMenu: {fileID: 0}
+  loadingScreen: {fileID: 0}

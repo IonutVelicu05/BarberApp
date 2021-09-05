@@ -16,7 +16,6 @@ public class Appointments : MonoBehaviour
     [SerializeField] private TextMeshProUGUI dayNumber; //text of the daynumber textbox;
     [SerializeField] private TextMeshProUGUI dayName; //text of the dayname textbox;
     [SerializeField] private Account accountClass;
-    [SerializeField] private Button createAppointmentHours;
     [SerializeField] private AppManager appmanagerClass;
     [SerializeField] private GameObject loadingScreen;
     [SerializeField] private InputField timeToCutInput;
@@ -37,7 +36,6 @@ public class Appointments : MonoBehaviour
     [SerializeField] private GameObject selectedDateBG;
     [SerializeField] private GameObject appointmentMenu; //child of full appointment menu
     [SerializeField] private GameObject fullAppointmentMenu; //the whole menu responsible for appointments
-    private GameObject checkHoursBTN;
     private GameObject nextMonthDateBTN;
     private GameObject previousMonthDateBTN;
     private GameObject hoursScrollView;
@@ -141,6 +139,7 @@ public class Appointments : MonoBehaviour
     [SerializeField] private TextMeshProUGUI occupiedAppointmentInfo;
     [SerializeField] private TextMeshProUGUI barberMenuCurrentMonth;
     private int barberMenuCurrentMonthNr = DateTime.Now.Month;
+    private int barberMenuCurrentYearNr = DateTime.Now.Year;
     private int occupiedAppointmentCounter = 0; //increases for every appointment that has to be shown
     //------end-------
     //DELETE THE APPOINTMENT ~~BARBER~~
@@ -148,7 +147,15 @@ public class Appointments : MonoBehaviour
 
     //~~~ END ~~~
 
-
+    // BARBER's Notification
+    private string barberNotificationTitleEN = "You just got a new appointment !";
+    private string barberNotificationBodyEN = "Check your barber menu to see more details.";
+    private string barberNotificationTitleRO = "Ai o noua programare !";
+    private string barberNotificationBodyRO = "Verifica meniul frizerului pentru mai multe detalii.";
+    private string reviewNotificationTitleRO = "Hey! Cum a fost experienta ta la salonul ";
+    private string reviewNotificationBodyRO = "Apasa aici pentru a lasa un review.";
+    private string reviewNotificationTitleEN = "Hey! How was your experience at ";
+    private string reviewNotificationBodyEN = "Click here to leave a review.";
 
 
 
@@ -164,7 +171,6 @@ public class Appointments : MonoBehaviour
         nextMonthDateBTN.SetActive(true);
         previousMonthDateBTN.SetActive(true);
         clientMentionsObj.SetActive(false);
-        checkHoursBTN.SetActive(true);
         nextToServicesBTN.SetActive(false);
         createAppointmentBTN.SetActive(false);
         foreach(GameObject obj in minuteObjects)
@@ -183,9 +189,9 @@ public class Appointments : MonoBehaviour
     }
     private void Start()
     {
+        barberMenuUpdateMonth();
         currentDateString = " / " + DateTime.Now.Month + " / " + DateTime.Now.Year;
         currentDateTXT.text = currentDateString;
-        checkHoursBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("CheckHoursBTN").gameObject;
         nextMonthDateBTN = selectedDateBG.transform.Find("NextPrevButtons").gameObject.transform.Find("NextMonthBTN").gameObject;
         previousMonthDateBTN = selectedDateBG.transform.Find("NextPrevButtons").gameObject.transform.Find("PreviousMonthBTN").gameObject;
         hoursScrollView = calendarBG.transform.Find("HoursScrollView").gameObject;
@@ -220,13 +226,29 @@ public class Appointments : MonoBehaviour
     }
     public void barberMenuNextMonth()
     {
-        barberMenuCurrentMonthNr++;
+        if(barberMenuCurrentMonthNr + 1 > 12)
+        {
+            barberMenuCurrentYearNr++;
+            barberMenuCurrentMonthNr = 1;
+        }
+        else
+        {
+            barberMenuCurrentMonthNr++;
+        }
         barberMenuUpdateMonth();
         CheckBarberAppointmentsDays();
     }
     public void barberMenuPreviousMonth()
     {
-        barberMenuCurrentMonthNr--;
+        if(barberMenuCurrentMonthNr - 1 < 1)
+        {
+            barberMenuCurrentMonthNr = 12;
+            barberMenuCurrentYearNr--;
+        }
+        else
+        {
+            barberMenuCurrentMonthNr--;
+        }
         barberMenuUpdateMonth();
         CheckBarberAppointmentsDays();
     }
@@ -592,14 +614,25 @@ public class Appointments : MonoBehaviour
         form.AddField("currentYear", currentYear);
         WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/checkbarberappdays.php", form);
         yield return www;
-        string[] days = new string[33];
+        string[] days = new string[36];
         for(int i = 0; i < barberOccupiedDays.Length; i++)
         {
             barberOccupiedDays[i] = false;
         }
         for (int i = 0; i < www.text.Split('\t').Length; i++)
         {
-            days[i] = www.text.Split('\t')[i];
+            for(int j = 0; j < days.Length; j++)
+            {
+                if(days[j] == www.text.Split('\t')[i])
+                {
+
+                }
+                else
+                {
+                    days[i] = www.text.Split('\t')[i];
+
+                }
+            }
             for (int k = 0; k < days.Length; k++)
             {
                 foreach (string str in days)
@@ -766,7 +799,7 @@ public class Appointments : MonoBehaviour
             }
             appointmentDayList.Clear();
         }
-        for(int i = 1; i < DateTime.DaysInMonth(currentYear, currentMonth) + 1; i++)
+        for(int i = 1; i < DateTime.DaysInMonth(currentYear, barberMenuCurrentMonthNr) + 1; i++)
         {
             GameObject day = Instantiate(appointmentDayPrefab);
             day.name = i.ToString();
@@ -777,7 +810,7 @@ public class Appointments : MonoBehaviour
             appointmentDayNumberObj = day.transform.Find("DayNumber").gameObject;
             appointmentDayNumberObj.GetComponent<TextMeshProUGUI>().text = i.ToString();
             appointmentDayNameObj = day.transform.Find("DayName").gameObject;
-            currentDate = new DateTime(currentYear, currentMonth, i);
+            currentDate = new DateTime(currentYear, barberMenuCurrentMonthNr, i);
             appointmentDayNameObj.GetComponent<TextMeshProUGUI>().text = currentDate.DayOfWeek.ToString();
             appointmentDayList.Add(day);
             if (barberOccupiedDays[i] == true)
@@ -873,7 +906,7 @@ public class Appointments : MonoBehaviour
         selectedAppointmentDay = selectedDayObj.name;
         selectedDayString = date.DayOfWeek.ToString();
         UpdateCurrentDate();
-        createAppointmentHours.interactable = true;
+        CreateAppointmentHours();
         
     }
     public string BarberFirstName
@@ -1079,7 +1112,16 @@ public class Appointments : MonoBehaviour
         yield return www;
         if(www.text[0] == '0')
         {
-            Debug.Log("update time cut");
+            if(appmanagerClass.SelectedLanguage == 1)
+            {
+                errorInfoTXT.text = "Timpul a fost actualizat cu succes!";
+                errorInfoObj.SetActive(true);
+            }
+            else if(appmanagerClass.SelectedLanguage == 2)
+            {
+                errorInfoTXT.text = "The time has been succesfully updated.";
+                errorInfoObj.SetActive(true);
+            }
         }
         else
         {
@@ -1123,7 +1165,6 @@ public class Appointments : MonoBehaviour
             if (www.text[0] == '0')
             {
                 loadingScreen.SetActive(true);
-                Debug.Log("success");
                 string workingHours = www.text.Split('\t')[1];
                 if (workingHours == null || workingHours == "")
                 {
@@ -1196,7 +1237,6 @@ public class Appointments : MonoBehaviour
         nextMonthDateBTN.SetActive(false);
         previousMonthDateBTN.SetActive(false);
         nextToServicesBTN.SetActive(true);
-        checkHoursBTN.SetActive(false);
         clientMentionsObj.SetActive(true);
     }
     public void CreateMinutes()//function to create the minutes buttons to create a new appointment
@@ -1267,6 +1307,36 @@ public class Appointments : MonoBehaviour
             Debug.Log("rasamati timetocut nu e0");
         }
     }
+    public void SendNotificationToBarber(string barberFirstname, string barberLastname)
+    {
+        StartCoroutine(SendNotificationToBarberEnum(barberFirstname, barberLastname));
+    }
+    IEnumerator SendNotificationToBarberEnum(string barberFirstName, string barberLastName)
+    {
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("firstName", barberFirstName));
+        form.Add(new MultipartFormDataSection("lastName", barberLastName));
+        if(appmanagerClass.SelectedLanguage == 1)
+        {
+            form.Add(new MultipartFormDataSection("notificationTitle", barberNotificationTitleRO));
+            form.Add(new MultipartFormDataSection("notificationBody", barberNotificationBodyRO));
+        }
+        else if(appmanagerClass.SelectedLanguage == 2)
+        {
+            form.Add(new MultipartFormDataSection("notificationTitle", barberNotificationTitleEN));
+            form.Add(new MultipartFormDataSection("notificationBody", barberNotificationBodyEN));
+        }
+        UnityWebRequest web = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/sendnotificationtobarber.php", form);
+        yield return web.SendWebRequest();
+        if (web.downloadHandler.text == "0")
+        {
+            Debug.Log("notificare la frizer trimisa");
+        }
+        else
+        {
+            Debug.Log(web.downloadHandler.text);
+        }
+    }
     public void CreateAppointment()
     {
         StartCoroutine(CreateAppointmentEnumerator());
@@ -1285,21 +1355,6 @@ public class Appointments : MonoBehaviour
         form.AddField("totalprice", totalPrice);
         WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/createappointment.php", form);
         yield return www;
-        /*
-        daysScrollView.SetActive(true);
-        hoursScrollView.SetActive(false);
-        minutesScrollView.SetActive(false);
-        closeAppointmentBTN.SetActive(true);
-        backFromHoursBTN.SetActive(false);
-        nextMonthDateBTN.SetActive(true);
-        previousMonthDateBTN.SetActive(true);
-        checkHoursBTN.SetActive(true);
-        createAppointmentBTN.SetActive(false);
-        appointmentMenu.SetActive(false);
-        clientMentionsObj.SetActive(false);
-        fullAppointmentMenu.SetActive(false);
-        servicesBG.SetActive(false);
-        */
         BackToHours();
         BackToCalendar();
         if (www.text[0] == '0')
@@ -1310,6 +1365,7 @@ public class Appointments : MonoBehaviour
                 errorInfoObj.SetActive(true);
                 notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1, barberFirstName, barberLastName);
                 Debug.Log("appointment luna: " + currentMonth + " ziua: " + selectedDayObj.name + " ora: " + selectedHour + "minute: " + selectedMinute);
+                SendNotificationToBarber(barberFirstName, barberLastName);
             }
             else if (appmanagerClass.SelectedLanguage == 1)
             {
@@ -1317,8 +1373,8 @@ public class Appointments : MonoBehaviour
                 errorInfoObj.SetActive(true);
                 notificationsClass.SendNotification(currentYear, currentMonth, int.Parse(selectedDayObj.name), selectedHour, selectedMinute, 1, barberFirstName, barberLastName);
                 Debug.Log("notificare trimisea");
+                SendNotificationToBarber(barberFirstName, barberLastName);
             }
-            errorInfoObj.SetActive(true);
         }
         else if (www.text[0] == '3')
         {
