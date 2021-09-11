@@ -46,9 +46,7 @@ public class Appointments : MonoBehaviour
     private GameObject nextToServicesBTN;
     private GameObject servicesBG;
     private GameObject backToHoursBTN;
-    //barber prices 
-    [SerializeField] private TextMeshProUGUI totalServicesPrice;
-    private int totalPrice;
+
 
     //time selection
     [SerializeField] private GameObject hourPrefab;
@@ -84,8 +82,18 @@ public class Appointments : MonoBehaviour
     [SerializeField] private InputField clientMentionInputField;
     [SerializeField] private GameObject errorInfoObj;
     [SerializeField] private TextMeshProUGUI errorInfoTXT;
+    [SerializeField] private GameObject servicePrefab;
     [SerializeField] private TextMeshProUGUI selectDateInfoTxt;
     private string clientMentionsWrite;
+    private List<GameObject> serviceObjectsList = new List<GameObject>();
+    private string[] serviceNameList;
+    private string[] servicePriceList;
+    [SerializeField] private TextMeshProUGUI totalServicesPrice;
+    private int totalPrice;
+    private string appointmentSelectedServices;
+    private List<string> appointmentSelectedServicesList = new List<string>();
+    private Color serviceButtonNormalColor = new Color(0.88f, 0.88f, 0.37f, 1f);
+    private Color serviceButtonSelectedColor = new Color(0.68f, 0.68f, 0.20f, 1f);
 
     //------end-------
     //notifications
@@ -180,8 +188,8 @@ public class Appointments : MonoBehaviour
         closeAppointmentBTN = appointmentMenu.transform.Find("CloseAppointmentMenu").gameObject;
         backFromHoursBTN = appointmentMenu.transform.Find("BackBTN(Hours)").gameObject;
         nextToServicesBTN = appointmentMenu.transform.Find("NextToServicesBTN").gameObject;
-        servicesBG = appointmentMenu.transform.Find("BarberServicesBG").gameObject;
-        backToHoursBTN = servicesBG.transform.Find("BackToHoursBTN").gameObject;
+        servicesBG = calendarBG.transform.Find("ServicesBG").gameObject;
+        backToHoursBTN = appointmentMenu.transform.Find("BackToHoursBTN").gameObject;
     }
 
     public void NextToServices()
@@ -190,6 +198,7 @@ public class Appointments : MonoBehaviour
         nextToServicesBTN.SetActive(false);
         clientMentionsObj.SetActive(false);
         backFromHoursBTN.SetActive(false);
+        backToHoursBTN.SetActive(true);
         if(appmanagerClass.SelectedLanguage == 1)
         {
             selectDateInfoTxt.text = "Alege ce servicii doresti";
@@ -355,13 +364,23 @@ public class Appointments : MonoBehaviour
     }
     public void BackToHours()
     {
+        CreateAppointmentHours();
         createAppointmentBTN.SetActive(false);
         servicesBG.SetActive(false);
-        nextToServicesBTN.SetActive(true);
+        nextToServicesBTN.SetActive(false);
         backFromHoursBTN.SetActive(true);
         clientMentionsObj.SetActive(true);
+        backToHoursBTN.SetActive(false);
         totalPrice = 0;
-        totalServicesPrice.text = totalPrice.ToString();
+        if (minuteObjects.Count > 0)
+        {
+            foreach (GameObject obj in minuteObjects)
+            {
+                Destroy(obj);
+            }
+            minuteObjects.Clear();
+        }
+        //totalServicesPrice.text = totalPrice.ToString();
 
         if (appmanagerClass.SelectedLanguage == 1)
         {
@@ -725,30 +744,109 @@ public class Appointments : MonoBehaviour
         barberLastName = selectedBarberObj.name.Split('\t')[1];
         GetTimeToCut(); //get the time needed for the barber to do a cut
         appointmentMenu.SetActive(true);
-        GetBarberPrices();
         selectedAppointmentDay = DateTime.Now.Day.ToString();
     }
-    public void GetBarberPrices()
+    public void SelectService()
     {
-        StartCoroutine(GetBarberPricesEnum());
-    }
-    IEnumerator GetBarberPricesEnum()
-    {
-        loadingScreen.SetActive(true);
-        List<IMultipartFormSection> newform = new List<IMultipartFormSection>();
-        newform.Add(new MultipartFormDataSection("barberFirstName", barberFirstName));
-        newform.Add(new MultipartFormDataSection("barberLastName", barberLastName));
-        UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/getbarberprices.php", newform);
-        yield return webreq.SendWebRequest();
-        if (webreq.isNetworkError || webreq.isHttpError)
+        string selectedService = EventSystem.current.currentSelectedGameObject.name; //store the name of selected service in a string variable
+        for (int i = 0; i < serviceObjectsList.Count; i++)
         {
-            Debug.Log(webreq.error);
+            if(selectedService == serviceObjectsList[i].name) //check if the selected service is in the serviceObjects list;
+            {
+                if (serviceObjectsList[i].GetComponent<Image>().color == serviceButtonNormalColor) //check if the button is selected already or not
+                {
+                    serviceObjectsList[i].GetComponent<Image>().color = serviceButtonSelectedColor; //set the colour of the button
+                    appointmentSelectedServicesList.Add(serviceObjectsList[i].name); //add the selected service to a list from where we can send it to the database.
+                }
+                else
+                {
+                    serviceObjectsList[i].GetComponent<Image>().color = serviceButtonNormalColor; //set the colour of the button
+                    for (int j = 0; j < appointmentSelectedServicesList.Count; j++) 
+                    {
+                        if(appointmentSelectedServicesList[j] == selectedService) //check if the selected service is already in the selectedServices list
+                        {
+                            appointmentSelectedServicesList.RemoveAt(j); //remove service from the list
+                        }
+                    }
+                }
+            }
+        }
+        if(appointmentSelectedServicesList.Count > 0) //if no service selected -> createAppointment button shall not be visible
+        {
+            createAppointmentBTN.SetActive(true);
         }
         else
         {
-            Debug.LogError("aici sa fac sa ia serviciile sa le afiseze idk");
-            loadingScreen.SetActive(false);
+            createAppointmentBTN.SetActive(false);
         }
+    }
+    public void GetShopServices()
+    {
+        StartCoroutine(GetShopServicesEnum());
+    }
+    IEnumerator GetShopServicesEnum()
+    {
+        int whattopick = 1;
+        loadingScreen.SetActive(true);
+        for(int i = 0; i < 2; i++)
+        {
+            List<IMultipartFormSection> newform = new List<IMultipartFormSection>();
+            newform.Add(new MultipartFormDataSection("selectedShop", appmanagerClass.GetSelectedShopName()));
+            newform.Add(new MultipartFormDataSection("whattopick", whattopick.ToString()));
+            UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/getshopservices.php", newform);
+            yield return webreq.SendWebRequest();
+            if (webreq.isNetworkError || webreq.isHttpError)
+            {
+                Debug.Log(webreq.error);
+            }
+            else
+            {
+                switch (whattopick)
+                {
+                    case 1:
+                        serviceNameList = webreq.downloadHandler.text.Split('\t');
+                        whattopick = 2;
+                        break;
+                    case 2:
+                        servicePriceList = webreq.downloadHandler.text.Split('\t');
+                        break;
+                }
+            }
+        }
+        CreateServices();
+    }
+    public void CreateServices()
+    {
+        if (serviceObjectsList.Count > 0) //if the list is not empty
+        {
+            foreach (GameObject obj in serviceObjectsList)
+            {
+                Destroy(obj); //destroy the object
+            }
+            serviceObjectsList.Clear(); //clear the list
+        }
+        for (int i = 0; i < serviceNameList.Length - 1; i++)
+        {
+            GameObject service = Instantiate(servicePrefab); //instantiate the new object
+            service.transform.SetParent(servicePrefab.transform.parent); //set the parent to be the same as the prefab's
+            service.name = serviceNameList[i]; //set the name of the object to be the service name
+            service.transform.Find("ServiceName").gameObject.GetComponent<TextMeshProUGUI>().text = serviceNameList[i];
+            if (appmanagerClass.SelectedLanguage == 1)
+            {
+                service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Pret: ";
+            }
+            else if (appmanagerClass.SelectedLanguage == 2)
+            {
+                service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Price: ";
+            }
+            service.transform.Find("PriceTXT").gameObject.transform.Find("ServicePrice").gameObject.GetComponent<TextMeshProUGUI>().text = servicePriceList[i];
+            //set z position to 0 so it can be seen
+            service.transform.localPosition = new Vector3(servicePrefab.transform.position.x, servicePrefab.transform.position.y, 0f);
+            service.transform.localScale = new Vector3(1f, 1f, 1f);
+            service.SetActive(true); //set the object to be visible
+            serviceObjectsList.Add(service); //add the object to the list
+        }
+        loadingScreen.SetActive(false);
     }
     public void SelectHour()
     {
@@ -770,6 +868,7 @@ public class Appointments : MonoBehaviour
     public void SelectMinute()
     {
         selectedMinute = int.Parse(EventSystem.current.currentSelectedGameObject.gameObject.name);
+        nextToServicesBTN.SetActive(true);
         if (lastSelectedMinuteImage != null)
         {
             lastSelectedMinuteImage.color = new Color(1f, 1f, 1f);
@@ -853,6 +952,19 @@ public class Appointments : MonoBehaviour
         yield return www;
         if(www.text[0] == '0')
         {
+            if(!int.TryParse(www.text.Split('\t')[1], out timeToCut))
+            {
+                if(appmanagerClass.SelectedLanguage == 1)
+                {
+                    errorInfoTXT.text = "Acest frizer nu si-a configurat profilul inca.";
+                    errorInfoObj.SetActive(true);
+                }
+                else if(appmanagerClass.SelectedLanguage == 2)
+                {
+                    errorInfoTXT.text = "This barber has not configured his profile yet.";
+                    errorInfoObj.SetActive(true);
+                }
+            }
             timeToCut = int.Parse(www.text.Split('\t')[1]);
         }
         else
@@ -1105,6 +1217,10 @@ public class Appointments : MonoBehaviour
     IEnumerator CreateAppointmentEnumerator()
     {
         WWWForm form = new WWWForm();
+        for(int i = 0; i < appointmentSelectedServicesList.Count; i++)
+        {
+            appointmentSelectedServices += appointmentSelectedServicesList[i] + "\t";
+        }
         form.AddField("barberName", barberFirstName + barberLastName);
         form.AddField("clientName", accountClass.AccountUsername);
         form.AddField("day", selectedDayObj.name);
@@ -1113,11 +1229,24 @@ public class Appointments : MonoBehaviour
         form.AddField("hour", selectedHour);
         form.AddField("minute", selectedMinute);
         form.AddField("mentions", clientMentionInputField.text);
+        form.AddField("services", appointmentSelectedServices);
         form.AddField("totalprice", totalPrice);
         WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/createappointment.php", form);
         yield return www;
         BackToHours();
         BackToCalendar();
+        for(int i = 0; i < appointmentSelectedServicesList.Count; i++)
+        {
+            for(int j = 0; j < serviceObjectsList.Count; j++)
+            {
+                if(appointmentSelectedServicesList[i] == serviceObjectsList[j].name)
+                {
+                    serviceObjectsList[j].GetComponent<Image>().color = serviceButtonNormalColor;
+                    appointmentSelectedServicesList.RemoveAt(i);
+                }
+            }
+        }
+        appointmentSelectedServices = "";
         if (www.text[0] == '0')
         {
             if (appmanagerClass.SelectedLanguage == 2)

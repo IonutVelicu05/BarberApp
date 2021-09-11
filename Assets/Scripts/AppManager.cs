@@ -96,8 +96,6 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI appointmentMenuNextToServicesBackBtn;
     [SerializeField] private TextMeshProUGUI appointmentMenuMentionsInfoTxt;
     [SerializeField] private Text appointmentMenuMentionsPlaceholder;
-    [SerializeField] private TextMeshProUGUI appointmentMenuInsertNameInfoTxt;
-    [SerializeField] private Text appointmentMenuInsertNamePlaceholder;
     [SerializeField] private TextMeshProUGUI appointmentMenuCreateAppointmentBtn;
     [SerializeField] private TextMeshProUGUI appointmentMenuHaircutServiceBtn;
     [SerializeField] private TextMeshProUGUI appointmentMenuBeardServiceBtn;
@@ -596,8 +594,6 @@ public class AppManager : MonoBehaviour
             appointmentMenuNextToServicesBackBtn.text = "Inapoi";
             appointmentMenuMentionsInfoTxt.text = "Daca ai informatii/mentiuni pentru frizer scrie-le mai jos";
             appointmentMenuMentionsPlaceholder.text = "Scrie aici..";
-            appointmentMenuInsertNameInfoTxt.text = "Introdu mai jos numele care va fi afisat frizerului pentru programare.";
-            appointmentMenuInsertNamePlaceholder.text = "Scrie aici...";
             appointmentMenuBackToHourBtn.text = "Inapoi";
             appointmentMenuCreateAppointmentBtn.text = "Creeaza";
             shopDescription.text = description_ro;
@@ -688,8 +684,6 @@ public class AppManager : MonoBehaviour
             appointmentMenuNextToServicesBackBtn.text = "Back";
             appointmentMenuMentionsInfoTxt.text = "If you have any information the barber should know about  type it bellow";
             appointmentMenuMentionsPlaceholder.text = "Type here..";
-            appointmentMenuInsertNameInfoTxt.text = "Enter below the name that will be shown to the barber for this appointment.";
-            appointmentMenuInsertNamePlaceholder.text = "Type here...";
             appointmentMenuHaircutServiceBtn.text = "Haircut";
             appointmentMenuBeardServiceBtn.text = "Beard";
             appointmentMenuMustacheServiceBtn.text = "Mustache";
@@ -920,6 +914,7 @@ public class AppManager : MonoBehaviour
         }
         ShowShopDescription();
         GetShopWorkingHours();
+        appointmentsClass.GetShopServices();
     }
     public void ShowShops()
     {
