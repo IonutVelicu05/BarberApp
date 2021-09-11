@@ -256,6 +256,7 @@ public class AppManager : MonoBehaviour
         settingsMenu.SetActive(false);
         profileMenu.SetActive(false);
     }
+    private Notifications notificationClass;
     public void Start()
     {
         account = gameObject.GetComponent<Account>();
@@ -597,11 +598,6 @@ public class AppManager : MonoBehaviour
             appointmentMenuMentionsPlaceholder.text = "Scrie aici..";
             appointmentMenuInsertNameInfoTxt.text = "Introdu mai jos numele care va fi afisat frizerului pentru programare.";
             appointmentMenuInsertNamePlaceholder.text = "Scrie aici...";
-            appointmentMenuHaircutServiceBtn.text = "Tunsoare";
-            appointmentMenuBeardServiceBtn.text = "Barba";
-            appointmentMenuMustacheServiceBtn.text = "Mustata";
-            appointmentMenuHairColourBtn.text = "Vopsit";
-            appointmentMenuEyebrowBtn.text = "Pensat";
             appointmentMenuBackToHourBtn.text = "Inapoi";
             appointmentMenuCreateAppointmentBtn.text = "Creeaza";
             shopDescription.text = description_ro;
@@ -658,11 +654,6 @@ public class AppManager : MonoBehaviour
             timeToCutMenuPlaceholder.text = "Type here...";
             timeToCutMenuSubmitBtn.text = "Update";
             timeToCutMenuInfoTxt.text = "Type in the time needed for you to do a cut. \n The time you need to finish your client's haircut.";
-            editPricesMenuHaircutBtn.text = "Haircut";
-            editPricesMenuBeardBtn.text = "Beard";
-            editPricesMenuMustacheBtn.text = "Mustache";
-            editPricesMenuHairColourBtn.text = "Hair Colour";
-            editPricesMenuEyebrowBtn.text = "Eyebrows";
             editPricesMenuInfoTxt.text = "For which service do you want to edit the price ?";
             editPricesMenuInputPlaceholder.text = "Enter price...";
             editPricesMenuInputUpdateBtn.text = "Update";
@@ -768,10 +759,14 @@ public class AppManager : MonoBehaviour
             if (selectedLanguage == 1)
             {
                 errorTXT.text = "Serviciu creat cu succes !";
+                createServiceNameInput.text = "";
+                createServicePriceInput.text = "";
             }
             else if (selectedLanguage == 2)
             {
                 errorTXT.text = "The service was successfully created!";
+                createServiceNameInput.text = "";
+                createServicePriceInput.text = "";
             }
             errorObj.SetActive(true);
             GetShopServices();

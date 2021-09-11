@@ -47,27 +47,7 @@ public class Appointments : MonoBehaviour
     private GameObject servicesBG;
     private GameObject backToHoursBTN;
     //barber prices 
-    private int barberHaircutPrice;
-    private int barberBeardPrice;
-    private int barberMustachePrice;
-    private int barberColourPrice;
-    private int barberEyebrowPrice;
-    private bool haircutService = false;
-    private bool beardService = false;
-    private bool mustacheService = false;
-    private bool colourService = false;
-    private bool eyebrowService = false;
-    [SerializeField] private TextMeshProUGUI barberHaircutPriceTXT;
-    [SerializeField] private TextMeshProUGUI barberBeardPriceTXT;
-    [SerializeField] private TextMeshProUGUI barberMustachePriceTXT;
-    [SerializeField] private TextMeshProUGUI barberColourPriceTXT;
-    [SerializeField] private TextMeshProUGUI barberEyebrowPriceTXT;
     [SerializeField] private TextMeshProUGUI totalServicesPrice;
-    private GameObject haircutServiceButton;
-    private GameObject beardServiceButton;
-    private GameObject mustacheServiceButton;
-    private GameObject colourServiceButton;
-    private GameObject eyebrowServiceButton;
     private int totalPrice;
 
     //time selection
@@ -197,16 +177,11 @@ public class Appointments : MonoBehaviour
         hoursScrollView = calendarBG.transform.Find("HoursScrollView").gameObject;
         minutesScrollView = calendarBG.transform.Find("MinutesScrollView").gameObject;
         daysScrollView = calendarBG.transform.Find("DaysScrollView").gameObject;
-        closeAppointmentBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("CloseAppointmentMenu").gameObject;
-        backFromHoursBTN = appointmentMenu.transform.Find("SelectedDateBG").gameObject.transform.Find("BackBTN(Hours)").gameObject;
-        nextToServicesBTN = selectedDateBG.transform.Find("NextToServicesBTN").gameObject;
-        servicesBG = selectedDateBG.transform.Find("BarberServicesBG").gameObject;
+        closeAppointmentBTN = appointmentMenu.transform.Find("CloseAppointmentMenu").gameObject;
+        backFromHoursBTN = appointmentMenu.transform.Find("BackBTN(Hours)").gameObject;
+        nextToServicesBTN = appointmentMenu.transform.Find("NextToServicesBTN").gameObject;
+        servicesBG = appointmentMenu.transform.Find("BarberServicesBG").gameObject;
         backToHoursBTN = servicesBG.transform.Find("BackToHoursBTN").gameObject;
-        haircutServiceButton = servicesBG.transform.Find("HaircutButton").gameObject;
-        beardServiceButton = servicesBG.transform.Find("BeardButton").gameObject;
-        mustacheServiceButton = servicesBG.transform.Find("MustacheButton").gameObject;
-        colourServiceButton = servicesBG.transform.Find("ColourButton").gameObject;
-        eyebrowServiceButton = servicesBG.transform.Find("EyebrowButton").gameObject;
     }
 
     public void NextToServices()
@@ -387,31 +362,6 @@ public class Appointments : MonoBehaviour
         clientMentionsObj.SetActive(true);
         totalPrice = 0;
         totalServicesPrice.text = totalPrice.ToString();
-        if(haircutService == true)
-        {
-            totalPrice += barberHaircutPrice;
-            selectHaircutService();
-        }
-        if (beardService == true)
-        {
-            totalPrice += barberBeardPrice;
-            selectBeardService();
-        }
-        if (mustacheService == true)
-        {
-            totalPrice += barberMustachePrice;
-            selectMustacheService();
-        }
-        if (colourService == true)
-        {
-            totalPrice += barberColourPrice;
-            selectColourService();
-        }
-        if (eyebrowService == true)
-        {
-            totalPrice += barberEyebrowPrice;
-            selectEyebrowService();
-        }
 
         if (appmanagerClass.SelectedLanguage == 1)
         {
@@ -421,186 +371,6 @@ public class Appointments : MonoBehaviour
         {
             selectDateInfoTxt.text = "Select an hour for your appointment.";
         }
-    }
-    /* cand e butonul selectat se seteaza variabila bool sa fie inversul a valorii de era
-    * daca este true, adica daca e butonu selectat se face culoarea lui mai gri sa para selectat
-    * daca e false se face invers, se face alb sa para deselectat
-    * daca este selectat butonul se adauga pretul serviciului respectiv la totalPrice si se updateaza textul afisat
-    */
-    public void selectHaircutService()
-    {
-        haircutService = !haircutService;
-        if (haircutService)
-        {
-            haircutServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
-            totalPrice += barberHaircutPrice;
-            if (appmanagerClass.SelectedLanguage == 2)
-            {
-                totalServicesPrice.text = "Price: " + totalPrice;
-            }
-            else if (appmanagerClass.SelectedLanguage == 1)
-            {
-                totalServicesPrice.text = "Pret: " + totalPrice;
-            }
-        }
-        else
-        {
-            haircutServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
-            totalPrice -= barberHaircutPrice;
-            if(totalPrice == 0)
-            {
-                createAppointmentBTN.SetActive(false);
-            }
-            if (appmanagerClass.SelectedLanguage == 2)
-            {
-                totalServicesPrice.text = "Price: " + totalPrice;
-            }
-            else if (appmanagerClass.SelectedLanguage == 1)
-            {
-                totalServicesPrice.text = "Pret: " + totalPrice;
-            }
-        }
-        createAppointmentBTN.SetActive(true);
-    }
-    public void selectBeardService()
-    {
-        beardService = !beardService;
-        if (beardService)
-        {
-            beardServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
-            totalPrice += barberBeardPrice;
-            if (appmanagerClass.SelectedLanguage == 2)
-            {
-                totalServicesPrice.text = "Price: " + totalPrice;
-            }
-            else if (appmanagerClass.SelectedLanguage == 1)
-            {
-                totalServicesPrice.text = "Pret: " + totalPrice;
-            }
-        }
-        else
-        {
-            beardServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
-            totalPrice -= barberBeardPrice;
-            if (totalPrice == 0)
-            {
-                createAppointmentBTN.SetActive(false);
-            }
-            if (appmanagerClass.SelectedLanguage == 2)
-            {
-                totalServicesPrice.text = "Price: " + totalPrice;
-            }
-            else if (appmanagerClass.SelectedLanguage == 1)
-            {
-                totalServicesPrice.text = "Pret: " + totalPrice;
-            }
-        }
-        createAppointmentBTN.SetActive(true);
-    }
-    public void selectMustacheService()
-    {
-        mustacheService = !mustacheService;
-        if (mustacheService)
-        {
-            mustacheServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
-            totalPrice += barberMustachePrice;
-            if (appmanagerClass.SelectedLanguage == 2)
-            {
-                totalServicesPrice.text = "Price: " + totalPrice;
-            }
-            else if (appmanagerClass.SelectedLanguage == 1)
-            {
-                totalServicesPrice.text = "Pret: " + totalPrice;
-            }
-        }
-        else
-        {
-            mustacheServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
-            totalPrice -= barberMustachePrice;
-            if (totalPrice == 0)
-            {
-                createAppointmentBTN.SetActive(false);
-            }
-            if (appmanagerClass.SelectedLanguage == 2)
-            {
-                totalServicesPrice.text = "Price: " + totalPrice;
-            }
-            else if (appmanagerClass.SelectedLanguage == 1)
-            {
-                totalServicesPrice.text = "Pret: " + totalPrice;
-            }
-        }
-        createAppointmentBTN.SetActive(true);
-    }
-    public void selectColourService()
-    {
-        colourService = !colourService;
-        if (colourService)
-        {
-            colourServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
-            totalPrice += barberColourPrice;
-            if (appmanagerClass.SelectedLanguage == 2)
-            {
-                totalServicesPrice.text = "Price: " + totalPrice;
-            }
-            else if (appmanagerClass.SelectedLanguage == 1)
-            {
-                totalServicesPrice.text = "Pret: " + totalPrice;
-            }
-        }
-        else
-        {
-            colourServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
-            totalPrice -= barberColourPrice;
-            if (totalPrice == 0)
-            {
-                createAppointmentBTN.SetActive(false);
-            }
-            if (appmanagerClass.SelectedLanguage == 2)
-            {
-                totalServicesPrice.text = "Price: " + totalPrice;
-            }
-            else if (appmanagerClass.SelectedLanguage == 1)
-            {
-                totalServicesPrice.text = "Pret: " + totalPrice;
-            }
-        }
-        createAppointmentBTN.SetActive(true);
-    }
-    public void selectEyebrowService()
-    {
-        eyebrowService = !eyebrowService;
-        if (eyebrowService)
-        {
-            eyebrowServiceButton.GetComponent<Image>().color = new Color(0.56f, 0.56f, 0.56f, 1f);
-            totalPrice += barberEyebrowPrice;
-            if (appmanagerClass.SelectedLanguage == 2)
-            {
-                totalServicesPrice.text = "Price: " + totalPrice;
-            }
-            else if (appmanagerClass.SelectedLanguage == 1)
-            {
-                totalServicesPrice.text = "Pret: " + totalPrice;
-            }
-        }
-        else
-        {
-            eyebrowServiceButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
-            totalPrice -= barberEyebrowPrice;
-            if (totalPrice == 0)
-            {
-                createAppointmentBTN.SetActive(false);
-            }
-            if (appmanagerClass.SelectedLanguage == 2)
-            {
-                totalServicesPrice.text = "Price: " + totalPrice;
-            }
-            else if (appmanagerClass.SelectedLanguage == 1)
-            {
-                totalServicesPrice.text = "Pret: " + totalPrice;
-            }
-        }
-        createAppointmentBTN.SetActive(true);
     }
     public void CheckBarberAppointmentsDays() //check which days are occupied
     {
@@ -976,16 +746,7 @@ public class Appointments : MonoBehaviour
         }
         else
         {
-            barberHaircutPrice = int.Parse(webreq.downloadHandler.text.Split('\t')[1]);
-            barberBeardPrice = int.Parse(webreq.downloadHandler.text.Split('\t')[2]);
-            barberMustachePrice = int.Parse(webreq.downloadHandler.text.Split('\t')[3]);
-            barberColourPrice = int.Parse(webreq.downloadHandler.text.Split('\t')[4]);
-            barberEyebrowPrice = int.Parse(webreq.downloadHandler.text.Split('\t')[5]);
-            barberHaircutPriceTXT.text = barberHaircutPrice.ToString();
-            barberBeardPriceTXT.text = barberBeardPrice.ToString();
-            barberMustachePriceTXT.text = barberMustachePrice.ToString();
-            barberColourPriceTXT.text = barberColourPrice.ToString();
-            barberEyebrowPriceTXT.text = barberEyebrowPrice.ToString();
+            Debug.LogError("aici sa fac sa ia serviciile sa le afiseze idk");
             loadingScreen.SetActive(false);
         }
     }

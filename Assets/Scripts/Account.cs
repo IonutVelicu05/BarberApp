@@ -134,23 +134,23 @@ public class Account : MonoBehaviour
         appmanager = gameObject.GetComponent<AppManager>();
         notificationClass = gameObject.GetComponent<Notifications>();
         Load();
-        if(tempAccount == false)
+        if (tempAccount == false)
         {
             usernameField.text = accountUsername;
             passwordField.text = password;
             LoginAccount();
         }
-        else if(tempAccount == true)
+        else if (tempAccount == true)
         {
-            if(accountUsername == null)
+            if (accountUsername == null)
             {
                 int randomNumber = Mathf.RoundToInt(Random.Range(000000f, 999999f));
                 accountUsername = "user" + randomNumber;
-                if(appmanager.SelectedLanguage == 1)
+                if (appmanager.SelectedLanguage == 1)
                 {
                     profileUsername.text = "Nume utilizator: " + accountUsername;
                 }
-                else if(appmanager.SelectedLanguage == 2)
+                else if (appmanager.SelectedLanguage == 2)
                 {
                     profileUsername.text = "Username: " + accountUsername;
                 }
@@ -343,9 +343,9 @@ public class Account : MonoBehaviour
         }
         form.AddField("username", accountUsername);
         form.AddField("password", password);
-        if(notificationClass.NotificationToken != null || notificationClass.NotificationToken != "")
+        if (!string.IsNullOrEmpty(notificationClass.NotificationToken))
         {
-            //form.AddField("newToken", notificationClass.NotificationToken);
+            form.AddField("newToken", notificationClass.NotificationToken);
         }
         WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/login.php", form);
         

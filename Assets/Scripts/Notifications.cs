@@ -79,7 +79,7 @@ public class Notifications : MonoBehaviour
     {
         Debug.Log("Received Registration Token: " + token.Token);
         notificationToken = token.Token;
-       notificationTokenTxt.text = notificationToken;
+        notificationTokenTxt.text = notificationToken;
     }
 
     public void OnMessageReceived(object sender, Firebase.Messaging.MessageReceivedEventArgs e)
