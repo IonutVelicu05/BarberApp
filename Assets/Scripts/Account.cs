@@ -326,6 +326,7 @@ public class Account : MonoBehaviour
             }
             errorInfoObj.SetActive(true);
         }
+        webreq.Dispose();
         appmanager.afterLogin();
     }
     public void LoginAccount()
@@ -474,6 +475,7 @@ public class Account : MonoBehaviour
             errorInfoObj.SetActive(true);
             loadingScreen.SetActive(false);
         }
+        www.Dispose();
     }
 
 }

@@ -38,5 +38,6 @@ public class Register : MonoBehaviour
             shopAddressField.text = "";
             shopNameField.text = "";
         }
+        www.Dispose();
     }
 }

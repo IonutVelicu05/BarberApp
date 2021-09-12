@@ -50,8 +50,6 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI barberMenuTimePerCutBtn;
     [SerializeField] private TextMeshProUGUI barberMenuCheckAppointmentsTxt;
     [SerializeField] private TextMeshProUGUI barberMenuCheckAppointmentsBtn;
-    [SerializeField] private TextMeshProUGUI barberMenuEditPricesTxt;
-    [SerializeField] private TextMeshProUGUI barberMenuEditPricesBtn;
     [SerializeField] private TextMeshProUGUI editShopSelectShopTxt;
     [SerializeField] private TextMeshProUGUI editShopDescriptionBtn;
     [SerializeField] private TextMeshProUGUI editShopWorkingProgramBtn;
@@ -61,15 +59,6 @@ public class AppManager : MonoBehaviour
     [SerializeField] private Text timeToCutMenuPlaceholder;
     [SerializeField] private TextMeshProUGUI timeToCutMenuSubmitBtn;
     [SerializeField] private TextMeshProUGUI timeToCutMenuInfoTxt;
-    [SerializeField] private TextMeshProUGUI editPricesMenuHaircutBtn;
-    [SerializeField] private TextMeshProUGUI editPricesMenuBeardBtn;
-    [SerializeField] private TextMeshProUGUI editPricesMenuMustacheBtn;
-    [SerializeField] private TextMeshProUGUI editPricesMenuHairColourBtn;
-    [SerializeField] private TextMeshProUGUI editPricesMenuEyebrowBtn;
-    [SerializeField] private TextMeshProUGUI editPricesMenuInfoTxt;
-    [SerializeField] private Text editPricesMenuInputPlaceholder;
-    [SerializeField] private Text editPricesMenuInputUpdateBtn;
-    [SerializeField] private Text editPricesMenuInputBackBtn;
     [SerializeField] private Text shopMenuEditDescriptionPlaceholder;
     [SerializeField] private TextMeshProUGUI shopMenuEditDescriptionUpdateBtn;
     [SerializeField] private TextMeshProUGUI editShopMenuWorkingProgramInfoTxt;
@@ -97,11 +86,6 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI appointmentMenuMentionsInfoTxt;
     [SerializeField] private Text appointmentMenuMentionsPlaceholder;
     [SerializeField] private TextMeshProUGUI appointmentMenuCreateAppointmentBtn;
-    [SerializeField] private TextMeshProUGUI appointmentMenuHaircutServiceBtn;
-    [SerializeField] private TextMeshProUGUI appointmentMenuBeardServiceBtn;
-    [SerializeField] private TextMeshProUGUI appointmentMenuMustacheServiceBtn;
-    [SerializeField] private TextMeshProUGUI appointmentMenuHairColourBtn;
-    [SerializeField] private TextMeshProUGUI appointmentMenuEyebrowBtn;
     [SerializeField] private TextMeshProUGUI appointmentMenuBackToHourBtn;
 
     //end of translation
@@ -203,21 +187,34 @@ public class AppManager : MonoBehaviour
     [SerializeField] private GameObject createShopMenuBTN;
     [SerializeField] private Dropdown createShopCityDropdown;
     [SerializeField] private Dropdown createShopCountyDropdown;
-    [SerializeField] private Toggle createShopGeneralPrices;
 
     //create service
-    [SerializeField] private InputField createServiceNameInput;
+    [SerializeField] private InputField createServiceNameInputRO;
+    [SerializeField] private InputField createServiceNameInputEN;
     [SerializeField] private InputField createServicePriceInput;
     [SerializeField] private GameObject createServicePrefab;
     [SerializeField] private TextMeshProUGUI serviceActualPrice;
     [SerializeField] private InputField editServicePriceInput;
+    [SerializeField] private TextMeshProUGUI createServiceRoNameInfo;
+    [SerializeField] private TextMeshProUGUI createServiceEnNameInfo;
+    [SerializeField] private TextMeshProUGUI createServicePriceInfo;
+    [SerializeField] private TextMeshProUGUI serviceInfoRoNameInput;
+    [SerializeField] private TextMeshProUGUI serviceInfoEnNameInput;
+    [SerializeField] private TextMeshProUGUI serviceInfoPriceInput;
+    [SerializeField] private GameObject createServiceInfoBG;
     private List<GameObject> createServiceObjectList = new List<GameObject>();
-    private string[] createServiceNameList;
+    private string[] createServiceNameListRO;
+    private string[] createServiceNameListEN;
     private string[] createServicePriceList;
     private int createServicePrice;
-    private string createServiceName;
+    private string createServiceNameRO;
+    private string createServiceNameEN;
     private string serviceName;
 
+    public void ShowCreateServiceInfo()
+    {
+        createServiceInfoBG.SetActive(!createServiceInfoBG.activeInHierarchy);
+    }
     public void OpenProfileMenu()
     {
         if(shopList.Count < 1)
@@ -314,30 +311,37 @@ public class AppManager : MonoBehaviour
                 case 1:
                     firstName = www.text.Split('\t');
                     whatToPickBarber = 2;
+                    www.Dispose();
                     break;
                 case 2:
                     lastName = www.text.Split('\t');
                     whatToPickBarber = 3;
+                    www.Dispose();
                     break;
                 case 3:
                     fiveStarReviews = www.text.Split('\t');
                     whatToPickBarber = 4;
+                    www.Dispose();
                     break;
                 case 4:
                     fourStarReviews = www.text.Split('\t');
                     whatToPickBarber = 5;
+                    www.Dispose();
                     break;
                 case 5:
                     threeStarReviews = www.text.Split('\t');
                     whatToPickBarber = 6;
+                    www.Dispose();
                     break;
                 case 6:
                     twoStarReviews = www.text.Split('\t');
                     whatToPickBarber = 7;
+                    www.Dispose();
                     break;
                 case 7:
                     oneStarReviews = www.text.Split('\t');
                     whatToPickBarber = 1;
+                    www.Dispose();
                     break;
             }
         }
@@ -445,7 +449,6 @@ public class AppManager : MonoBehaviour
         form.Add(new MultipartFormDataSection("shopCity", createShopCityDropdown.options[createShopCityDropdown.value].text));
         form.Add(new MultipartFormDataSection("username", account.AccountUsername));
         form.Add(new MultipartFormDataSection("personalCode", account.PersonalCode.ToString()));
-        //form.Add(new MultipartFormDataSection("generalPrices", createShopGeneralPrices.isOn.ToString()));
         Debug.Log(createShopCityDropdown.options[createShopCityDropdown.value].text + " orasu ");
         Debug.Log(createShopCountyDropdown.options[createShopCountyDropdown.value].text + " judet");
         Debug.Log(createShopName.text + " = nume shop");
@@ -490,6 +493,7 @@ public class AppManager : MonoBehaviour
             account.ShopsCreated++;
             createShopMenuBTN.SetActive(account.CanCreateShops);
         }
+        webreq.Dispose();
     }
     void CountyAddToList(params string[] list)
     {
@@ -544,8 +548,6 @@ public class AppManager : MonoBehaviour
             barberMenuTimePerCutBtn.text = "Timp tuns";
             barberMenuCheckAppointmentsTxt.text = "Verifica programarile tale";
             barberMenuCheckAppointmentsBtn.text = "Afiseaza programari";
-            barberMenuEditPricesTxt.text = "Modifica preturile serviciilor tale";
-            barberMenuEditPricesBtn.text = "Modifica preturi";
             editShopSelectShopTxt.text = "Alege ce salon doresti sa modifici";
             editShopDescriptionBtn.text = "Modifica descrierea";
             editShopWorkingProgramBtn.text = "Modifica program de lucru";
@@ -555,15 +557,6 @@ public class AppManager : MonoBehaviour
             timeToCutMenuPlaceholder.text = "Scrie aici...";
             timeToCutMenuSubmitBtn.text = "Actualizeaza";
             timeToCutMenuInfoTxt.text = "Introdu timpul de care ai nevoie intre clienti. \n Timpul necesar pentru realizarea unei tunsori.";
-            editPricesMenuHaircutBtn.text = "Tunsoare";
-            editPricesMenuBeardBtn.text = "Barba";
-            editPricesMenuMustacheBtn.text = "Mustata";
-            editPricesMenuHairColourBtn.text = "Vopsit";
-            editPricesMenuEyebrowBtn.text = "Pensat";
-            editPricesMenuInfoTxt.text = "Pentru ce serviciu doresti sa modifici pretul ?";
-            editPricesMenuInputPlaceholder.text = "Introdu pretul...";
-            editPricesMenuInputUpdateBtn.text = "Actualizeaza";
-            editPricesMenuInputBackBtn.text = "Inapoi";
             shopMenuEditDescriptionPlaceholder.text = "Apasa aici pentru a scrie descrierea..";
             shopMenuEditDescriptionUpdateBtn.text = "Actualizeaza";
             editShopMenuWorkingProgramMondayBtn.text = "Luni";
@@ -607,6 +600,12 @@ public class AppManager : MonoBehaviour
                 barberList[i].GetComponent<Barber>().LastNameUI = "Nume: " + lastName[i];
             }
             editServicePriceInput.transform.Find("Placeholder").gameObject.GetComponent<Text>().text = "Introdu pret nou..";
+            createServiceEnNameInfo.text = "Scrie mai jos varianta in engleza a numelui serviciului.";
+            createServiceRoNameInfo.text = "Scrie mai jos numele noului serviciu.";
+            createServicePriceInfo.text = "Scrie mai jos pretul noului serviciu.";
+            serviceInfoRoNameInput.text = "1. In prima caseta de text trebuie introdus este cel in limba romana. Scrie numele serviciului in romana sau lasa spatiul gol daca nu vrei sa ai o versiune in romana a salonului tau.";
+            serviceInfoEnNameInput.text = "2. In a doua caseta de text trebuie introdus este cel in limba engleza. Scrie numele serviciului in engleza sau lasa spatiul gol daca nu vrei sa ai o versiune in engleza a salonului tau.";
+            serviceInfoPriceInput.text = "3. In ultima caseta de text trebuie introdus pretul pe care vrei sa-l aibe noul tau serviciu.";
 
             loadingScreen.SetActive(false);
         }
@@ -639,8 +638,6 @@ public class AppManager : MonoBehaviour
             barberMenuTimePerCutBtn.text = "Time per cut";
             barberMenuCheckAppointmentsTxt.text = "Check your appointments";
             barberMenuCheckAppointmentsBtn.text = "Show appointments";
-            barberMenuEditPricesTxt.text = "Edit the price of your services";
-            barberMenuEditPricesBtn.text = "Edit prices";
             editShopSelectShopTxt.text = "Select which saloon do you want to edit";
             editShopDescriptionBtn.text = "Edit description";
             editShopWorkingProgramBtn.text = "Edit working program";
@@ -650,10 +647,6 @@ public class AppManager : MonoBehaviour
             timeToCutMenuPlaceholder.text = "Type here...";
             timeToCutMenuSubmitBtn.text = "Update";
             timeToCutMenuInfoTxt.text = "Type in the time needed for you to do a cut. \n The time you need to finish your client's haircut.";
-            editPricesMenuInfoTxt.text = "For which service do you want to edit the price ?";
-            editPricesMenuInputPlaceholder.text = "Enter price...";
-            editPricesMenuInputUpdateBtn.text = "Update";
-            editPricesMenuInputBackBtn.text = "Back";
             shopMenuEditDescriptionPlaceholder.text = "Click here to write your shop's description.";
             shopMenuEditDescriptionUpdateBtn.text = "Update";
             editShopMenuWorkingProgramMondayBtn.text = "Monday";
@@ -684,11 +677,6 @@ public class AppManager : MonoBehaviour
             appointmentMenuNextToServicesBackBtn.text = "Back";
             appointmentMenuMentionsInfoTxt.text = "If you have any information the barber should know about  type it bellow";
             appointmentMenuMentionsPlaceholder.text = "Type here..";
-            appointmentMenuHaircutServiceBtn.text = "Haircut";
-            appointmentMenuBeardServiceBtn.text = "Beard";
-            appointmentMenuMustacheServiceBtn.text = "Mustache";
-            appointmentMenuHairColourBtn.text = "Hair colour";
-            appointmentMenuEyebrowBtn.text = "Eyebrows";
             appointmentMenuBackToHourBtn.text = "Back";
             appointmentMenuCreateAppointmentBtn.text = "Create";
             shopDescription.text = description_en;
@@ -701,13 +689,19 @@ public class AppManager : MonoBehaviour
                 barberList[i].GetComponent<Barber>().LastNameUI = "Last name: " + lastName[i];
             }
             editServicePriceInput.transform.Find("Placeholder").gameObject.GetComponent<Text>().text = "Enter new price..";
-
+            createServiceRoNameInfo.text = "Type the romanian name of the new service.";
+            createServiceEnNameInfo.text = "Type the english name of the new service.";
+            createServicePriceInfo.text = "Type the price of the new service.";
+            serviceInfoRoNameInput.text = "1. The first input field is for romanian language. You should write the name of the service in romanian or leave it blank if you dont want to have a romanian version of your saloon.";
+            serviceInfoEnNameInput.text = "2. The second input field is for english language. You should write the name of the service in english or leave it blank if you dont want to have a english version of your saloon.";
+            serviceInfoPriceInput.text = "3. Last input field is for the price. Type in how much should your new service cost.";
             loadingScreen.SetActive(false);
         }
     }
     public void CreateShopService()
     {
-        createServiceName = createServiceNameInput.text;
+        createServiceNameRO = createServiceNameInputRO.text;
+        createServiceNameEN = createServiceNameInputEN.text;
         if (!int.TryParse(createServicePriceInput.text, out createServicePrice))
         {
             if(selectedLanguage == 1)
@@ -729,7 +723,14 @@ public class AppManager : MonoBehaviour
     IEnumerator CreateShopServiceEnum()
     {
         List<IMultipartFormSection> form = new List<IMultipartFormSection>();
-        form.Add(new MultipartFormDataSection("serviceName", createServiceName));
+        if(createServiceNameRO.Length > 0)
+        {
+            form.Add(new MultipartFormDataSection("serviceNameRO", createServiceNameRO));
+        }
+        if(createServiceNameEN.Length > 0)
+        {
+            form.Add(new MultipartFormDataSection("serviceNameEN", createServiceNameEN));
+        }
         form.Add(new MultipartFormDataSection("servicePrice", createServicePrice.ToString()));
         form.Add(new MultipartFormDataSection("selectedShop", selectedShopToManage.name));
         UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/createshopservices.php", form);
@@ -753,18 +754,21 @@ public class AppManager : MonoBehaviour
             if (selectedLanguage == 1)
             {
                 errorTXT.text = "Serviciu creat cu succes !";
-                createServiceNameInput.text = "";
+                createServiceNameInputRO.text = "";
+                createServiceNameInputEN.text = "";
                 createServicePriceInput.text = "";
             }
             else if (selectedLanguage == 2)
             {
                 errorTXT.text = "The service was successfully created!";
-                createServiceNameInput.text = "";
+                createServiceNameInputRO.text = "";
+                createServiceNameInputEN.text = "";
                 createServicePriceInput.text = "";
             }
             errorObj.SetActive(true);
             GetShopServices();
         }
+        webreq.Dispose();
     }
     public void GetShopServices()
     {
@@ -774,25 +778,32 @@ public class AppManager : MonoBehaviour
     {
         int whatToPick = 1;
         loadingScreen.SetActive(true);
-        for(int i = 1; i < 3; i++)
+        for(int i = 1; i < 4; i++)
         {
             List<IMultipartFormSection> form = new List<IMultipartFormSection>();
             form.Add(new MultipartFormDataSection("selectedShop", selectedShopToManage.name));
             form.Add(new MultipartFormDataSection("whattopick", whatToPick.ToString()));
             UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/getshopservices.php", form);
             yield return webreq.SendWebRequest();
-            Debug.Log("text = " + webreq.downloadHandler.text);
+            
             switch (whatToPick)
             {
-                case 1: createServiceNameList = webreq.downloadHandler.text.Split('\t');
+                case 1: createServiceNameListRO = webreq.downloadHandler.text.Split('\t');
                     whatToPick = 2;
+                    webreq.Dispose();
                     break;
                 case 2: createServicePriceList = webreq.downloadHandler.text.Split('\t');
+                    whatToPick = 3;
+                    webreq.Dispose();
+                    break;
+                case 3:
+                    createServiceNameListEN = webreq.downloadHandler.text.Split('\t');
                     whatToPick = 1;
+                    webreq.Dispose();
                     break;
             }
         }
-        CreateShopServiceButtons();
+        loadingScreen.SetActive(false);
     }
     public void UpdateServicePrice()
     {
@@ -852,10 +863,11 @@ public class AppManager : MonoBehaviour
             }
             errorObj.SetActive(true);
         }
+        web.Dispose();
     }
     public void SelectService()
     {
-        serviceName = EventSystem.current.currentSelectedGameObject.gameObject.name;
+        serviceName = EventSystem.current.currentSelectedGameObject.gameObject.transform.Find("Name").gameObject.GetComponent<TextMeshProUGUI>().text;
         for (int i = 0; i < createServiceObjectList.Count; i++)
         {
             if (createServiceObjectList[i].name == serviceName)
@@ -866,6 +878,7 @@ public class AppManager : MonoBehaviour
     }
     public void CreateShopServiceButtons()
     {
+        loadingScreen.SetActive(true);
         if (createServiceObjectList.Count > 0)
         {
             foreach (GameObject obj in createServiceObjectList)
@@ -874,14 +887,54 @@ public class AppManager : MonoBehaviour
             }
             createServiceObjectList.Clear();
         }
-        for (int i = 0; i < createServiceNameList.Length - 1; i++)
+        for (int i = 0; i < createServicePriceList.Length - 1; i++)
         {
-            GameObject service = Instantiate(createServicePrefab, createServicePrefab.transform.position, createServicePrefab.transform.rotation, createServicePrefab.transform.parent);
-            service.name = createServiceNameList[i];
-            manageShopNameTXT = service.transform.Find("Name").GetComponent<TextMeshProUGUI>();
-            manageShopNameTXT.text = createServiceNameList[i];
-            service.SetActive(true);
-            createServiceObjectList.Add(service);
+            if(selectedLanguage == 1)
+            {
+                if(createServiceNameListRO[i].Length < 1)
+                {
+                    GameObject service = Instantiate(createServicePrefab, createServicePrefab.transform.position, createServicePrefab.transform.rotation, createServicePrefab.transform.parent);
+                    errorTXT.text = "Unul sau mai multe servicii nu au numele in romana configurate. Am tradus numele lor in urmatoarea limba gasita.";
+                    errorObj.SetActive(true);
+                    service.name = createServiceNameListEN[i];
+                    manageShopNameTXT = service.transform.Find("Name").GetComponent<TextMeshProUGUI>();
+                    manageShopNameTXT.text = createServiceNameListEN[i];
+                    service.SetActive(true);
+                    createServiceObjectList.Add(service);
+                }
+                else
+                {
+                    GameObject service = Instantiate(createServicePrefab, createServicePrefab.transform.position, createServicePrefab.transform.rotation, createServicePrefab.transform.parent);
+                    service.name = createServiceNameListRO[i];
+                    manageShopNameTXT = service.transform.Find("Name").GetComponent<TextMeshProUGUI>();
+                    manageShopNameTXT.text = createServiceNameListRO[i];
+                    service.SetActive(true);
+                    createServiceObjectList.Add(service);
+                }
+            }
+            else if(selectedLanguage == 2)
+            {
+                if (createServiceNameListEN[i].Length < 1)
+                {
+                    GameObject service = Instantiate(createServicePrefab, createServicePrefab.transform.position, createServicePrefab.transform.rotation, createServicePrefab.transform.parent);
+                    errorTXT.text = "Some services have no english name configured. We've translated their names in the next found language.";
+                    errorObj.SetActive(true);
+                    service.name = createServiceNameListRO[i];
+                    manageShopNameTXT = service.transform.Find("Name").GetComponent<TextMeshProUGUI>();
+                    manageShopNameTXT.text = createServiceNameListRO[i];
+                    service.SetActive(true);
+                    createServiceObjectList.Add(service);
+                }
+                else
+                {
+                    GameObject service = Instantiate(createServicePrefab, createServicePrefab.transform.position, createServicePrefab.transform.rotation, createServicePrefab.transform.parent);
+                    service.name = createServiceNameListEN[i];
+                    manageShopNameTXT = service.transform.Find("Name").GetComponent<TextMeshProUGUI>();
+                    manageShopNameTXT.text = createServiceNameListEN[i];
+                    service.SetActive(true);
+                    createServiceObjectList.Add(service);
+                }
+            }
         }
         loadingScreen.SetActive(false);
     }
@@ -936,9 +989,11 @@ public class AppManager : MonoBehaviour
             {
                 case 1: shopName = www.text.Split('\t');
                     whatToPick = 2;
+                    www.Dispose();
                     break;
                 case 2: shopAddress = www.text.Split('\t');
                     whatToPick = 1;
+                    www.Dispose();
                     break;
             }
         }
@@ -1014,6 +1069,7 @@ public class AppManager : MonoBehaviour
             }
             errorObj.SetActive(true);
         }
+        webreq.Dispose();
     }
     public void ShowShopDescription()
     {
@@ -1051,6 +1107,7 @@ public class AppManager : MonoBehaviour
                 shopDescription.text = description_en;
             }
         }
+        webreq.Dispose();
     }
     public void SelectOpenWorkingHour()
     {
@@ -1174,6 +1231,7 @@ public class AppManager : MonoBehaviour
         {
             Debug.Log(www.text);
         }
+        www.Dispose();
     }
     public void GetShopWorkingHours()
     {
@@ -1289,6 +1347,7 @@ public class AppManager : MonoBehaviour
                 }
             }
         }
+        www.Dispose();
     }
     public void nextShopImage()
     {
@@ -1343,6 +1402,8 @@ public class AppManager : MonoBehaviour
                     shopMenu.SetActive(true);
                 }
             }
+            www.Dispose();
+            w.Dispose();
         }
     }
     private bool isFailedImage(Texture tex) // to check if the downloaded image is equal to the question mark image(when it fails loading)
@@ -1483,6 +1544,7 @@ public class AppManager : MonoBehaviour
                     shopsOfUserCity = webreq.downloadHandler.text.Split('\t');
                 }
             }
+            webreq.Dispose();
         }
     }
     public void SelectShopToManage()

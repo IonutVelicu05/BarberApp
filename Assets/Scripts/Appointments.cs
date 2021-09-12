@@ -76,8 +76,6 @@ public class Appointments : MonoBehaviour
     private int newOpenMinutes;
     private int timeToCut = 0;
     [SerializeField] private GameObject createAppointmentBTN;
-    [SerializeField] private GameObject clientNameInsertObj;
-    [SerializeField] private InputField clientNameInputField;
     [SerializeField] private GameObject clientMentionsObj;
     [SerializeField] private InputField clientMentionInputField;
     [SerializeField] private GameObject errorInfoObj;
@@ -434,6 +432,7 @@ public class Appointments : MonoBehaviour
             }
         }
         CreateAppointmentDays();
+        www.Dispose();
     }
     public void CheckBarberAppointmentsTime()
     {
@@ -461,6 +460,7 @@ public class Appointments : MonoBehaviour
                         barberOccupiedHours[j] = www.text.Split('\t')[j];
                         occupiedAppointmentCounter++;
                     }
+                    www.Dispose();
                     WTP = 2;
                     break;
                 case 2:
@@ -468,6 +468,7 @@ public class Appointments : MonoBehaviour
                     {
                         barberOccupiedMinutes[j] = www.text.Split('\t')[j];
                     }
+                    www.Dispose();
                     WTP = 3;
                     break;
                 case 3:
@@ -475,6 +476,7 @@ public class Appointments : MonoBehaviour
                     {
                         clientName[j] = www.text.Split('\t')[j];
                     }
+                    www.Dispose();
                     WTP = 4;
                     break;
                 case 4:
@@ -482,6 +484,7 @@ public class Appointments : MonoBehaviour
                     {
                         appointmentInfo[j] = www.text.Split('\t')[j];
                     }
+                    www.Dispose();
                     WTP = 5;
                     break;
                 case 5:
@@ -489,6 +492,7 @@ public class Appointments : MonoBehaviour
                     {
                         appointmentPrice[j] = www.text.Split('\t')[j];
                     }
+                    www.Dispose();
                     WTP = 1;
                     break;
             }
@@ -537,6 +541,7 @@ public class Appointments : MonoBehaviour
         {
             Debug.Log(www.text);
         }
+        www.Dispose();
     }
     public void CreateOccupiedAppointments()
     {
@@ -806,9 +811,11 @@ public class Appointments : MonoBehaviour
                     case 1:
                         serviceNameList = webreq.downloadHandler.text.Split('\t');
                         whattopick = 2;
+                        webreq.Dispose();
                         break;
                     case 2:
                         servicePriceList = webreq.downloadHandler.text.Split('\t');
+                        webreq.Dispose();
                         break;
                 }
             }
@@ -916,6 +923,7 @@ public class Appointments : MonoBehaviour
                             }
                         }
                     }
+                    www.Dispose();
                     WhatToPick = 2;
                     break;
                 case 2:
@@ -933,6 +941,7 @@ public class Appointments : MonoBehaviour
                             }
                         }
                     }
+                    www.Dispose();
                     WhatToPick = 1;
                     break;
             }
@@ -971,6 +980,7 @@ public class Appointments : MonoBehaviour
         {
             Debug.Log(www.text);
         }
+        www.Dispose();
     }
     public void UpdateTimeToCut()
     {
@@ -1000,6 +1010,7 @@ public class Appointments : MonoBehaviour
         {
             Debug.Log(www.text);
         }
+        www.Dispose();
     }
     public void CreateAppointmentHours()
     {
@@ -1077,6 +1088,7 @@ public class Appointments : MonoBehaviour
                 }
                 errorInfoObj.SetActive(true);
             }
+            www.Dispose();
         }
     }
     public void CreateHours() //function to create the hours buttons to create a new appointment
@@ -1209,6 +1221,7 @@ public class Appointments : MonoBehaviour
         {
             Debug.Log(web.downloadHandler.text);
         }
+        web.Dispose();
     }
     public void CreateAppointment()
     {
@@ -1294,6 +1307,7 @@ public class Appointments : MonoBehaviour
             }
             errorInfoObj.SetActive(true);
         }
+        www.Dispose();
     }
     public void ClearErrorInfo()
     {
