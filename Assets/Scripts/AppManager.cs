@@ -55,7 +55,8 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI editShopWorkingProgramBtn;
     [SerializeField] private TextMeshProUGUI editShopPhotosBtn;
     [SerializeField] private TextMeshProUGUI editShopBarbersBtn;
-    [SerializeField] private TextMeshProUGUI editShopPricesBtn;
+    [SerializeField] private TextMeshProUGUI editShopServicesBtn;
+    [SerializeField] private TextMeshProUGUI editShopLogoImageBtn;
     [SerializeField] private Text timeToCutMenuPlaceholder;
     [SerializeField] private TextMeshProUGUI timeToCutMenuSubmitBtn;
     [SerializeField] private TextMeshProUGUI timeToCutMenuInfoTxt;
@@ -107,9 +108,11 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI sundayHours;
     [SerializeField] private Image shopPhoto; //the photo user is currently seeing
     private Texture2D[] shopImage = new Texture2D[6];
+    private Texture2D[] logoImage;
     [SerializeField] private GameObject loadingScreen;
     [SerializeField] private GameObject shopMenu;
     [SerializeField] private InputField imageFromPhoneName;
+    [SerializeField] private Image selectedLogoImage;
     [SerializeField] private Dropdown whatImageToUpload;
     private string description_ro;
     private string description_en;
@@ -126,10 +129,13 @@ public class AppManager : MonoBehaviour
     private List<string> cityList = new List<string>();
     private int uploadedImageNumber; //the number of the uploading image
     private int shopImageNumber = 1;
+    private string shopImageUrlPng;
+    private string shopImageUrlJpg;
     private List<string> uploadImageList = new List<string>();
     private bool anotherShopSelected = false; //when selecting a shop it sets it to true and if its true when selecting it shows the first image of
     //the shop; sets shopImageNumber to 1;
     private Texture2D imageFromPhone;
+    private Texture2D logoFromPhone;
     // ~~~ User (boss) manage shop ~~~
     private string[] shopsOfUser;
     private string[] shopsOfUserAddress;
@@ -192,6 +198,7 @@ public class AppManager : MonoBehaviour
     [SerializeField] private InputField createServiceNameInputRO;
     [SerializeField] private InputField createServiceNameInputEN;
     [SerializeField] private InputField createServicePriceInput;
+    [SerializeField] private InputField createServiceCoinInput;
     [SerializeField] private GameObject createServicePrefab;
     [SerializeField] private TextMeshProUGUI serviceActualPrice;
     [SerializeField] private InputField editServicePriceInput;
@@ -206,6 +213,7 @@ public class AppManager : MonoBehaviour
     private string[] createServiceNameListRO;
     private string[] createServiceNameListEN;
     private string[] createServicePriceList;
+    private string[] createServiceCoinList;
     private int createServicePrice;
     private string createServiceNameRO;
     private string createServiceNameEN;
@@ -552,8 +560,9 @@ public class AppManager : MonoBehaviour
             editShopDescriptionBtn.text = "Modifica descrierea";
             editShopWorkingProgramBtn.text = "Modifica program de lucru";
             editShopPhotosBtn.text = "Modifica pozele salonului";
-            editShopPricesBtn.text = "Modifica servicii";
+            editShopServicesBtn.text = "Modifica servicii";
             editShopBarbersBtn.text = "Modifica angajati";
+            editShopLogoImageBtn.text = "Modifica logo salon";
             timeToCutMenuPlaceholder.text = "Scrie aici...";
             timeToCutMenuSubmitBtn.text = "Actualizeaza";
             timeToCutMenuInfoTxt.text = "Introdu timpul de care ai nevoie intre clienti. \n Timpul necesar pentru realizarea unei tunsori.";
@@ -642,8 +651,9 @@ public class AppManager : MonoBehaviour
             editShopDescriptionBtn.text = "Edit description";
             editShopWorkingProgramBtn.text = "Edit working program";
             editShopPhotosBtn.text = "Edit photos";
-            editShopPricesBtn.text = "Edit services";
+            editShopServicesBtn.text = "Edit services";
             editShopBarbersBtn.text = "Edit barbers";
+            editShopLogoImageBtn.text = "Edit shop's logo";
             timeToCutMenuPlaceholder.text = "Type here...";
             timeToCutMenuSubmitBtn.text = "Update";
             timeToCutMenuInfoTxt.text = "Type in the time needed for you to do a cut. \n The time you need to finish your client's haircut.";
@@ -731,6 +741,10 @@ public class AppManager : MonoBehaviour
         {
             form.Add(new MultipartFormDataSection("serviceNameEN", createServiceNameEN));
         }
+        if(createServiceCoinInput.text.Length > 0)
+        {
+            form.Add(new MultipartFormDataSection("serviceCoinName", createServiceCoinInput.text));
+        }
         form.Add(new MultipartFormDataSection("servicePrice", createServicePrice.ToString()));
         form.Add(new MultipartFormDataSection("selectedShop", selectedShopToManage.name));
         UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/createshopservices.php", form);
@@ -778,7 +792,7 @@ public class AppManager : MonoBehaviour
     {
         int whatToPick = 1;
         loadingScreen.SetActive(true);
-        for(int i = 1; i < 4; i++)
+        for(int i = 1; i < 5; i++)
         {
             List<IMultipartFormSection> form = new List<IMultipartFormSection>();
             form.Add(new MultipartFormDataSection("selectedShop", selectedShopToManage.name));
@@ -798,6 +812,11 @@ public class AppManager : MonoBehaviour
                     break;
                 case 3:
                     createServiceNameListEN = webreq.downloadHandler.text.Split('\t');
+                    whatToPick = 4;
+                    webreq.Dispose();
+                    break;
+                case 4:
+                    createServiceCoinList = webreq.downloadHandler.text.Split('\t');
                     whatToPick = 1;
                     webreq.Dispose();
                     break;
@@ -955,7 +974,6 @@ public class AppManager : MonoBehaviour
     {
         pageTitle.text = "Saloon page";
         shopImageNumber = 1;
-        getShopImages();
         selectedShopName = EventSystem.current.currentSelectedGameObject.name;
         if(selectedShopName == lastShopSelected)
         {
@@ -967,7 +985,7 @@ public class AppManager : MonoBehaviour
         }
         ShowShopDescription();
         GetShopWorkingHours();
-        appointmentsClass.GetShopServices();
+        getShopImages();
     }
     public void ShowShops()
     {
@@ -978,20 +996,21 @@ public class AppManager : MonoBehaviour
         loadingScreen.SetActive(true);
         for(int i=0; i<2; i++)
         {
-            WWWForm form = new WWWForm();
-            form.AddField("whatToPick", whatToPick);
-            form.AddField("city", selectedCity);
-            form.AddField("county", selectedCounty);
+            loadingScreen.SetActive(true);  //activeaza loading screenu
 
-            WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/showShops.php", form);
-            yield return www;
+            List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+            form.Add(new MultipartFormDataSection("whatToPick", whatToPick.ToString()));
+            form.Add(new MultipartFormDataSection("city", selectedCity));
+            form.Add(new MultipartFormDataSection("county", selectedCounty));
+            UnityWebRequest www = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/showShops.php", form);
+            yield return www.SendWebRequest();
             switch (whatToPick)
             {
-                case 1: shopName = www.text.Split('\t');
+                case 1: shopName = www.downloadHandler.text.Split('\t');
                     whatToPick = 2;
                     www.Dispose();
                     break;
-                case 2: shopAddress = www.text.Split('\t');
+                case 2: shopAddress = www.downloadHandler.text.Split('\t');
                     whatToPick = 1;
                     www.Dispose();
                     break;
@@ -1015,6 +1034,34 @@ public class AppManager : MonoBehaviour
                 barberShop.GetComponent<BarberShop>().ShopName = shopName[i];
                 barberShop.GetComponent<BarberShop>().ShopAddress = shopAddress[i];
                 barberShop.transform.SetParent(shopPrefab.transform.parent, false);
+                UnityWebRequest webjpg = new UnityWebRequest();
+                Texture2D logoTexture;
+                shopImageUrlJpg = "http://mybarber.vlcapps.com/shop_photos/" + shopName[i] + "/shop_logo.jpg";
+                UnityWebRequest headjpg = UnityWebRequest.Head(shopImageUrlJpg); //check if the image exists on server
+                yield return headjpg.SendWebRequest();
+                if (headjpg.responseCode < 400) //if the image exists execute code below
+                {
+                    webjpg = UnityWebRequestTexture.GetTexture(shopImageUrlJpg); //get the image texture from url
+                    yield return webjpg.SendWebRequest();
+                    logoTexture = DownloadHandlerTexture.GetContent(webjpg); //set the texture to a variable
+                    barberShop.GetComponent<BarberShop>().ShopLogo.sprite = Sprite.Create(logoTexture, new Rect(0, 0, logoTexture.width, logoTexture.height), new Vector2(0, 0));
+                    webjpg.Dispose();
+                }
+                List<IMultipartFormSection> employeesform = new List<IMultipartFormSection>();
+                employeesform.Add(new MultipartFormDataSection("shopName", shopName[i]));
+                UnityWebRequest employeeswww = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/getemployeesnumber.php", employeesform);
+                yield return employeeswww.SendWebRequest();
+                Debug.Log(employeeswww.downloadHandler.text + " number");
+                int employeesNumberInt = int.Parse(employeeswww.downloadHandler.text) -3;
+                if(int.Parse(employeeswww.downloadHandler.text) > 3)
+                {
+                    barberShop.GetComponent<BarberShop>().ShopEmployees = "+" + employeesNumberInt;
+                }
+                else
+                {
+                    barberShop.GetComponent<BarberShop>().ShopEmployees = "";
+                }
+                employeeswww.Dispose();
                 shopList.Add(barberShop);
             }
         }
@@ -1205,7 +1252,7 @@ public class AppManager : MonoBehaviour
     }
     IEnumerator UpdateShopWH()
     {
-        if(selectedOpenWorkingMinute == null || selectedOpenWorkingMinute == "") //in caz ca nu alege niciun minut se pune 00
+        if (selectedOpenWorkingMinute == null || selectedOpenWorkingMinute == "") //in caz ca nu alege niciun minut se pune 00
         {
             selectedOpenWorkingMinute = "00";
         }
@@ -1216,22 +1263,49 @@ public class AppManager : MonoBehaviour
         updateWorkingProgram = selectedOpenWorkingHour + ":" + selectedOpenWorkingMinute + "-" 
             + selectedCloseWorkingHour + ":" + selectedCloseWorkingMinute;
 
-        WWWForm form = new WWWForm();
-        form.AddField("selectedDay", selectedWorkingDay);
-        form.AddField("workingHours", updateWorkingProgram);
-        form.AddField("shopName", selectedShopToManage.name);
-
-        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/editshopworkinghours.php", form);
-        yield return www;
-        if(www.text[0] == '0')
+        if(selectedCloseWorkingHour == null || selectedCloseWorkingHour == "" || selectedOpenWorkingHour == null || selectedOpenWorkingHour == "")
         {
-            Debug.Log("updated");
+            switch (selectedLanguage)
+            {
+                case 1: 
+                    errorTXT.text = "Asigura-te ca ai ales ora de deschidere si ora de inchidere a salonului.";
+                    errorObj.SetActive(true);
+                    break;
+                case 2:
+                    errorTXT.text = "Make sure you selected the opening and closing hours of your shop.";
+                    errorObj.SetActive(true);
+                    break;
+            }
         }
         else
         {
-            Debug.Log(www.text);
+            WWWForm form = new WWWForm();
+            form.AddField("selectedDay", selectedWorkingDay);
+            form.AddField("workingHours", updateWorkingProgram);
+            form.AddField("shopName", selectedShopToManage.name);
+
+            WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/editshopworkinghours.php", form);
+            yield return www;
+            if (www.text[0] == '0')
+            {
+                switch (selectedLanguage)
+                {
+                    case 1:
+                        errorTXT.text = "Program actualizat cu succes!";
+                        errorObj.SetActive(true);
+                        break;
+                    case 2:
+                        errorTXT.text = "Working program successfully updated!";
+                        errorObj.SetActive(true);
+                        break;
+                }
+            }
+            else
+            {
+                Debug.Log(www.text);
+            }
+            www.Dispose();
         }
-        www.Dispose();
     }
     public void GetShopWorkingHours()
     {
@@ -1367,7 +1441,10 @@ public class AppManager : MonoBehaviour
     }
     public void setimagine()
     {
-        shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+        if (!isFailedImage(shopImage[shopImageNumber]))
+        {
+            shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+        }
     }
     public void getShopImages()
     {
@@ -1375,9 +1452,63 @@ public class AppManager : MonoBehaviour
     }
     IEnumerator GetShopImages()
     {
-        for(int i =0; i<6; i++)
+        for(int i = 1; i<6; i++)
         {
             loadingScreen.SetActive(true);  //activeaza loading screenu
+            UnityWebRequest webjpg = new UnityWebRequest();
+            UnityWebRequest webpng = new UnityWebRequest();
+            shopImageUrlJpg = "http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + i + ".jpg";
+            shopImageUrlPng = "http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + i + ".png";
+            UnityWebRequest headjpg = UnityWebRequest.Head(shopImageUrlJpg); //check if the image exists on server
+            UnityWebRequest headpng = UnityWebRequest.Head(shopImageUrlPng); //check if the image exists on server
+            yield return headjpg.SendWebRequest();
+            yield return headpng.SendWebRequest();
+            if(headjpg.responseCode < 400) //if the image exists execute code below
+            {
+                webjpg = UnityWebRequestTexture.GetTexture(shopImageUrlJpg); //get the image texture from url
+                yield return webjpg.SendWebRequest();
+                shopImage[i] = DownloadHandlerTexture.GetContent(webjpg); //set the texture to a variable
+                if (i >= 5) //if the loop got the 5th photo close the loading screen and set the shown image to 1
+                {
+                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+                    loadingScreen.SetActive(false);
+                    shopMenu.SetActive(true);
+                }
+            }
+            else
+            {
+                if(i >= 5)
+                {
+                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+                    loadingScreen.SetActive(false);
+                    shopMenu.SetActive(true);
+                }
+            }
+            if(headpng.responseCode < 400)
+            {
+                webpng = UnityWebRequestTexture.GetTexture(shopImageUrlPng);
+                yield return webpng.SendWebRequest();
+                shopImage[i] = DownloadHandlerTexture.GetContent(webpng); //set the texture to a variable
+                if (i >= 5) //if the loop got the 5th photo close the loading screen and set the shown image to 1
+                {
+                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+                    loadingScreen.SetActive(false);
+                    shopMenu.SetActive(true);
+                }
+            }
+            else
+            {
+                if (i >= 5)
+                {
+                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+                    loadingScreen.SetActive(false);
+                    shopMenu.SetActive(true);
+                }
+            }
+            webjpg.Dispose();
+            webpng.Dispose();
+            /*
+             *            
             WWW www = new WWW("http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + i + ".jpg");
             WWW w = new WWW("http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + i + ".png");
             yield return www;
@@ -1401,9 +1532,9 @@ public class AppManager : MonoBehaviour
                     loadingScreen.SetActive(false);
                     shopMenu.SetActive(true);
                 }
-            }
-            www.Dispose();
-            w.Dispose();
+            } 
+            
+             */
         }
     }
     private bool isFailedImage(Texture tex) // to check if the downloaded image is equal to the question mark image(when it fails loading)
@@ -1422,6 +1553,49 @@ public class AppManager : MonoBehaviour
         for (int i = 0; i < bytes1.Length; i++)
             if (!bytes1[i].Equals(bytes2[i])) return false;
         return true;
+    }
+    public void PickPhoneLogoImage()
+    {
+        NativeGallery.Permission permission = NativeGallery.GetImageFromGallery((path) =>
+        {
+            Debug.Log("Image path: " + path);
+            if (path != null)
+            {
+                // Create Texture from selected image
+
+                Texture2D texture = NativeGallery.LoadImageAtPath(path);
+                if (texture == null)
+                {
+                    Debug.Log("Couldn't load texture from " + path);
+                    return;
+                }
+                selectedLogoImage.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0, 0));
+                logoFromPhone = texture; // poza de upload sa fie textura luata din telefon
+            }
+        }, "Select a PNG image", "image/png");
+
+        Debug.Log("Permission result: " + permission);
+    }
+    public void UploadLogoImage()
+    {
+        StartCoroutine(StartUploadingLogo());
+    }
+    IEnumerator StartUploadingLogo()
+    {
+        WWWForm form = new WWWForm();
+        byte[] textureBytes = null;
+
+        //Get a copy of the texture, because we can't access original texure data directly. 
+        Texture2D photoTexture = GetTextureCopy(logoFromPhone);
+        textureBytes = photoTexture.EncodeToJPG();
+        form.AddBinaryData("myimage", textureBytes, "shop_logo.jpg", "logobro.jpg");
+        form.AddField("shopName", selectedShopToManage.name);
+
+        WWW w = new WWW("http://mybarber.vlcapps.com/appscripts/uploadimage.php", form);
+
+        yield return w;
+        Debug.Log(w.text);
+        w.Dispose();
     }
     public void uploadImage()
     {

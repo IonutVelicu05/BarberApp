@@ -84,8 +84,10 @@ public class Appointments : MonoBehaviour
     [SerializeField] private TextMeshProUGUI selectDateInfoTxt;
     private string clientMentionsWrite;
     private List<GameObject> serviceObjectsList = new List<GameObject>();
-    private string[] serviceNameList;
+    private string[] serviceNameListRO;
+    private string[] serviceNameListEN;
     private string[] servicePriceList;
+    private string[] serviceCoinNameList;
     [SerializeField] private TextMeshProUGUI totalServicesPrice;
     private int totalPrice;
     private string appointmentSelectedServices;
@@ -192,6 +194,7 @@ public class Appointments : MonoBehaviour
 
     public void NextToServices()
     {
+        GetShopServices();
         servicesBG.SetActive(true);
         nextToServicesBTN.SetActive(false);
         clientMentionsObj.SetActive(false);
@@ -750,6 +753,8 @@ public class Appointments : MonoBehaviour
         GetTimeToCut(); //get the time needed for the barber to do a cut
         appointmentMenu.SetActive(true);
         selectedAppointmentDay = DateTime.Now.Day.ToString();
+        CreateCalendar();
+        ResetDateTime();
     }
     public void SelectService()
     {
@@ -762,10 +767,12 @@ public class Appointments : MonoBehaviour
                 {
                     serviceObjectsList[i].GetComponent<Image>().color = serviceButtonSelectedColor; //set the colour of the button
                     appointmentSelectedServicesList.Add(serviceObjectsList[i].name); //add the selected service to a list from where we can send it to the database.
+                    totalPrice += int.Parse(servicePriceList[i]);
                 }
                 else
                 {
                     serviceObjectsList[i].GetComponent<Image>().color = serviceButtonNormalColor; //set the colour of the button
+                    totalPrice -= int.Parse(servicePriceList[i]);
                     for (int j = 0; j < appointmentSelectedServicesList.Count; j++) 
                     {
                         if(appointmentSelectedServicesList[j] == selectedService) //check if the selected service is already in the selectedServices list
@@ -793,7 +800,7 @@ public class Appointments : MonoBehaviour
     {
         int whattopick = 1;
         loadingScreen.SetActive(true);
-        for(int i = 0; i < 2; i++)
+        for(int i = 0; i < 4; i++)
         {
             List<IMultipartFormSection> newform = new List<IMultipartFormSection>();
             newform.Add(new MultipartFormDataSection("selectedShop", appmanagerClass.GetSelectedShopName()));
@@ -809,12 +816,23 @@ public class Appointments : MonoBehaviour
                 switch (whattopick)
                 {
                     case 1:
-                        serviceNameList = webreq.downloadHandler.text.Split('\t');
+                        serviceNameListRO = webreq.downloadHandler.text.Split('\t');
                         whattopick = 2;
                         webreq.Dispose();
                         break;
                     case 2:
                         servicePriceList = webreq.downloadHandler.text.Split('\t');
+                        whattopick = 3;
+                        webreq.Dispose();
+                        break;
+                    case 3:
+                        serviceNameListEN = webreq.downloadHandler.text.Split('\t');
+                        whattopick = 4;
+                        webreq.Dispose();
+                        break;
+                    case 4:
+                        serviceCoinNameList = webreq.downloadHandler.text.Split('\t');
+                        whattopick = 1;
                         webreq.Dispose();
                         break;
                 }
@@ -832,26 +850,106 @@ public class Appointments : MonoBehaviour
             }
             serviceObjectsList.Clear(); //clear the list
         }
-        for (int i = 0; i < serviceNameList.Length - 1; i++)
+        for (int i = 0; i < servicePriceList.Length - 1; i++)
         {
-            GameObject service = Instantiate(servicePrefab); //instantiate the new object
-            service.transform.SetParent(servicePrefab.transform.parent); //set the parent to be the same as the prefab's
-            service.name = serviceNameList[i]; //set the name of the object to be the service name
-            service.transform.Find("ServiceName").gameObject.GetComponent<TextMeshProUGUI>().text = serviceNameList[i];
             if (appmanagerClass.SelectedLanguage == 1)
             {
-                service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Pret: ";
+                if (serviceNameListRO[i].Length < 1)
+                {
+                    GameObject service = Instantiate(servicePrefab, servicePrefab.transform.position, servicePrefab.transform.rotation, servicePrefab.transform.parent);
+                    errorInfoTXT.text = "Unul sau mai multe servicii nu au numele in romana configurate. Am tradus numele lor in urmatoarea limba gasita.";
+                    errorInfoObj.SetActive(true);
+                    service.name = serviceNameListEN[i];
+                    service.transform.Find("ServiceName").gameObject.GetComponent<TextMeshProUGUI>().text = serviceNameListEN[i];
+                    service.transform.SetParent(servicePrefab.transform.parent); //set the parent to be the same as the prefab's
+                    if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Pret: ";
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Price: ";
+                    }
+                    service.transform.Find("PriceTXT").gameObject.transform.Find("ServicePrice").gameObject.GetComponent<TextMeshProUGUI>().text = servicePriceList[i] + " " + serviceCoinNameList[i];
+                    //set z position to 0 so it can be seen
+                    service.transform.localPosition = new Vector3(servicePrefab.transform.position.x, servicePrefab.transform.position.y, 0f);
+                    service.transform.localScale = new Vector3(1f, 1f, 1f);
+                    service.SetActive(true); //set the object to be visible
+                    serviceObjectsList.Add(service); //add the object to the list
+                }
+                else
+                {
+                    GameObject service = Instantiate(servicePrefab, servicePrefab.transform.position, servicePrefab.transform.rotation, servicePrefab.transform.parent);
+                    errorInfoTXT.text = "Unul sau mai multe servicii nu au numele in romana configurate. Am tradus numele lor in urmatoarea limba gasita.";
+                    errorInfoObj.SetActive(true);
+                    service.name = serviceNameListRO[i];
+                    service.transform.Find("ServiceName").gameObject.GetComponent<TextMeshProUGUI>().text = serviceNameListRO[i];
+                    service.transform.SetParent(servicePrefab.transform.parent); //set the parent to be the same as the prefab's
+                    if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Pret: ";
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Price: ";
+                    }
+                    service.transform.Find("PriceTXT").gameObject.transform.Find("ServicePrice").gameObject.GetComponent<TextMeshProUGUI>().text = servicePriceList[i] + " " + serviceCoinNameList[i];
+                    //set z position to 0 so it can be seen
+                    service.transform.localPosition = new Vector3(servicePrefab.transform.position.x, servicePrefab.transform.position.y, 0f);
+                    service.transform.localScale = new Vector3(1f, 1f, 1f);
+                    service.SetActive(true); //set the object to be visible
+                    serviceObjectsList.Add(service); //add the object to the list
+                }
             }
             else if (appmanagerClass.SelectedLanguage == 2)
             {
-                service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Price: ";
+                if (serviceNameListEN[i].Length < 1)
+                {
+                    GameObject service = Instantiate(servicePrefab, servicePrefab.transform.position, servicePrefab.transform.rotation, servicePrefab.transform.parent);
+                    errorInfoTXT.text = "Some services have no english name configured. We've translated their names in the next found language.";
+                    errorInfoObj.SetActive(true);
+                    service.name = serviceNameListRO[i];
+                    service.transform.Find("ServiceName").gameObject.GetComponent<TextMeshProUGUI>().text = serviceNameListRO[i];
+                    service.transform.SetParent(servicePrefab.transform.parent); //set the parent to be the same as the prefab's
+                    if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Pret: ";
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Price: ";
+                    }
+                    service.transform.Find("PriceTXT").gameObject.transform.Find("ServicePrice").gameObject.GetComponent<TextMeshProUGUI>().text = servicePriceList[i] + " " + serviceCoinNameList[i];
+                    //set z position to 0 so it can be seen
+                    service.transform.localPosition = new Vector3(servicePrefab.transform.position.x, servicePrefab.transform.position.y, 0f);
+                    service.transform.localScale = new Vector3(1f, 1f, 1f);
+                    service.SetActive(true); //set the object to be visible
+                    serviceObjectsList.Add(service); //add the object to the list
+                }
+                else
+                {
+                    GameObject service = Instantiate(servicePrefab, servicePrefab.transform.position, servicePrefab.transform.rotation, servicePrefab.transform.parent);
+                    errorInfoTXT.text = "Some services have no english name configured. We've translated their names in the next found language.";
+                    errorInfoObj.SetActive(true);
+                    service.name = serviceNameListEN[i];
+                    service.transform.Find("ServiceName").gameObject.GetComponent<TextMeshProUGUI>().text = serviceNameListEN[i];
+                    service.transform.SetParent(servicePrefab.transform.parent); //set the parent to be the same as the prefab's
+                    if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Pret: ";
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        service.transform.Find("PriceTXT").gameObject.GetComponent<TextMeshProUGUI>().text = "Price: ";
+                    }
+                    service.transform.Find("PriceTXT").gameObject.transform.Find("ServicePrice").gameObject.GetComponent<TextMeshProUGUI>().text = servicePriceList[i] + " " + serviceCoinNameList[i];
+                    //set z position to 0 so it can be seen
+                    service.transform.localPosition = new Vector3(servicePrefab.transform.position.x, servicePrefab.transform.position.y, 0f);
+                    service.transform.localScale = new Vector3(1f, 1f, 1f);
+                    service.SetActive(true); //set the object to be visible
+                    serviceObjectsList.Add(service); //add the object to the list
+                }
             }
-            service.transform.Find("PriceTXT").gameObject.transform.Find("ServicePrice").gameObject.GetComponent<TextMeshProUGUI>().text = servicePriceList[i];
-            //set z position to 0 so it can be seen
-            service.transform.localPosition = new Vector3(servicePrefab.transform.position.x, servicePrefab.transform.position.y, 0f);
-            service.transform.localScale = new Vector3(1f, 1f, 1f);
-            service.SetActive(true); //set the object to be visible
-            serviceObjectsList.Add(service); //add the object to the list
         }
         loadingScreen.SetActive(false);
     }
@@ -1229,6 +1327,7 @@ public class Appointments : MonoBehaviour
     }
     IEnumerator CreateAppointmentEnumerator()
     {
+        string www0index;
         WWWForm form = new WWWForm();
         for(int i = 0; i < appointmentSelectedServicesList.Count; i++)
         {
@@ -1246,6 +1345,8 @@ public class Appointments : MonoBehaviour
         form.AddField("totalprice", totalPrice);
         WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/createappointment.php", form);
         yield return www;
+        www0index = www.text[0].ToString();
+        www.Dispose();
         BackToHours();
         BackToCalendar();
         for(int i = 0; i < appointmentSelectedServicesList.Count; i++)
@@ -1260,7 +1361,7 @@ public class Appointments : MonoBehaviour
             }
         }
         appointmentSelectedServices = "";
-        if (www.text[0] == '0')
+        if (www0index == "0")
         {
             if (appmanagerClass.SelectedLanguage == 2)
             {
@@ -1279,7 +1380,7 @@ public class Appointments : MonoBehaviour
                 SendNotificationToBarber(barberFirstName, barberLastName);
             }
         }
-        else if (www.text[0] == '3')
+        else if (www0index == "3")
         {
             if (appmanagerClass.SelectedLanguage == 2)
             {
@@ -1307,7 +1408,6 @@ public class Appointments : MonoBehaviour
             }
             errorInfoObj.SetActive(true);
         }
-        www.Dispose();
     }
     public void ClearErrorInfo()
     {

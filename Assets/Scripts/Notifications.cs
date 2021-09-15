@@ -89,26 +89,30 @@ public class Notifications : MonoBehaviour
     }
     void Start()
     {
+        AndroidNotificationCenter.NotificationReceivedCallback receivedNotificationHandler =
+            delegate (AndroidNotificationIntentData lastNotification)
+            {
+                if (lastNotification.Channel == "review_ch")
+                {
+                    errorTxt.text = lastNotification.Channel;
+                    errorObj.SetActive(true);
+                    reviewBarberFirstName = lastNotification.Notification.IntentData.Split('\t')[0];
+                    reviewBarberLastName = lastNotification.Notification.IntentData.Split('\t')[1];
+                    if (appmanagerClass.SelectedLanguage == 1)
+                    {
+                        barberName.text = "Nume frizer: " + lastNotification.Notification.IntentData.Split('\t')[0] + " " + lastNotification.Notification.IntentData.Split('\t')[1];
+                        reviewMenu.SetActive(true);
+                    }
+                    else if (appmanagerClass.SelectedLanguage == 2)
+                    {
+                        barberName.text = "Barber name: " + lastNotification.Notification.IntentData.Split('\t')[0] + " " + lastNotification.Notification.IntentData.Split('\t')[1];
+                        reviewMenu.SetActive(true);
+                    }
+                }
+            };
+        AndroidNotificationCenter.OnNotificationReceived += receivedNotificationHandler;
         Firebase.Messaging.FirebaseMessaging.TokenReceived += OnTokenReceived;
         Firebase.Messaging.FirebaseMessaging.MessageReceived += OnMessageReceived;
-        var lastNotification = AndroidNotificationCenter.GetLastNotificationIntent();
-        if(lastNotification.Channel == "review_ch")
-        {
-            errorTxt.text = lastNotification.Channel;
-            errorObj.SetActive(true);
-            reviewBarberFirstName = lastNotification.Notification.IntentData.Split('\t')[0];
-            reviewBarberLastName = lastNotification.Notification.IntentData.Split('\t')[1];
-            if (appmanagerClass.SelectedLanguage == 1)
-            {
-                barberName.text = "Nume frizer: " + lastNotification.Notification.IntentData.Split('\t')[0] + " " + lastNotification.Notification.IntentData.Split('\t')[1];
-                reviewMenu.SetActive(true);
-            }
-            else if(appmanagerClass.SelectedLanguage == 2)
-            {
-                barberName.text = "Barber name: " + lastNotification.Notification.IntentData.Split('\t')[0] + " " + lastNotification.Notification.IntentData.Split('\t')[1];
-                reviewMenu.SetActive(true);
-            }
-        }
         minutesAfterAppointment = Mathf.RoundToInt(UnityEngine.Random.Range(30f, 80f));
         //Create a channel
         var channel = new AndroidNotificationChannel()
