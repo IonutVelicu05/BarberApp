@@ -19,6 +19,8 @@ public class AppManager : MonoBehaviour
     [SerializeField] private GameObject barberMenuBTN;
     [SerializeField] private GameObject backBTN;
     [SerializeField] private GameObject profileMenu;
+    [SerializeField] private Image profilePicture;
+    private Texture2D profilePictureTexture;
     [SerializeField] private GameObject settingsMenu;
     [SerializeField] private GameObject locationPickMenu;
     private Account account;
@@ -136,6 +138,7 @@ public class AppManager : MonoBehaviour
     //the shop; sets shopImageNumber to 1;
     private Texture2D imageFromPhone;
     private Texture2D logoFromPhone;
+
     // ~~~ User (boss) manage shop ~~~
     private string[] shopsOfUser;
     private string[] shopsOfUserAddress;
@@ -178,6 +181,7 @@ public class AppManager : MonoBehaviour
 
     private int whatToPickBarber = 1;
     private List<GameObject> barberList = new List<GameObject>();
+    private string[] barberUsername;
     private string[] firstName;
     private string[] lastName;
     private string[] fiveStarReviews;
@@ -218,6 +222,7 @@ public class AppManager : MonoBehaviour
     private string createServiceNameRO;
     private string createServiceNameEN;
     private string serviceName;
+
 
     public void ShowCreateServiceInfo()
     {
@@ -307,7 +312,7 @@ public class AppManager : MonoBehaviour
     IEnumerator ShowBarbersEnumerator()
     {
         loadingScreen.SetActive(true);
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 9; i++)
         {
             WWWForm form = new WWWForm();
             form.AddField("whatToPick", whatToPickBarber);
@@ -348,6 +353,11 @@ public class AppManager : MonoBehaviour
                     break;
                 case 7:
                     oneStarReviews = www.text.Split('\t');
+                    whatToPickBarber = 8;
+                    www.Dispose();
+                    break;
+                case 8:
+                    barberUsername = www.text.Split('\t');
                     whatToPickBarber = 1;
                     www.Dispose();
                     break;
@@ -384,6 +394,19 @@ public class AppManager : MonoBehaviour
             barber.GetComponent<Barber>().TwoStarUI = twoStarReviews[j];
             barber.GetComponent<Barber>().OneStarUI = oneStarReviews[j];
             barber.transform.SetParent(barberPrefab.transform.parent, false);
+            UnityWebRequest webjpg = new UnityWebRequest();
+            Texture2D logoTexture;
+            shopImageUrlJpg = "http://mybarber.vlcapps.com/barber_photos/" + barberUsername[j] + "/profile_picture.jpg";
+            UnityWebRequest headjpg = UnityWebRequest.Head(shopImageUrlJpg); //check if the image exists on server
+            yield return headjpg.SendWebRequest();
+            if (headjpg.responseCode < 400) //if the image exists execute code below
+            {
+                webjpg = UnityWebRequestTexture.GetTexture(shopImageUrlJpg); //get the image texture from url
+                yield return webjpg.SendWebRequest();
+                logoTexture = DownloadHandlerTexture.GetContent(webjpg); //set the texture to a variable
+                barber.transform.Find("Avatar").gameObject.GetComponent<Image>().sprite = Sprite.Create(logoTexture, new Rect(0, 0, logoTexture.width, logoTexture.height), new Vector2(0, 0));
+                webjpg.Dispose();
+            }
             barber.SetActive(true);
             barberList.Add(barber);
         }
@@ -1061,6 +1084,7 @@ public class AppManager : MonoBehaviour
                 {
                     barberShop.GetComponent<BarberShop>().ShopEmployees = "";
                 }
+                barberShop.transform.Find("LogoSalon").transform.Find("Loading").gameObject.SetActive(false);
                 employeeswww.Dispose();
                 shopList.Add(barberShop);
             }
@@ -1553,6 +1577,88 @@ public class AppManager : MonoBehaviour
         for (int i = 0; i < bytes1.Length; i++)
             if (!bytes1[i].Equals(bytes2[i])) return false;
         return true;
+    }
+    public void PickPhoneProfilePicture()
+    {
+        float width;
+        float height;
+        NativeGallery.Permission permission = NativeGallery.GetImageFromGallery((path) =>
+        {
+            Debug.Log("Image path: " + path);
+            if (path != null)
+            {
+                // Create Texture from selected image
+
+                Texture2D texture = NativeGallery.LoadImageAtPath(path);
+                if (texture == null)
+                {
+                    Debug.Log("Couldn't load texture from " + path);
+                    return;
+                }
+                if(texture.width > 512)
+                {
+                    width = 512;
+                }
+                else
+                {
+                    width = texture.width;
+                }
+                if (texture.height > 256)
+                {
+                    height = 256;
+                }
+                else
+                {
+                    height = texture.height;
+                }
+                profilePicture.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0, 0));
+                profilePictureTexture = texture; // poza de upload sa fie textura luata din telefon
+                UploadProfilePicture();
+            }
+        }, "Select a PNG image", "image/png");
+
+        Debug.Log("Permission result: " + permission);
+    }
+    public void GetProfilePicture()
+    {
+        StartCoroutine(GetProfilePictureEnum());
+    }
+    IEnumerator GetProfilePictureEnum()
+    {
+        UnityWebRequest webjpg = new UnityWebRequest();
+        Texture2D logoTexture;
+        shopImageUrlJpg = "http://mybarber.vlcapps.com/barber_photos/" + account.AccountUsername + "/profile_picture.jpg";
+        UnityWebRequest headjpg = UnityWebRequest.Head(shopImageUrlJpg); //check if the image exists on server
+        yield return headjpg.SendWebRequest();
+        if (headjpg.responseCode < 400) //if the image exists execute code below
+        {
+            webjpg = UnityWebRequestTexture.GetTexture(shopImageUrlJpg); //get the image texture from url
+            yield return webjpg.SendWebRequest();
+            logoTexture = DownloadHandlerTexture.GetContent(webjpg); //set the texture to a variable
+            profilePicture.sprite = Sprite.Create(logoTexture, new Rect(0, 0, logoTexture.width, logoTexture.height), new Vector2(0, 0));
+            webjpg.Dispose();
+        }
+    }
+    public void UploadProfilePicture()
+    {
+        StartCoroutine(StartUploadingProfileEnum());
+    }
+    IEnumerator StartUploadingProfileEnum()
+    {
+        WWWForm form = new WWWForm();
+        byte[] textureBytes = null;
+
+        //Get a copy of the texture, because we can't access original texure data directly. 
+        Texture2D photoTexture = GetTextureCopy(profilePictureTexture);
+        textureBytes = photoTexture.EncodeToJPG();
+        form.AddBinaryData("myimage", textureBytes, "profile_picture.jpg", "logobro.jpg");
+        form.AddField("username", account.AccountUsername);
+
+        WWW w = new WWW("http://mybarber.vlcapps.com/appscripts/uploadprofilepicture.php", form);
+
+        yield return w;
+        Debug.Log(w.text);
+        w.Dispose();
     }
     public void PickPhoneLogoImage()
     {

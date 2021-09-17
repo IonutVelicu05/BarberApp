@@ -59,9 +59,6 @@ public class Appointments : MonoBehaviour
     private List<GameObject> minuteObjects = new List<GameObject>();
     private int selectedHour;
     private int selectedMinute;
-    private GameObject selectedMinuteObj;
-    private GameObject selectedHourObj;
-    private bool[] occupiedHours = new bool[25];
     private bool[] occupiedMinutes = new bool[60];
     private Image selectedHourImage;
     private Image lastSelectedHourImage;
@@ -82,7 +79,6 @@ public class Appointments : MonoBehaviour
     [SerializeField] private TextMeshProUGUI errorInfoTXT;
     [SerializeField] private GameObject servicePrefab;
     [SerializeField] private TextMeshProUGUI selectDateInfoTxt;
-    private string clientMentionsWrite;
     private List<GameObject> serviceObjectsList = new List<GameObject>();
     private string[] serviceNameListRO;
     private string[] serviceNameListEN;
@@ -683,6 +679,7 @@ public class Appointments : MonoBehaviour
     }
     public void SelectDay()
     {
+        loadingScreen.SetActive(true);
         //if the lastday image is not null (or an day has been selected already)
         if (lastDaySelectedImg != null)
         {
@@ -955,6 +952,7 @@ public class Appointments : MonoBehaviour
     }
     public void SelectHour()
     {
+        occupiedMinutes = new bool[60];
         selectedHour = int.Parse(EventSystem.current.currentSelectedGameObject.gameObject.name);
         CheckForAvailableAppointment();
         //if the lasthour image is not null (or an hour button has been selected already)
@@ -988,62 +986,34 @@ public class Appointments : MonoBehaviour
     }
     IEnumerator CheckForAvailableAppointmentEnum()
     {
-        for(int j =0; j<2; j++)
+        WWWForm form = new WWWForm();
+        form.AddField("barberName", barberFirstName + barberLastName);
+        form.AddField("selectedDay", selectedDayObj.name);
+        form.AddField("selectedMonth", currentMonth);
+        form.AddField("selectedYear", currentYear);
+        form.AddField("selectedHour", selectedHour);
+        form.AddField("whatToPick", WhatToPick);
+        form.AddField("firstname", barberFirstName);
+        form.AddField("lastname", barberLastName);
+        WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/checkforappointment.php", form);
+        yield return www;
+        string[] minutes = new string[60];
+        for (int i = 0; i < www.text.Split('\t').Length; i++)
         {
-            WWWForm form = new WWWForm();
-            form.AddField("barberName", barberFirstName + barberLastName);
-            form.AddField("selectedDay", selectedDayObj.name);
-            form.AddField("selectedMonth", currentMonth);
-            form.AddField("selectedYear", currentYear);
-            form.AddField("selectedHour", selectedHour);
-            form.AddField("selectedMinute", selectedMinute);
-            form.AddField("whatToPick", WhatToPick);
-            form.AddField("firstname", barberFirstName);
-            form.AddField("lastname", barberLastName);
-            WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/checkforappointment.php", form);
-            yield return www;
-            string[] hours = new string[24];
-            string[] minutes = new string[60];
-            switch (WhatToPick)
+            minutes[i] = www.text.Split('\t')[i];
+        }
+        for (int i = 0; i < minutes.Length; i++)
+        {
+            foreach (string str in minutes)
             {
-                case 1:
-                    for(int i = 0; i < www.text.Split('\t').Length; i++)
-                    {
-                        hours[i] = www.text.Split('\t')[i];
-                        for(int k=0; k< hours.Length; k++)
-                        {
-                            foreach(string str in hours)
-                            {
-                                if(str == k.ToString())
-                                {
-                                    occupiedHours[int.Parse(str)] = true;
-                                }
-                            }
-                        }
-                    }
-                    www.Dispose();
-                    WhatToPick = 2;
-                    break;
-                case 2:
-                    for(int i = 0; i < www.text.Split('\t').Length; i++)
-                    {
-                        minutes[i] = www.text.Split('\t')[i];
-                    }
-                    for (int i = 0; i < minutes.Length; i++)
-                    {
-                        foreach (string str in minutes)
-                        {
-                            if (str == i.ToString())
-                            {
-                                occupiedMinutes[int.Parse(str)] = true;
-                            }
-                        }
-                    }
-                    www.Dispose();
-                    WhatToPick = 1;
-                    break;
+                if (str == i.ToString())
+                {
+                    occupiedMinutes[int.Parse(str)] = true;
+                }
             }
         }
+
+        www.Dispose();
         CreateMinutes();
     }
     public void GetTimeToCut()
@@ -1221,6 +1191,7 @@ public class Appointments : MonoBehaviour
         previousMonthDateBTN.SetActive(false);
         nextToServicesBTN.SetActive(true);
         clientMentionsObj.SetActive(true);
+
     }
     public void CreateMinutes()//function to create the minutes buttons to create a new appointment
     {
@@ -1278,7 +1249,7 @@ public class Appointments : MonoBehaviour
                 minute.SetActive(true);
                 minuteObjects.Add(minute);
                 //if the created minute button is occupied it becomes red and not interactable
-                if(occupiedMinutes[i] == true && occupiedHours[selectedHour] == true) 
+                if(occupiedMinutes[i] == true) 
                 {
                     minute.GetComponent<Button>().interactable = false;
                     minute.GetComponent<Image>().color = new Color(1f, 0f, 0f, 1f);
@@ -1346,21 +1317,11 @@ public class Appointments : MonoBehaviour
         WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/createappointment.php", form);
         yield return www;
         www0index = www.text[0].ToString();
-        www.Dispose();
         BackToHours();
         BackToCalendar();
-        for(int i = 0; i < appointmentSelectedServicesList.Count; i++)
-        {
-            for(int j = 0; j < serviceObjectsList.Count; j++)
-            {
-                if(appointmentSelectedServicesList[i] == serviceObjectsList[j].name)
-                {
-                    serviceObjectsList[j].GetComponent<Image>().color = serviceButtonNormalColor;
-                    appointmentSelectedServicesList.RemoveAt(i);
-                }
-            }
-        }
+        appointmentSelectedServicesList.Clear();
         appointmentSelectedServices = "";
+        www.Dispose();
         if (www0index == "0")
         {
             if (appmanagerClass.SelectedLanguage == 2)
@@ -1396,7 +1357,6 @@ public class Appointments : MonoBehaviour
         }
         else
         {
-            Debug.Log(www.text);
             if (appmanagerClass.SelectedLanguage == 2)
             {
                 errorInfoTXT.text = "Something went wrong! Failed to create your appointment. Try again in a few minutes.";

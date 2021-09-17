@@ -363,6 +363,7 @@ public class Account : MonoBehaviour
                 errorInfoTXT.text = "Conectare reusita !";
                 errorInfoObj.SetActive(true);
             }
+            appmanager.GetProfilePicture();
             accountUsername = www.text.Split('\t')[1];
             isLogged = true;
             bool.TryParse(www.text.Split('\t')[2], out isBoss);
@@ -415,6 +416,7 @@ public class Account : MonoBehaviour
             }
             accountUsername = www.text.Split('\t')[1];
             isLogged = true;
+            appmanager.GetProfilePicture();
             bool.TryParse(www.text.Split('\t')[2], out isBoss);
             int.TryParse(www.text.Split('\t')[3], out fiveStarReviews);
             int.TryParse(www.text.Split('\t')[4], out fourStarReviews);
