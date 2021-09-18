@@ -1,0 +1,4 @@
+repository "SaloonApp@VlcApps@cloud"
+  path "/"
+    br "/main"
+    co "/main"

@@ -109,6 +109,11 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI saturdayHours;
     [SerializeField] private TextMeshProUGUI sundayHours;
     [SerializeField] private Image shopPhoto; //the photo user is currently seeing
+    [SerializeField] private Image shopPhoto2;
+    [SerializeField] private Image shopPhoto3;
+    [SerializeField] private Image shopPhoto4;
+    [SerializeField] private Image shopPhoto5;
+    [SerializeField] private Sprite shopPhotoNull;
     private Texture2D[] shopImage = new Texture2D[6];
     private Texture2D[] logoImage;
     [SerializeField] private GameObject loadingScreen;
@@ -138,6 +143,7 @@ public class AppManager : MonoBehaviour
     //the shop; sets shopImageNumber to 1;
     private Texture2D imageFromPhone;
     private Texture2D logoFromPhone;
+    [SerializeField] private GameObject loadingScreenImages;
 
     // ~~~ User (boss) manage shop ~~~
     private string[] shopsOfUser;
@@ -222,6 +228,13 @@ public class AppManager : MonoBehaviour
     private string createServiceNameRO;
     private string createServiceNameEN;
     private string serviceName;
+    [SerializeField] private GameObject deleteServiceQuestion;
+    [SerializeField] private GameObject deleteServiceBTN;
+    [SerializeField] private TextMeshProUGUI deleteServiceQuestionText;
+    [SerializeField] private GameObject serviceInputPriceBG;
+    private bool deleteService = false;
+    private Color deleteServiceNormalColor = new Color(0.85f, 0.4f, 0.4f, 1f);
+    private Color DeleteServiceSelectedColor = new Color(0.6f, 0.24f, 0.24f, 1f);
 
 
     public void ShowCreateServiceInfo()
@@ -264,7 +277,18 @@ public class AppManager : MonoBehaviour
         settingsMenu.SetActive(false);
         profileMenu.SetActive(false);
     }
-    private Notifications notificationClass;
+    public void DeleteServiceBTN()
+    {
+        deleteService = !deleteService;
+        if (deleteService)
+        {
+            deleteServiceBTN.GetComponent<Image>().color = DeleteServiceSelectedColor;
+        }
+        else
+        {
+            deleteServiceBTN.GetComponent<Image>().color = deleteServiceNormalColor;
+        }
+    }
     public void Start()
     {
         account = gameObject.GetComponent<Account>();
@@ -638,6 +662,7 @@ public class AppManager : MonoBehaviour
             serviceInfoRoNameInput.text = "1. In prima caseta de text trebuie introdus este cel in limba romana. Scrie numele serviciului in romana sau lasa spatiul gol daca nu vrei sa ai o versiune in romana a salonului tau.";
             serviceInfoEnNameInput.text = "2. In a doua caseta de text trebuie introdus este cel in limba engleza. Scrie numele serviciului in engleza sau lasa spatiul gol daca nu vrei sa ai o versiune in engleza a salonului tau.";
             serviceInfoPriceInput.text = "3. In ultima caseta de text trebuie introdus pretul pe care vrei sa-l aibe noul tau serviciu.";
+            deleteServiceQuestionText.text = "Doresti sa stergi acest serviciu ?";
 
             loadingScreen.SetActive(false);
         }
@@ -728,6 +753,9 @@ public class AppManager : MonoBehaviour
             serviceInfoRoNameInput.text = "1. The first input field is for romanian language. You should write the name of the service in romanian or leave it blank if you dont want to have a romanian version of your saloon.";
             serviceInfoEnNameInput.text = "2. The second input field is for english language. You should write the name of the service in english or leave it blank if you dont want to have a english version of your saloon.";
             serviceInfoPriceInput.text = "3. Last input field is for the price. Type in how much should your new service cost.";
+            deleteServiceQuestionText.text = "Do you want to delete this service?";
+
+
             loadingScreen.SetActive(false);
         }
     }
@@ -772,7 +800,6 @@ public class AppManager : MonoBehaviour
         form.Add(new MultipartFormDataSection("selectedShop", selectedShopToManage.name));
         UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/createshopservices.php", form);
         yield return webreq.SendWebRequest();
-        Debug.Log("text = " + webreq.downloadHandler.text);
         if (webreq.downloadHandler.text[0] != '0')
         {
             Debug.Log(webreq.downloadHandler.text);
@@ -907,15 +934,66 @@ public class AppManager : MonoBehaviour
         }
         web.Dispose();
     }
+    public void DeleteService()
+    {
+        StartCoroutine(DeleteServiceEnum());
+    }
+    IEnumerator DeleteServiceEnum()
+    {
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("serviceName", serviceName));
+        form.Add(new MultipartFormDataSection("selectedShop", selectedShopToManage.name));
+        UnityWebRequest web = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/deleteservice.php", form);
+        yield return web.SendWebRequest(); 
+        if(web.downloadHandler.text[0] == '0')
+        {
+            switch (selectedLanguage)
+            {
+                case 1:
+                    errorTXT.text = "Serviciul a fost sters cu succes!";
+                    errorObj.SetActive(true);
+                    GetShopServices();
+                    break;
+                case 2:
+                    errorTXT.text = "This service has been deleted successfully!";
+                    errorObj.SetActive(true);
+                    GetShopServices();
+                    break;
+            }
+        }
+        else
+        {
+            switch (selectedLanguage)
+            {
+                case 1:
+                    errorTXT.text = generalErrorRo;
+                    errorObj.SetActive(true);
+                    break;
+                case 2:
+                    errorTXT.text = generalErrorEng;
+                    errorObj.SetActive(true);
+                    break;
+            }
+        }
+        web.Dispose();
+    }
     public void SelectService()
     {
         serviceName = EventSystem.current.currentSelectedGameObject.gameObject.transform.Find("Name").gameObject.GetComponent<TextMeshProUGUI>().text;
-        for (int i = 0; i < createServiceObjectList.Count; i++)
+        if (deleteService)
         {
-            if (createServiceObjectList[i].name == serviceName)
+            deleteServiceQuestion.SetActive(true);
+        }
+        else
+        {
+            for (int i = 0; i < createServiceObjectList.Count; i++)
             {
-                serviceActualPrice.text = createServicePriceList[i];
+                if (createServiceObjectList[i].name == serviceName)
+                {
+                    serviceActualPrice.text = createServicePriceList[i];
+                }
             }
+            serviceInputPriceBG.SetActive(true);
         }
     }
     public void CreateShopServiceButtons()
@@ -1001,14 +1079,25 @@ public class AppManager : MonoBehaviour
         if(selectedShopName == lastShopSelected)
         {
             shopImageNumber = 1;
+            ShowShopDescription();
+            GetShopWorkingHours();
         }
         else
         {
+            shopImageNumber = 1;
+            shopPhoto.sprite = shopPhotoNull;
+            shopPhoto2.sprite = shopPhotoNull;
+            shopPhoto3.sprite = shopPhotoNull;
+            shopPhoto4.sprite = shopPhotoNull;
+            shopPhoto5.sprite = shopPhotoNull;
+            getShopImages();
+            shopPhoto.gameObject.SetActive(true);
+            shopPhoto2.gameObject.SetActive(false);
+            shopPhoto3.gameObject.SetActive(false);
+            shopPhoto4.gameObject.SetActive(false);
+            shopPhoto5.gameObject.SetActive(false);
             lastShopSelected = selectedShopName;
         }
-        ShowShopDescription();
-        GetShopWorkingHours();
-        getShopImages();
     }
     public void ShowShops()
     {
@@ -1445,15 +1534,77 @@ public class AppManager : MonoBehaviour
                 }
             }
         }
+        loadingScreen.SetActive(false);
         www.Dispose();
     }
     public void nextShopImage()
     {
         if (shopImageNumber < 5)
         {
-        shopImageNumber++;
+            shopImageNumber++;
         }
-        setimagine();
+        switch (shopImageNumber)
+        {
+            case 1:
+                if (shopPhoto.sprite == shopPhotoNull)
+                {
+                    getShopImages();
+                }
+                else
+                {
+                    setimagine();
+                }
+                shopPhoto.gameObject.SetActive(true);
+                break;
+            case 2:
+                if (shopPhoto2.sprite == shopPhotoNull)
+                {
+                    getShopImages();
+                }
+                else
+                {
+                    setimagine();
+                }
+                shopPhoto.gameObject.SetActive(false);
+                shopPhoto2.gameObject.SetActive(true);
+                break;
+            case 3:
+                if (shopPhoto3.sprite == shopPhotoNull)
+                {
+                    getShopImages();
+                }
+                else
+                {
+                    setimagine();
+                }
+                shopPhoto2.gameObject.SetActive(false);
+                shopPhoto3.gameObject.SetActive(true);
+                break;
+            case 4:
+                if (shopPhoto4.sprite == shopPhotoNull)
+                {
+                    getShopImages();
+                }
+                else
+                {
+                    setimagine();
+                }
+                shopPhoto3.gameObject.SetActive(false);
+                shopPhoto4.gameObject.SetActive(true);
+                break;
+            case 5:
+                if (shopPhoto5.sprite == shopPhotoNull)
+                {
+                    getShopImages();
+                }
+                else
+                {
+                    setimagine();
+                }
+                shopPhoto4.gameObject.SetActive(false);
+                shopPhoto5.gameObject.SetActive(true);
+                break;
+        }
     }
     public void previousShopImage()
     {
@@ -1461,7 +1612,68 @@ public class AppManager : MonoBehaviour
         {
         shopImageNumber--;
         }
-        setimagine();
+        switch (shopImageNumber)
+        {
+            case 1:
+                if (shopPhoto.sprite == shopPhotoNull)
+                {
+                    getShopImages();
+                }
+                else
+                {
+                    setimagine();
+                }
+                shopPhoto2.gameObject.SetActive(false);
+                shopPhoto.gameObject.SetActive(true);
+                break;
+            case 2:
+                if (shopPhoto2.sprite == shopPhotoNull)
+                {
+                    getShopImages();
+                }
+                else
+                {
+                    setimagine();
+                }
+                shopPhoto3.gameObject.SetActive(false);
+                shopPhoto2.gameObject.SetActive(true);
+                break;
+            case 3:
+                if (shopPhoto3.sprite == shopPhotoNull)
+                {
+                    getShopImages();
+                }
+                else
+                {
+                    setimagine();
+                }
+                shopPhoto4.gameObject.SetActive(false);
+                shopPhoto3.gameObject.SetActive(true);
+                break;
+            case 4:
+                if (shopPhoto4.sprite == shopPhotoNull)
+                {
+                    getShopImages();
+                }
+                else
+                {
+                    setimagine();
+                }
+                shopPhoto5.gameObject.SetActive(false);
+                shopPhoto4.gameObject.SetActive(true);
+                break;
+            case 5:
+                if (shopPhoto5.sprite == shopPhotoNull)
+                {
+                    getShopImages();
+                }
+                else
+                {
+                    setimagine();
+                }
+                shopPhoto5.gameObject.SetActive(true);
+                break;
+        }
     }
     public void setimagine()
     {
@@ -1476,7 +1688,85 @@ public class AppManager : MonoBehaviour
     }
     IEnumerator GetShopImages()
     {
-        for(int i = 1; i<6; i++)
+        loadingScreenImages.SetActive(true);
+        UnityWebRequest webjpg = new UnityWebRequest();
+        shopImageUrlJpg = "http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + shopImageNumber + ".jpg";
+        UnityWebRequest headjpg = UnityWebRequest.Head(shopImageUrlJpg); //check if the image exists on server
+        yield return headjpg.SendWebRequest();
+        if (headjpg.responseCode < 400) //if the image exists execute code below
+        {
+            webjpg = UnityWebRequestTexture.GetTexture(shopImageUrlJpg); //get the image texture from url
+            yield return webjpg.SendWebRequest();
+            shopImage[shopImageNumber] = DownloadHandlerTexture.GetContent(webjpg); //set the texture to a variable
+            switch (shopImageNumber)
+            {
+                case 1:
+                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+                    break;
+                case 2:
+                    shopPhoto2.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+                    break;
+                case 3:
+                    shopPhoto3.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+                    break;
+                case 4:
+                    shopPhoto4.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+                    break;
+                case 5:
+                    shopPhoto5.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+                    break;
+            }
+            //shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+            loadingScreenImages.SetActive(false);
+            webjpg.Dispose();
+        }
+        else
+        {
+            switch (shopImageNumber)
+            {
+                case 1:
+                    loadingScreenImages.SetActive(false);
+                    shopImageNumber = 1;
+                    switch (selectedLanguage)
+                    {
+                        case 1:
+                            errorTXT.text = "Acest salon nu are nicio imagine setata.";
+                            errorObj.SetActive(true);
+                            break;
+                        case 2:
+                            errorTXT.text = "This shop has no images set.";
+                            errorObj.SetActive(true);
+                            break;
+                    }
+                    break;
+                case 2:
+                    shopImageNumber = 1;
+                    loadingScreenImages.SetActive(false);
+                    shopPhoto2.gameObject.SetActive(false);
+                    shopPhoto.gameObject.SetActive(true);
+                    break;
+                case 3:
+                    shopImageNumber = 2;
+                    loadingScreenImages.SetActive(false);
+                    shopPhoto3.gameObject.SetActive(false);
+                    shopPhoto2.gameObject.SetActive(true);
+                    break;
+                case 4:
+                    shopImageNumber = 3;
+                    loadingScreenImages.SetActive(false);
+                    shopPhoto4.gameObject.SetActive(false);
+                    shopPhoto3.gameObject.SetActive(true);
+                    break;
+                case 5:
+                    shopImageNumber = 4;
+                    loadingScreenImages.SetActive(false);
+                    shopPhoto5.gameObject.SetActive(false);
+                    shopPhoto4.gameObject.SetActive(true);
+                    break;
+            }
+        }
+        /*
+        for (int i = 1; i<6; i++)
         {
             loadingScreen.SetActive(true);  //activeaza loading screenu
             UnityWebRequest webjpg = new UnityWebRequest();
@@ -1528,9 +1818,7 @@ public class AppManager : MonoBehaviour
                     loadingScreen.SetActive(false);
                     shopMenu.SetActive(true);
                 }
-            }
-            webjpg.Dispose();
-            webpng.Dispose();
+            }*/
             /*
              *            
             WWW www = new WWW("http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + i + ".jpg");
@@ -1559,7 +1847,6 @@ public class AppManager : MonoBehaviour
             } 
             
              */
-        }
     }
     private bool isFailedImage(Texture tex) // to check if the downloaded image is equal to the question mark image(when it fails loading)
     {
