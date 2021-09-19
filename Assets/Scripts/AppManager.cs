@@ -29,10 +29,11 @@ public class AppManager : MonoBehaviour
     [SerializeField] private GameObject logoutBtn;
     //translation
 
-    private int selectedLanguage = 1; // 1 = romana ;; 2 = engleza
+    private int selectedLanguage; // 1 = romana ;; 2 = engleza
     public int SelectedLanguage
     {
         get { return selectedLanguage; }
+        set { selectedLanguage = value; }
     }
     [SerializeField] private TextMeshProUGUI locationShowShopBTN;
     [SerializeField] private TextMeshProUGUI locationShowShopsInfo;
@@ -109,10 +110,6 @@ public class AppManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI saturdayHours;
     [SerializeField] private TextMeshProUGUI sundayHours;
     [SerializeField] private Image shopPhoto; //the photo user is currently seeing
-    [SerializeField] private Image shopPhoto2;
-    [SerializeField] private Image shopPhoto3;
-    [SerializeField] private Image shopPhoto4;
-    [SerializeField] private Image shopPhoto5;
     [SerializeField] private Sprite shopPhotoNull;
     private Texture2D[] shopImage = new Texture2D[6];
     private Texture2D[] logoImage;
@@ -128,8 +125,14 @@ public class AppManager : MonoBehaviour
     [SerializeField] private GameObject editDescriptionEnBtn;
     //SHOP
 
-    [SerializeField] private Dropdown countyDropdown;
-    [SerializeField] private Dropdown cityDropdown;
+    [SerializeField] private GameObject countyPrefab;
+    [SerializeField] private GameObject cityPrefab;
+    [SerializeField] private GameObject countyScrollview;
+    [SerializeField] private GameObject cityScrollview;
+    [SerializeField] private GameObject pickCountyBTN;
+    [SerializeField] private GameObject pickCityBTN;
+    private List<GameObject> countyObjectList = new List<GameObject>();
+    private List<GameObject> cityObjectList = new List<GameObject>();
     private string selectedCounty;
     private string selectedCity;
     private List<string> countyList = new List<string>();
@@ -143,7 +146,10 @@ public class AppManager : MonoBehaviour
     //the shop; sets shopImageNumber to 1;
     private Texture2D imageFromPhone;
     private Texture2D logoFromPhone;
+    [SerializeField] private TextMeshProUGUI imageNumberTxt;
     [SerializeField] private GameObject loadingScreenImages;
+    [SerializeField] private GameObject noImageLoadedErrorObj;
+    [SerializeField] private TextMeshProUGUI noImageLoadedErrorTxt;
 
     // ~~~ User (boss) manage shop ~~~
     private string[] shopsOfUser;
@@ -237,9 +243,100 @@ public class AppManager : MonoBehaviour
     private Color DeleteServiceSelectedColor = new Color(0.6f, 0.24f, 0.24f, 1f);
 
 
+    public void PickACounty()
+    {
+        if(countyObjectList.Count > 0)
+        {
+            foreach(GameObject obj in countyObjectList)
+            {
+                Destroy(obj);
+            }
+            countyObjectList.Clear();
+        }
+        for (int i = 0; i < countyList.Count; i++)
+        {
+            GameObject county = Instantiate(countyPrefab, countyPrefab.transform.parent);
+            county.name = countyList[i];
+            county.gameObject.transform.Find("name").gameObject.GetComponent<TextMeshProUGUI>().text = countyList[i];
+            county.SetActive(true);
+            countyObjectList.Add(county);
+        }
+        countyScrollview.SetActive(!countyScrollview.activeInHierarchy);
+    }
+    public void PickACity()
+    {
+        if (cityObjectList.Count > 0)
+        {
+            foreach (GameObject obj in cityObjectList)
+            {
+                Destroy(obj);
+            }
+            cityObjectList.Clear();
+        }
+        for (int i = 0; i < cityList.Count; i++)
+        {
+            GameObject city = Instantiate(cityPrefab, cityPrefab.transform.parent);
+            city.name = cityList[i];
+            city.gameObject.transform.Find("name").gameObject.GetComponent<TextMeshProUGUI>().text = cityList[i];
+            city.SetActive(true);
+            cityObjectList.Add(city);
+        }
+        cityScrollview.SetActive(!cityScrollview.activeInHierarchy);
+    }
+    public void SelectCity()
+    {
+        selectedCity = EventSystem.current.currentSelectedGameObject.name;
+        cityScrollview.SetActive(!cityScrollview.activeInHierarchy);
+        pickCityBTN.transform.Find("name").gameObject.GetComponent<TextMeshProUGUI>().text = selectedCity;
+    }
+    public void SelectCounty()
+    {
+        selectedCounty = EventSystem.current.currentSelectedGameObject.name;
+        countyScrollview.SetActive(!countyScrollview.activeInHierarchy);
+        pickCountyBTN.transform.Find("name").gameObject.GetComponent<TextMeshProUGUI>().text = selectedCounty;
+        GetDatabaseCities();
+        pickCityBTN.transform.Find("name").gameObject.GetComponent<TextMeshProUGUI>().text = "Pick a city";
+    }
     public void ShowCreateServiceInfo()
     {
         createServiceInfoBG.SetActive(!createServiceInfoBG.activeInHierarchy);
+    }
+
+    public void GetDatabaseCounties()
+    {
+        StartCoroutine(GetDatabaseCountiesEnum());
+    }
+    IEnumerator GetDatabaseCountiesEnum()
+    {
+        UnityWebRequest webreq = UnityWebRequest.Get("http://mybarber.vlcapps.com/appscripts/getcounties.php");
+        yield return webreq.SendWebRequest();
+        countyList.Clear();
+        for(int i = 0; i < webreq.downloadHandler.text.Split('\t').Length -1; i++)
+        {
+            countyList.Add(webreq.downloadHandler.text.Split('\t')[i]);
+        }
+        webreq.Dispose();
+    }
+    public void GetDatabaseCities()
+    {
+        StartCoroutine(GetDatabaseCitiesEnum());
+    }
+    IEnumerator GetDatabaseCitiesEnum()
+    {
+        loadingScreen.SetActive(true);
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("county", selectedCounty));
+        UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/getcities.php", form);
+        yield return webreq.SendWebRequest();
+        cityList.Clear();
+        Debug.Log(webreq.downloadHandler.text);
+        for (int i = 0; i < webreq.downloadHandler.text.Split('\t').Length - 1; i++)
+        {
+            cityList.Add(webreq.downloadHandler.text.Split('\t')[i]);
+        }
+        pickCityBTN.GetComponent<Button>().interactable = true;
+        webreq.Dispose();
+        loadingScreen.SetActive(false);
     }
     public void OpenProfileMenu()
     {
@@ -291,18 +388,15 @@ public class AppManager : MonoBehaviour
     }
     public void Start()
     {
+        GetDatabaseCounties();
         account = gameObject.GetComponent<Account>();
         appointmentsClass = gameObject.GetComponent<Appointments>();
-        countyDropdown.ClearOptions(); //choosing from which location to show shops
         updateLanguageTexts();
-        countyDropdown.AddOptions(countyList);
 
         createShopCountyDropdown.ClearOptions();
         createShopCountyDropdown.AddOptions(countyList);
 
         afterLogin();
-        countyDropdown.onValueChanged.AddListener(delegate { CountyPicked(countyDropdown); });
-        cityDropdown.onValueChanged.AddListener(delegate { CityPicked(cityDropdown); });
 
         createShopCountyDropdown.onValueChanged.AddListener(delegate { CreateShopCountyPicked(createShopCountyDropdown); });
         whatImageToUpload.onValueChanged.AddListener(delegate { WhatImageToUpload(whatImageToUpload); });
@@ -317,11 +411,13 @@ public class AppManager : MonoBehaviour
     public void SelectRomanianLanguage()
     {
         selectedLanguage = 1;
+        account.Save();
         updateLanguageTexts();
     }
     public void SelectEnglishLanguage()
     {
         selectedLanguage = 2;
+        account.Save();
         updateLanguageTexts();
     }
     public string GetSelectedShopName()
@@ -577,14 +673,12 @@ public class AppManager : MonoBehaviour
         if (selectedLanguage == 1)
         {
             loadingScreen.SetActive(true);
-            countyList.Clear();
-            countyDropdown.ClearOptions(); //choosing from which location to show shops
-            CountyAddToList("Alege un judet", "Olt", "Dolj", "Timis");
-            cityList.Clear();
-            cityDropdown.ClearOptions();
-            CityAddToList("Nu ai ales un judet");
-            cityDropdown.AddOptions(cityList);
-            countyDropdown.AddOptions(countyList);
+            if (string.IsNullOrEmpty(selectedCounty))
+            {
+                pickCityBTN.GetComponent<Button>().interactable = false;
+                pickCityBTN.transform.Find("name").gameObject.GetComponent<TextMeshProUGUI>().text = "Alege un judet mai intai";
+            }
+            pickCountyBTN.transform.Find("name").gameObject.GetComponent<TextMeshProUGUI>().text = "Alege un judet";
             locationShowShopBTN.text = "Afiseaza";
             locationShowShopsInfo.text = "Alege locatia saloanelor.";
             settingsMenuLanguageTxt.text = "Limba";
@@ -663,20 +757,20 @@ public class AppManager : MonoBehaviour
             serviceInfoEnNameInput.text = "2. In a doua caseta de text trebuie introdus este cel in limba engleza. Scrie numele serviciului in engleza sau lasa spatiul gol daca nu vrei sa ai o versiune in engleza a salonului tau.";
             serviceInfoPriceInput.text = "3. In ultima caseta de text trebuie introdus pretul pe care vrei sa-l aibe noul tau serviciu.";
             deleteServiceQuestionText.text = "Doresti sa stergi acest serviciu ?";
+            noImageLoadedErrorTxt.text = "Imaginea nu a putut fi gasita pe server.";
+
 
             loadingScreen.SetActive(false);
         }
         else if (selectedLanguage == 2)
         {
             loadingScreen.SetActive(true);
-            countyList.Clear();
-            countyDropdown.ClearOptions(); //choosing from which location to show shops
-            CountyAddToList("Pick a county", "Olt", "Dolj", "Timis");
-            cityList.Clear();
-            cityDropdown.ClearOptions();
-            CityAddToList("Pick a county first");
-            cityDropdown.AddOptions(cityList);
-            countyDropdown.AddOptions(countyList);
+            if (string.IsNullOrEmpty(selectedCounty))
+            {
+                pickCityBTN.GetComponent<Button>().interactable = false;
+                pickCityBTN.transform.Find("name").gameObject.GetComponent<TextMeshProUGUI>().text = "Choose a county first";
+            }
+            pickCountyBTN.transform.Find("name").gameObject.GetComponent<TextMeshProUGUI>().text = "Choose a county";
             locationShowShopBTN.text = "Show";
             locationShowShopsInfo.text = "Pick the shop's location.";
             settingsMenuLanguageTxt.text = "Language";
@@ -754,7 +848,7 @@ public class AppManager : MonoBehaviour
             serviceInfoEnNameInput.text = "2. The second input field is for english language. You should write the name of the service in english or leave it blank if you dont want to have a english version of your saloon.";
             serviceInfoPriceInput.text = "3. Last input field is for the price. Type in how much should your new service cost.";
             deleteServiceQuestionText.text = "Do you want to delete this service?";
-
+            noImageLoadedErrorTxt.text = "This image couldn't be found on the server.";
 
             loadingScreen.SetActive(false);
         }
@@ -1084,18 +1178,9 @@ public class AppManager : MonoBehaviour
         }
         else
         {
+            shopImage = new Texture2D[6];
             shopImageNumber = 1;
-            shopPhoto.sprite = shopPhotoNull;
-            shopPhoto2.sprite = shopPhotoNull;
-            shopPhoto3.sprite = shopPhotoNull;
-            shopPhoto4.sprite = shopPhotoNull;
-            shopPhoto5.sprite = shopPhotoNull;
             getShopImages();
-            shopPhoto.gameObject.SetActive(true);
-            shopPhoto2.gameObject.SetActive(false);
-            shopPhoto3.gameObject.SetActive(false);
-            shopPhoto4.gameObject.SetActive(false);
-            shopPhoto5.gameObject.SetActive(false);
             lastShopSelected = selectedShopName;
         }
     }
@@ -1542,144 +1627,43 @@ public class AppManager : MonoBehaviour
         if (shopImageNumber < 5)
         {
             shopImageNumber++;
-        }
-        switch (shopImageNumber)
-        {
-            case 1:
-                if (shopPhoto.sprite == shopPhotoNull)
-                {
-                    getShopImages();
-                }
-                else
-                {
-                    setimagine();
-                }
-                shopPhoto.gameObject.SetActive(true);
-                break;
-            case 2:
-                if (shopPhoto2.sprite == shopPhotoNull)
-                {
-                    getShopImages();
-                }
-                else
-                {
-                    setimagine();
-                }
-                shopPhoto.gameObject.SetActive(false);
-                shopPhoto2.gameObject.SetActive(true);
-                break;
-            case 3:
-                if (shopPhoto3.sprite == shopPhotoNull)
-                {
-                    getShopImages();
-                }
-                else
-                {
-                    setimagine();
-                }
-                shopPhoto2.gameObject.SetActive(false);
-                shopPhoto3.gameObject.SetActive(true);
-                break;
-            case 4:
-                if (shopPhoto4.sprite == shopPhotoNull)
-                {
-                    getShopImages();
-                }
-                else
-                {
-                    setimagine();
-                }
-                shopPhoto3.gameObject.SetActive(false);
-                shopPhoto4.gameObject.SetActive(true);
-                break;
-            case 5:
-                if (shopPhoto5.sprite == shopPhotoNull)
-                {
-                    getShopImages();
-                }
-                else
-                {
-                    setimagine();
-                }
-                shopPhoto4.gameObject.SetActive(false);
-                shopPhoto5.gameObject.SetActive(true);
-                break;
+            imageNumberTxt.text = shopImageNumber + "/5";
+            loadingScreenImages.SetActive(true);
+            noImageLoadedErrorObj.SetActive(false);
+            if (shopImage[shopImageNumber] == null)
+            {
+                getShopImages();
+            }
+            else
+            {
+                setimagine();
+            }
         }
     }
     public void previousShopImage()
     {
         if(shopImageNumber > 1)
         {
-        shopImageNumber--;
-        }
-        switch (shopImageNumber)
-        {
-            case 1:
-                if (shopPhoto.sprite == shopPhotoNull)
-                {
-                    getShopImages();
-                }
-                else
-                {
-                    setimagine();
-                }
-                shopPhoto2.gameObject.SetActive(false);
-                shopPhoto.gameObject.SetActive(true);
-                break;
-            case 2:
-                if (shopPhoto2.sprite == shopPhotoNull)
-                {
-                    getShopImages();
-                }
-                else
-                {
-                    setimagine();
-                }
-                shopPhoto3.gameObject.SetActive(false);
-                shopPhoto2.gameObject.SetActive(true);
-                break;
-            case 3:
-                if (shopPhoto3.sprite == shopPhotoNull)
-                {
-                    getShopImages();
-                }
-                else
-                {
-                    setimagine();
-                }
-                shopPhoto4.gameObject.SetActive(false);
-                shopPhoto3.gameObject.SetActive(true);
-                break;
-            case 4:
-                if (shopPhoto4.sprite == shopPhotoNull)
-                {
-                    getShopImages();
-                }
-                else
-                {
-                    setimagine();
-                }
-                shopPhoto5.gameObject.SetActive(false);
-                shopPhoto4.gameObject.SetActive(true);
-                break;
-            case 5:
-                if (shopPhoto5.sprite == shopPhotoNull)
-                {
-                    getShopImages();
-                }
-                else
-                {
-                    setimagine();
-                }
-                shopPhoto5.gameObject.SetActive(true);
-                break;
+            shopImageNumber--;
+            imageNumberTxt.text = shopImageNumber + "/5";
+            loadingScreenImages.SetActive(true);
+            noImageLoadedErrorObj.SetActive(false);
+            if (shopImage[shopImageNumber] == null)
+            {
+                getShopImages();
+            }
+            else
+            {
+                setimagine();
+            }
         }
     }
     public void setimagine()
     {
         if (!isFailedImage(shopImage[shopImageNumber]))
         {
-            shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
+            shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0), 16, 0, SpriteMeshType.FullRect);
+            loadingScreenImages.SetActive(false);
         }
     }
     public void getShopImages()
@@ -1688,7 +1672,6 @@ public class AppManager : MonoBehaviour
     }
     IEnumerator GetShopImages()
     {
-        loadingScreenImages.SetActive(true);
         UnityWebRequest webjpg = new UnityWebRequest();
         shopImageUrlJpg = "http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + shopImageNumber + ".jpg";
         UnityWebRequest headjpg = UnityWebRequest.Head(shopImageUrlJpg); //check if the image exists on server
@@ -1698,155 +1681,15 @@ public class AppManager : MonoBehaviour
             webjpg = UnityWebRequestTexture.GetTexture(shopImageUrlJpg); //get the image texture from url
             yield return webjpg.SendWebRequest();
             shopImage[shopImageNumber] = DownloadHandlerTexture.GetContent(webjpg); //set the texture to a variable
-            switch (shopImageNumber)
-            {
-                case 1:
-                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    break;
-                case 2:
-                    shopPhoto2.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    break;
-                case 3:
-                    shopPhoto3.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    break;
-                case 4:
-                    shopPhoto4.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    break;
-                case 5:
-                    shopPhoto5.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    break;
-            }
-            //shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-            loadingScreenImages.SetActive(false);
+            shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0), 16, 0, SpriteMeshType.FullRect);
             webjpg.Dispose();
+            loadingScreenImages.SetActive(false);
         }
         else
         {
-            switch (shopImageNumber)
-            {
-                case 1:
-                    loadingScreenImages.SetActive(false);
-                    shopImageNumber = 1;
-                    switch (selectedLanguage)
-                    {
-                        case 1:
-                            errorTXT.text = "Acest salon nu are nicio imagine setata.";
-                            errorObj.SetActive(true);
-                            break;
-                        case 2:
-                            errorTXT.text = "This shop has no images set.";
-                            errorObj.SetActive(true);
-                            break;
-                    }
-                    break;
-                case 2:
-                    shopImageNumber = 1;
-                    loadingScreenImages.SetActive(false);
-                    shopPhoto2.gameObject.SetActive(false);
-                    shopPhoto.gameObject.SetActive(true);
-                    break;
-                case 3:
-                    shopImageNumber = 2;
-                    loadingScreenImages.SetActive(false);
-                    shopPhoto3.gameObject.SetActive(false);
-                    shopPhoto2.gameObject.SetActive(true);
-                    break;
-                case 4:
-                    shopImageNumber = 3;
-                    loadingScreenImages.SetActive(false);
-                    shopPhoto4.gameObject.SetActive(false);
-                    shopPhoto3.gameObject.SetActive(true);
-                    break;
-                case 5:
-                    shopImageNumber = 4;
-                    loadingScreenImages.SetActive(false);
-                    shopPhoto5.gameObject.SetActive(false);
-                    shopPhoto4.gameObject.SetActive(true);
-                    break;
-            }
+            loadingScreenImages.SetActive(false);
+            noImageLoadedErrorObj.SetActive(true);
         }
-        /*
-        for (int i = 1; i<6; i++)
-        {
-            loadingScreen.SetActive(true);  //activeaza loading screenu
-            UnityWebRequest webjpg = new UnityWebRequest();
-            UnityWebRequest webpng = new UnityWebRequest();
-            shopImageUrlJpg = "http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + i + ".jpg";
-            shopImageUrlPng = "http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + i + ".png";
-            UnityWebRequest headjpg = UnityWebRequest.Head(shopImageUrlJpg); //check if the image exists on server
-            UnityWebRequest headpng = UnityWebRequest.Head(shopImageUrlPng); //check if the image exists on server
-            yield return headjpg.SendWebRequest();
-            yield return headpng.SendWebRequest();
-            if(headjpg.responseCode < 400) //if the image exists execute code below
-            {
-                webjpg = UnityWebRequestTexture.GetTexture(shopImageUrlJpg); //get the image texture from url
-                yield return webjpg.SendWebRequest();
-                shopImage[i] = DownloadHandlerTexture.GetContent(webjpg); //set the texture to a variable
-                if (i >= 5) //if the loop got the 5th photo close the loading screen and set the shown image to 1
-                {
-                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    loadingScreen.SetActive(false);
-                    shopMenu.SetActive(true);
-                }
-            }
-            else
-            {
-                if(i >= 5)
-                {
-                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    loadingScreen.SetActive(false);
-                    shopMenu.SetActive(true);
-                }
-            }
-            if(headpng.responseCode < 400)
-            {
-                webpng = UnityWebRequestTexture.GetTexture(shopImageUrlPng);
-                yield return webpng.SendWebRequest();
-                shopImage[i] = DownloadHandlerTexture.GetContent(webpng); //set the texture to a variable
-                if (i >= 5) //if the loop got the 5th photo close the loading screen and set the shown image to 1
-                {
-                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    loadingScreen.SetActive(false);
-                    shopMenu.SetActive(true);
-                }
-            }
-            else
-            {
-                if (i >= 5)
-                {
-                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    loadingScreen.SetActive(false);
-                    shopMenu.SetActive(true);
-                }
-            }*/
-            /*
-             *            
-            WWW www = new WWW("http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + i + ".jpg");
-            WWW w = new WWW("http://mybarber.vlcapps.com/shop_photos/" + selectedShopName + "/image" + i + ".png");
-            yield return www;
-            yield return w;
-            if (isFailedImage(www.texture)) // check if the image is the question mark
-            {
-                shopImage[i] = w.texture; //set the texture to a variable
-                if (i >= 5) //if the loop got the 5th photo close the loading screen and set the shown image to 1
-                {
-                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    loadingScreen.SetActive(false);
-                    shopMenu.SetActive(true);
-                }
-            }
-            else
-            {
-                shopImage[i] = www.texture; //set the texture to a variable
-                if (i >= 5) //if the loop got the 5th photo close the loading screen and set the shown image to 1
-                {
-                    shopPhoto.sprite = Sprite.Create(shopImage[shopImageNumber], new Rect(0, 0, shopImage[shopImageNumber].width, shopImage[shopImageNumber].height), new Vector2(0, 0));
-                    loadingScreen.SetActive(false);
-                    shopMenu.SetActive(true);
-                }
-            } 
-            
-             */
     }
     private bool isFailedImage(Texture tex) // to check if the downloaded image is equal to the question mark image(when it fails loading)
     {
@@ -2175,91 +2018,6 @@ public class AppManager : MonoBehaviour
                     createShopCityDropdown.AddOptions(cityDoljOptions);
                 }
                 break;
-        }
-    }
-    public void CityPicked(Dropdown cityDropdown)
-    {
-        if (selectedCounty == countyList[1])
-        {
-            switch (cityDropdown.value)
-            {
-                case 1:
-                    selectedCity = cityList[1];
-                    break;
-                case 2:
-                    selectedCity = cityList[2];
-                    break;
-                case 3:
-                    selectedCity = cityList[3];
-                    break;
-                case 4:
-                    selectedCity = cityList[4];
-                    break;
-            }
-        }
-        else if (selectedCounty == countyList[2])
-        {
-            switch (cityDropdown.value)
-            {
-                case 1:
-                    selectedCity = cityList[1];
-                    break;
-                case 2:
-                    selectedCity = cityList[2];
-                    break;
-                case 3:
-                    selectedCity = cityList[3];
-                    break;
-                case 4: 
-                    selectedCity = cityList[4];
-                    break;
-                case 5:
-                    selectedCity = cityList[5];
-                    break;
-            }
-        }
-    }
-    public void CountyPicked(Dropdown countyPicked)
-    {
-        switch (countyPicked.value)
-        {
-            case 1:
-                cityDropdown.interactable = true;
-                cityList.Clear();
-                if(selectedLanguage == 1)
-                {
-                    CityAddToList("Alege un oras", "Caracal", "Slatina", "Grojdibodu", "Conacu Piatra-Olt");
-                    cityDropdown.ClearOptions();
-                    cityDropdown.AddOptions(cityList);
-                    selectedCounty = countyList[1];
-                }
-                else if(selectedLanguage == 2)
-                {
-                    CityAddToList("Pick a city", "Caracal", "Slatina", "Grojdibodu", "Conacu Piatra-Olt");
-                    cityDropdown.ClearOptions();
-                    cityDropdown.AddOptions(cityList);
-                    selectedCounty = countyList[1];
-                }
-                break;
-            case 2:
-                cityDropdown.interactable = true;
-                cityList.Clear();
-                if (selectedLanguage == 1)
-                {
-                    CityAddToList("Alege un oras", "Craiova", "Radovan", "Gura Racului", "Gogosu");
-                    cityDropdown.ClearOptions();
-                    cityDropdown.AddOptions(cityList);
-                    selectedCounty = countyList[2];
-                }
-                else if (selectedLanguage == 2)
-                {
-                    CityAddToList("Pick a city", "Craiova", "Radovan", "Gura Racului", "Gogosu");
-                    cityDropdown.ClearOptions();
-                    cityDropdown.AddOptions(cityList);
-                    selectedCounty = countyList[2];
-                }
-                break;
-                
         }
     }
 }

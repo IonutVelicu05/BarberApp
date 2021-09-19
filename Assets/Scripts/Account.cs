@@ -60,6 +60,7 @@ public class Account : MonoBehaviour
         bf.Serialize(file, accountUsername);
         bf.Serialize(file, tempAccount);
         bf.Serialize(file, password);
+        bf.Serialize(file, appmanager.SelectedLanguage);
         file.Close();
     }
     public void Logout()
@@ -111,6 +112,8 @@ public class Account : MonoBehaviour
             accountUsername = bf.Deserialize(file).ToString();
             tempAccount = bool.Parse(bf.Deserialize(file).ToString());
             password = bf.Deserialize(file).ToString();
+            appmanager.SelectedLanguage = int.Parse(bf.Deserialize(file).ToString());
+            appmanager.updateLanguageTexts();
             usernameField.text = accountUsername;
             passwordField.text = password;
             if (appmanager.SelectedLanguage == 1)
@@ -146,6 +149,7 @@ public class Account : MonoBehaviour
             {
                 int randomNumber = Mathf.RoundToInt(Random.Range(000000f, 999999f));
                 accountUsername = "user" + randomNumber;
+                appmanager.SelectedLanguage = 1;
                 if (appmanager.SelectedLanguage == 1)
                 {
                     profileUsername.text = "Nume utilizator: " + accountUsername;
@@ -328,6 +332,10 @@ public class Account : MonoBehaviour
         }
         webreq.Dispose();
         appmanager.afterLogin();
+    }
+    public void OnApplicationQuit()
+    {
+        Save();
     }
     public void LoginAccount()
     {
