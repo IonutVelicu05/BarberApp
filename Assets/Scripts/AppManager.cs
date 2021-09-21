@@ -210,6 +210,24 @@ public class AppManager : MonoBehaviour
     [SerializeField] private Dropdown createShopCityDropdown;
     [SerializeField] private Dropdown createShopCountyDropdown;
 
+    //create employees
+    [SerializeField] private InputField employeePersonalCodeInput;
+    [SerializeField] private GameObject employeeInfoBG;
+    [SerializeField] private TextMeshProUGUI employeeInfoTxt;
+    [SerializeField] private GameObject addEmployeeBTN;
+    [SerializeField] private GameObject deleteEmployeeBTN;
+    [SerializeField] private GameObject employeePrefab;
+    [SerializeField] private GameObject deleteQuestionObject;
+    [SerializeField] private TextMeshProUGUI deleteEmployeeQuestion;
+    private List<GameObject> employeeObjectList = new List<GameObject>();
+    private string[] employeeFirstNameList;
+    private string[] employeeLastNameList;
+    private string[] employeePersonalCodeList;
+    private string selectedEmployee;
+    private bool deleteEmployee = false;
+    private Color deleteEmployeeNormalColor = new Color(0.85f, 0.4f, 0.4f, 1f);
+    private Color deleteEmployeeSelectedColor = new Color(0.6f, 0.24f, 0.24f, 1f);
+
     //create service
     [SerializeField] private InputField createServiceNameInputRO;
     [SerializeField] private InputField createServiceNameInputEN;
@@ -235,6 +253,7 @@ public class AppManager : MonoBehaviour
     private string createServiceNameEN;
     private string serviceName;
     [SerializeField] private GameObject deleteServiceQuestion;
+    [SerializeField] private GameObject createServiceBTN;
     [SerializeField] private GameObject deleteServiceBTN;
     [SerializeField] private TextMeshProUGUI deleteServiceQuestionText;
     [SerializeField] private GameObject serviceInputPriceBG;
@@ -373,6 +392,18 @@ public class AppManager : MonoBehaviour
         locationPickMenu.SetActive(true);
         settingsMenu.SetActive(false);
         profileMenu.SetActive(false);
+    }
+    public void DeleteEmployeeBTN()
+    {
+        deleteEmployee = !deleteEmployee;
+        if (deleteEmployee)
+        {
+            deleteEmployeeBTN.GetComponent<Image>().color = deleteEmployeeSelectedColor;
+        }
+        else
+        {
+            deleteEmployeeBTN.GetComponent<Image>().color = deleteEmployeeNormalColor;
+        }
     }
     public void DeleteServiceBTN()
     {
@@ -756,10 +787,15 @@ public class AppManager : MonoBehaviour
             serviceInfoRoNameInput.text = "1. In prima caseta de text trebuie introdus este cel in limba romana. Scrie numele serviciului in romana sau lasa spatiul gol daca nu vrei sa ai o versiune in romana a salonului tau.";
             serviceInfoEnNameInput.text = "2. In a doua caseta de text trebuie introdus este cel in limba engleza. Scrie numele serviciului in engleza sau lasa spatiul gol daca nu vrei sa ai o versiune in engleza a salonului tau.";
             serviceInfoPriceInput.text = "3. In ultima caseta de text trebuie introdus pretul pe care vrei sa-l aibe noul tau serviciu.";
+            createServiceBTN.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>().text = "Creeaza serviciu";
+            deleteServiceBTN.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>().text = "Sterge serviciu";
+            addEmployeeBTN.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>().text = "Adauga angajat";
+            deleteEmployeeBTN.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>().text = "Sterge angajat";
             deleteServiceQuestionText.text = "Doresti sa stergi acest serviciu ?";
             noImageLoadedErrorTxt.text = "Imaginea nu a putut fi gasita pe server.";
-
-
+            employeeInfoTxt.text = "~  Introdu codul personal al persoanei pe care doresti sa o angajezi. Acest cod este gasit pe profilul fiecarui utilizator al aplicatiei dupa ce isi creeaza un cont si se conecteaza.";
+            employeePersonalCodeInput.transform.Find("Placeholder").gameObject.GetComponent<Text>().text = "Cod personal...";
+            deleteEmployeeQuestion.text = "Doresti sa stergi acest angajat ?";
             loadingScreen.SetActive(false);
         }
         else if (selectedLanguage == 2)
@@ -847,9 +883,15 @@ public class AppManager : MonoBehaviour
             serviceInfoRoNameInput.text = "1. The first input field is for romanian language. You should write the name of the service in romanian or leave it blank if you dont want to have a romanian version of your saloon.";
             serviceInfoEnNameInput.text = "2. The second input field is for english language. You should write the name of the service in english or leave it blank if you dont want to have a english version of your saloon.";
             serviceInfoPriceInput.text = "3. Last input field is for the price. Type in how much should your new service cost.";
+            createServiceBTN.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>().text = "Create service";
+            deleteServiceBTN.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>().text = "Remove service";
+            addEmployeeBTN.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>().text = "Add employee";
+            deleteEmployeeBTN.transform.Find("Text").gameObject.GetComponent<TextMeshProUGUI>().text = "Remove employee";
             deleteServiceQuestionText.text = "Do you want to delete this service?";
             noImageLoadedErrorTxt.text = "This image couldn't be found on the server.";
-
+            employeeInfoTxt.text = "~ Please type in the personal code of the person you want to hire. This code can be found on every user's profile page after they create an account and log in.";
+            employeePersonalCodeInput.transform.Find("Placeholder").gameObject.GetComponent<Text>().text = "Personal code...";
+            deleteEmployeeQuestion.text = "Do you want to remove this employee ?";
             loadingScreen.SetActive(false);
         }
     }
@@ -927,6 +969,157 @@ public class AppManager : MonoBehaviour
             GetShopServices();
         }
         webreq.Dispose();
+    }
+    public void AddEmployee()
+    {
+        StartCoroutine(AddEmployeeEnum());
+    }
+    IEnumerator AddEmployeeEnum()
+    {
+        loadingScreen.SetActive(true);
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("selectedShop", selectedShopToManage.name));
+        if (int.TryParse(employeePersonalCodeInput.text, out int muie))
+        {
+            form.Add(new MultipartFormDataSection("personalCode", employeePersonalCodeInput.text));
+            UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/addemployee.php", form);
+            yield return webreq.SendWebRequest();
+            if(webreq.downloadHandler.text[0] == '0')
+            {
+                GetEmployeesWCreate();
+                if (selectedLanguage == 1)
+                {
+                    errorTXT.text = "Utilizatorul a fost adaugat ca angajat al salonului.";
+                    errorObj.SetActive(true);
+                    webreq.Dispose();
+                }
+                else if (selectedLanguage == 2)
+                {
+                    errorTXT.text = "The user has been added as an employee of this saloon.";
+                    errorObj.SetActive(true);
+                    webreq.Dispose();
+                }
+            }
+            else
+            {
+                Debug.Log(webreq.downloadHandler.text);
+            }
+        }
+        else
+        {
+            if(selectedLanguage == 1)
+            {
+                errorTXT.text = "Codul introdus nu este corect.";
+                errorObj.SetActive(true);
+            }
+            else if (selectedLanguage == 2)
+            {
+                errorTXT.text = "This code is incorrect.";
+                errorObj.SetActive(true);
+            }
+        }
+        loadingScreen.SetActive(false);
+    }
+    public void GetEmployeesWCreate()
+    {
+        StartCoroutine(GetEmployeesWCreateEnum());
+    }
+    IEnumerator GetEmployeesWCreateEnum()
+    {
+        int whatToPick = 1;
+        loadingScreen.SetActive(true);
+        for (int i = 0; i < 4; i++)
+        {
+            List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+            form.Add(new MultipartFormDataSection("selectedShop", selectedShopToManage.name));
+            form.Add(new MultipartFormDataSection("whattopick", whatToPick.ToString()));
+            UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/getemployees.php", form);
+            yield return webreq.SendWebRequest();
+            switch (whatToPick)
+            {
+                case 1:
+                    employeeFirstNameList = webreq.downloadHandler.text.Split('\t');
+                    whatToPick = 2;
+                    webreq.Dispose();
+                    break;
+                case 2:
+                    employeeLastNameList = webreq.downloadHandler.text.Split('\t');
+                    whatToPick = 3;
+                    webreq.Dispose();
+                    break;
+                case 3:
+                    employeePersonalCodeList = webreq.downloadHandler.text.Split('\t');
+                    whatToPick = 1;
+                    webreq.Dispose();
+                    break;
+            }
+        }
+        CreateEmployeesButtons();
+        loadingScreen.SetActive(false);
+    }
+    public void GetEmployeesWOCreate()
+    {
+        StartCoroutine(GetEmployeesEnum());
+    }
+    IEnumerator GetEmployeesEnum()
+    {
+        int whatToPick = 1;
+        loadingScreen.SetActive(true);
+        for(int i = 0; i < 4; i++)
+        {
+            List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+            form.Add(new MultipartFormDataSection("selectedShop", selectedShopToManage.name));
+            form.Add(new MultipartFormDataSection("whattopick", whatToPick.ToString()));
+            UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/getemployees.php", form);
+            yield return webreq.SendWebRequest();
+            switch (whatToPick)
+            {
+                case 1:
+                    employeeFirstNameList = webreq.downloadHandler.text.Split('\t');
+                    whatToPick = 2;
+                    webreq.Dispose();
+                    break;
+                case 2:
+                    employeeLastNameList = webreq.downloadHandler.text.Split('\t');
+                    whatToPick = 3;
+                    webreq.Dispose();
+                    break;
+                case 3:
+                    employeePersonalCodeList = webreq.downloadHandler.text.Split('\t');
+                    whatToPick = 1;
+                    webreq.Dispose();
+                    break;
+            }
+        }
+        loadingScreen.SetActive(false);
+    }
+    public void CreateEmployeesButtons()
+    {
+        if(employeeObjectList.Count > 0)
+        {
+            foreach(GameObject obj in employeeObjectList)
+            {
+                Destroy(obj);
+            }
+            employeeObjectList.Clear();
+        }
+        for(int i = 0; i<employeePersonalCodeList.Length -1; i++)
+        {
+            GameObject employee = Instantiate(employeePrefab, employeePrefab.transform.parent);
+            employee.name = employeePersonalCodeList[i];
+            if(selectedLanguage == 1)
+            {
+                employee.transform.Find("Name").gameObject.GetComponent<TextMeshProUGUI>().text = "Nume: " + employeeFirstNameList[i] + "  " + employeeLastNameList[i];
+                employee.transform.Find("PersonalCode").gameObject.GetComponent<TextMeshProUGUI>().text = "Cod utilizator: " + employeePersonalCodeList[i];
+            }
+            else if(selectedLanguage == 2)
+            {
+                employee.transform.Find("Name").gameObject.GetComponent<TextMeshProUGUI>().text = "Name: " + employeeFirstNameList[i] + "  " + employeeLastNameList[i];
+                employee.transform.Find("PersonalCode").gameObject.GetComponent<TextMeshProUGUI>().text = "Personal code: " + employeePersonalCodeList[i];
+            }
+            employee.SetActive(true);
+            employeeObjectList.Add(employee);
+        }
     }
     public void GetShopServices()
     {
@@ -1028,6 +1221,51 @@ public class AppManager : MonoBehaviour
         }
         web.Dispose();
     }
+    public void DeleteEmployee()
+    {
+        StartCoroutine(DeleteEmployeeEnum());
+    }
+    IEnumerator DeleteEmployeeEnum()
+    {
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("personalCode", selectedEmployee));
+        UnityWebRequest web = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/deleteemployee.php", form);
+        yield return web.SendWebRequest();
+        if(web.downloadHandler.text[0] == '0')
+        {
+            switch (selectedLanguage)
+            {
+                case 1:
+                    errorTXT.text = "Angajatul a fost sters cu succes!";
+                    errorObj.SetActive(true);
+                    GetEmployeesWCreate();
+                    web.Dispose();
+                    break;
+                case 2:
+                    errorTXT.text = "This employee has been removed successfully!";
+                    errorObj.SetActive(true);
+                    GetEmployeesWCreate();
+                    web.Dispose();
+                    break;
+            }
+        }
+        else
+        {
+            Debug.Log(web.downloadHandler.text);
+            switch (selectedLanguage)
+            {
+                case 1:
+                    errorTXT.text = generalErrorRo;
+                    web.Dispose();
+                    break;
+                case 2:
+                    errorTXT.text = generalErrorEng;
+                    errorObj.SetActive(true);
+                    web.Dispose();
+                    break;
+            }
+        }
+    }
     public void DeleteService()
     {
         StartCoroutine(DeleteServiceEnum());
@@ -1070,6 +1308,14 @@ public class AppManager : MonoBehaviour
             }
         }
         web.Dispose();
+    }
+    public void SelectEmployee()
+    {
+        selectedEmployee = EventSystem.current.currentSelectedGameObject.gameObject.name;
+        if (deleteEmployee)
+        {
+            deleteQuestionObject.SetActive(true);
+        }
     }
     public void SelectService()
     {
@@ -1173,14 +1419,14 @@ public class AppManager : MonoBehaviour
         if(selectedShopName == lastShopSelected)
         {
             shopImageNumber = 1;
-            ShowShopDescription();
-            GetShopWorkingHours();
         }
         else
         {
             shopImage = new Texture2D[6];
             shopImageNumber = 1;
             getShopImages();
+            ShowShopDescription();
+            GetShopWorkingHours();
             lastShopSelected = selectedShopName;
         }
     }
@@ -1961,6 +2207,7 @@ public class AppManager : MonoBehaviour
     {
         selectedShopToManage = EventSystem.current.currentSelectedGameObject.gameObject;
         GetShopServices();
+        GetEmployeesWOCreate();
     }
     public void CreateShopsToManage()
     {

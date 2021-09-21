@@ -27,6 +27,7 @@ public class Account : MonoBehaviour
     [SerializeField] private TextMeshProUGUI profileFirstName;
     [SerializeField] private TextMeshProUGUI profileLastName;
     [SerializeField] private TextMeshProUGUI profileUsername;
+    [SerializeField] private TextMeshProUGUI profilePersonalCode;
     [SerializeField] private GameObject errorInfoObj;
     [SerializeField] private TextMeshProUGUI errorInfoTXT;
     [SerializeField] private GameObject settingsMenu;
@@ -398,12 +399,14 @@ public class Account : MonoBehaviour
                 profileUsername.text = "Nume utilizator: " + accountUsername;
                 profileFirstName.text = "Prenume: " + firstName;
                 profileLastName.text = "Nume: " + lastName;
+                profilePersonalCode.text = "Cod personal: " + personalCode;
             }
             else if(appmanager.SelectedLanguage == 2)
             {
                 profileUsername.text = "Username: " + accountUsername;
                 profileFirstName.text = "First name: " + firstName;
                 profileLastName.text = "Last name: " + lastName;
+                profilePersonalCode.text = "Personal code: " + personalCode;
             }
             loadingScreen.SetActive(false);
             tempAccount = false;
@@ -446,12 +449,14 @@ public class Account : MonoBehaviour
                 profileUsername.text = "Nume utilizator: " + accountUsername;
                 profileFirstName.text = "Prenume: " + firstName;
                 profileLastName.text = "Nume: " + lastName;
+                profilePersonalCode.text = "Cod personal: " + personalCode;
             }
             else if (appmanager.SelectedLanguage == 2)
             {
                 profileUsername.text = "Username: " + accountUsername;
                 profileFirstName.text = "First name: " + firstName;
                 profileLastName.text = "Last name: " + lastName;
+                profilePersonalCode.text = "Personal code: " + personalCode;
             }
             loadingScreen.SetActive(false);
             tempAccount = false;
