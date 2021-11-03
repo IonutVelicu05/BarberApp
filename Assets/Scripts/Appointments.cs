@@ -47,7 +47,6 @@ public class Appointments : MonoBehaviour
     private GameObject servicesBG;
     private GameObject backToHoursBTN;
 
-
     //time selection
     [SerializeField] private GameObject hourPrefab;
     [SerializeField] private GameObject minutePrefab;
@@ -73,8 +72,6 @@ public class Appointments : MonoBehaviour
     private int newOpenMinutes;
     private int timeToCut = 0;
     [SerializeField] private GameObject createAppointmentBTN;
-    [SerializeField] private GameObject clientMentionsObj;
-    [SerializeField] private InputField clientMentionInputField;
     [SerializeField] private GameObject errorInfoObj;
     [SerializeField] private TextMeshProUGUI errorInfoTXT;
     [SerializeField] private GameObject servicePrefab;
@@ -92,6 +89,20 @@ public class Appointments : MonoBehaviour
     private Color serviceButtonSelectedColor = new Color(0.68f, 0.68f, 0.20f, 1f);
 
     //------end-------
+
+    //barber create appointments
+    [SerializeField] private TextMeshProUGUI MonthAndYear;
+    [SerializeField] private TextMeshProUGUI MondayLetter;
+    [SerializeField] private TextMeshProUGUI TuesdayLetter;
+    [SerializeField] private TextMeshProUGUI WednesdayLetter;
+    [SerializeField] private TextMeshProUGUI ThursdayLetter;
+    [SerializeField] private TextMeshProUGUI FridayLetter;
+    [SerializeField] private TextMeshProUGUI SaturdayLetter;
+    [SerializeField] private TextMeshProUGUI SundayLetter;
+    [SerializeField] private GameObject calendarDayPrefab;
+    private List<GameObject> calendarDaysList = new List<GameObject>();
+    private int[] appointmentsInDay = new int[42];
+
     //notifications
     [SerializeField] private Notifications notificationsClass;
     private AndroidNotification notification;
@@ -154,7 +165,6 @@ public class Appointments : MonoBehaviour
         daysScrollView.SetActive(true);
         nextMonthDateBTN.SetActive(true);
         previousMonthDateBTN.SetActive(true);
-        clientMentionsObj.SetActive(false);
         nextToServicesBTN.SetActive(false);
         createAppointmentBTN.SetActive(false);
         foreach(GameObject obj in minuteObjects)
@@ -178,8 +188,8 @@ public class Appointments : MonoBehaviour
         currentDateTXT.text = currentDateString;
         nextMonthDateBTN = selectedDateBG.transform.Find("NextPrevButtons").gameObject.transform.Find("NextMonthBTN").gameObject;
         previousMonthDateBTN = selectedDateBG.transform.Find("NextPrevButtons").gameObject.transform.Find("PreviousMonthBTN").gameObject;
-        hoursScrollView = calendarBG.transform.Find("HoursScrollView").gameObject;
-        minutesScrollView = calendarBG.transform.Find("MinutesScrollView").gameObject;
+        hoursScrollView = calendarBG.transform.Find("Hours&Minutes").gameObject.transform.Find("HoursScrollView").gameObject;
+        minutesScrollView = calendarBG.transform.Find("Hours&Minutes").gameObject.transform.Find("MinutesScrollView").gameObject;
         daysScrollView = calendarBG.transform.Find("DaysScrollView").gameObject;
         closeAppointmentBTN = appointmentMenu.transform.Find("CloseAppointmentMenu").gameObject;
         backFromHoursBTN = appointmentMenu.transform.Find("BackBTN(Hours)").gameObject;
@@ -193,7 +203,6 @@ public class Appointments : MonoBehaviour
         GetShopServices();
         servicesBG.SetActive(true);
         nextToServicesBTN.SetActive(false);
-        clientMentionsObj.SetActive(false);
         backFromHoursBTN.SetActive(false);
         backToHoursBTN.SetActive(true);
         if(appmanagerClass.SelectedLanguage == 1)
@@ -366,7 +375,6 @@ public class Appointments : MonoBehaviour
         servicesBG.SetActive(false);
         nextToServicesBTN.SetActive(false);
         backFromHoursBTN.SetActive(true);
-        clientMentionsObj.SetActive(true);
         backToHoursBTN.SetActive(false);
         totalPrice = 0;
         if (minuteObjects.Count > 0)
@@ -568,10 +576,22 @@ public class Appointments : MonoBehaviour
             occupiedAppointmentMinute = minute.transform.Find("Number").gameObject.GetComponent<TextMeshProUGUI>();
             occupiedAppointmentMinute.text = barberOccupiedMinutes[i];
             appointmentClientName = appointment.transform.Find("ClientName").gameObject.GetComponent<TextMeshProUGUI>();
-            appointmentClientName.text = clientName[i];
+            //appointmentClientName.text = clientName[i];
             GameObject price = appointment.transform.Find("Price").gameObject;
             occupiedAppointmentPrice = price.transform.Find("Number").gameObject.GetComponent<TextMeshProUGUI>();
             occupiedAppointmentPrice.text = appointmentPrice[i];
+            if (appmanagerClass.SelectedLanguage == 1)
+            {
+                hour.GetComponent<TextMeshProUGUI>().text = "Ora : " + barberOccupiedHours[i] + " : " + barberOccupiedMinutes[i];
+                appointmentClientName.text = "Nume: " + clientName[i];
+                price.GetComponent<TextMeshProUGUI>().text = "Pret: ";
+            }
+            else if (appmanagerClass.SelectedLanguage == 2)
+            {
+                hour.GetComponent<TextMeshProUGUI>().text = "Hour : " + barberOccupiedHours[i] + " : " + barberOccupiedMinutes[i];
+                appointmentClientName.text = "Name: " + clientName[i];
+                price.GetComponent<TextMeshProUGUI>().text = "Price: ";
+            }
             occupiedAppointments.Add(appointment);
         }
         occupiedAppointmentCounter = 0;
@@ -745,8 +765,8 @@ public class Appointments : MonoBehaviour
     public void SelectBarber()
     {
         selectedBarberObj = EventSystem.current.currentSelectedGameObject;
-        barberFirstName = selectedBarberObj.name.Split('\t')[0];
-        barberLastName = selectedBarberObj.name.Split('\t')[1];
+        barberFirstName = selectedBarberObj.name.Split('\t')[1];
+        barberLastName = selectedBarberObj.name.Split('\t')[2];
         GetTimeToCut(); //get the time needed for the barber to do a cut
         appointmentMenu.SetActive(true);
         selectedAppointmentDay = DateTime.Now.Day.ToString();
@@ -765,11 +785,13 @@ public class Appointments : MonoBehaviour
                     serviceObjectsList[i].GetComponent<Image>().color = serviceButtonSelectedColor; //set the colour of the button
                     appointmentSelectedServicesList.Add(serviceObjectsList[i].name); //add the selected service to a list from where we can send it to the database.
                     totalPrice += int.Parse(servicePriceList[i]);
+                    Debug.Log("Pret =  " + totalPrice);
                 }
                 else
                 {
                     serviceObjectsList[i].GetComponent<Image>().color = serviceButtonNormalColor; //set the colour of the button
                     totalPrice -= int.Parse(servicePriceList[i]);
+                    Debug.Log("Pret =  " + totalPrice);
                     for (int j = 0; j < appointmentSelectedServicesList.Count; j++) 
                     {
                         if(appointmentSelectedServicesList[j] == selectedService) //check if the selected service is already in the selectedServices list
@@ -780,6 +802,7 @@ public class Appointments : MonoBehaviour
                 }
             }
         }
+        Debug.Log(appointmentSelectedServicesList.Count + " = numaru de servicii");
         if(appointmentSelectedServicesList.Count > 0) //if no service selected -> createAppointment button shall not be visible
         {
             createAppointmentBTN.SetActive(true);
@@ -804,7 +827,7 @@ public class Appointments : MonoBehaviour
             newform.Add(new MultipartFormDataSection("whattopick", whattopick.ToString()));
             UnityWebRequest webreq = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/getshopservices.php", newform);
             yield return webreq.SendWebRequest();
-            if (webreq.isNetworkError || webreq.isHttpError)
+            if (webreq.result == UnityWebRequest.Result.ConnectionError)
             {
                 Debug.Log(webreq.error);
             }
@@ -877,8 +900,6 @@ public class Appointments : MonoBehaviour
                 else
                 {
                     GameObject service = Instantiate(servicePrefab, servicePrefab.transform.position, servicePrefab.transform.rotation, servicePrefab.transform.parent);
-                    errorInfoTXT.text = "Unul sau mai multe servicii nu au numele in romana configurate. Am tradus numele lor in urmatoarea limba gasita.";
-                    errorInfoObj.SetActive(true);
                     service.name = serviceNameListRO[i];
                     service.transform.Find("ServiceName").gameObject.GetComponent<TextMeshProUGUI>().text = serviceNameListRO[i];
                     service.transform.SetParent(servicePrefab.transform.parent); //set the parent to be the same as the prefab's
@@ -926,8 +947,6 @@ public class Appointments : MonoBehaviour
                 else
                 {
                     GameObject service = Instantiate(servicePrefab, servicePrefab.transform.position, servicePrefab.transform.rotation, servicePrefab.transform.parent);
-                    errorInfoTXT.text = "Some services have no english name configured. We've translated their names in the next found language.";
-                    errorInfoObj.SetActive(true);
                     service.name = serviceNameListEN[i];
                     service.transform.Find("ServiceName").gameObject.GetComponent<TextMeshProUGUI>().text = serviceNameListEN[i];
                     service.transform.SetParent(servicePrefab.transform.parent); //set the parent to be the same as the prefab's
@@ -1015,6 +1034,107 @@ public class Appointments : MonoBehaviour
 
         www.Dispose();
         CreateMinutes();
+    }
+    public void BarberCreateAppointment()
+    {
+        StartCoroutine(BarberCreateAppointmentEnum());
+    }
+    IEnumerator BarberCreateAppointmentEnum()
+    {
+        UnityWebRequest web = new UnityWebRequest("http://mybarber.vlcapps.com/appscripts/barbercreateappointment.php");
+        //logic;
+        yield return web;
+    }
+
+    public void BarberCheckCalendar()
+    {
+        StartCoroutine(BarberCheckCalendarEnum());
+    }
+    IEnumerator BarberCheckCalendarEnum()
+    {
+        loadingScreen.SetActive(true);
+        for (int i = 1; i < DateTime.DaysInMonth(currentYear, barberMenuCurrentMonthNr+1); i++) // do the php script for each day in the current selected month
+        {
+            List<IMultipartFormSection> form = new List<IMultipartFormSection>(); //create a form to pass to the php script and add the needed variables
+            form.Add(new MultipartFormDataSection("barberName", accountClass.GetProfileFirstName + accountClass.GetProfileLastName));
+            form.Add(new MultipartFormDataSection("selectedDay", i.ToString()));
+            form.Add(new MultipartFormDataSection("selectedMonth", barberMenuCurrentMonthNr.ToString()));
+            form.Add(new MultipartFormDataSection("selectedYear", currentYear.ToString()));
+            UnityWebRequest web = UnityWebRequest.Post("http://mybarber.vlcapps.com/appscripts/barbercheckcalendar.php", form);
+            yield return web.SendWebRequest(); //execute the script
+            appointmentsInDay[i] = int.Parse(web.downloadHandler.text); //set the int list array of each day to be the number of appointments that the barber has in that specific day
+            web.Dispose();
+        }
+
+        BarberCreateAppointmentCalendar(); //create calendar with data collected
+    }
+    public void BarberCreateAppointmentCalendar()
+    {
+        DateTime date = new DateTime(currentYear, barberMenuCurrentMonthNr, 1);
+        MonthAndYear.text = date.ToString("MMM yyyy");
+        if (calendarDaysList.Count > 0) //check the list if there are objects already created and deletes them
+        {
+            foreach (GameObject obj in calendarDaysList)
+            {
+                Destroy(obj);
+            }
+            calendarDaysList.Clear();
+        }
+        int dayAfterMonthEnd = 0; //how many days objects should appear.
+        int nextMonthDay = 1; // number to set the next month's day's name 
+        switch(DateTime.DaysInMonth(currentYear, barberMenuCurrentMonthNr)) //set how many days objects can be created to fill the calendar
+        {
+            case 28:
+                dayAfterMonthEnd = 7;
+                break;
+            case 29:
+                dayAfterMonthEnd = 6;
+                break;
+            case 30:
+                dayAfterMonthEnd = 5;
+                break;
+            case 31:
+                dayAfterMonthEnd = 4;
+                break;
+            case 32:
+                dayAfterMonthEnd = 3;
+                break;
+        }
+        for (int i = 1; i < DateTime.DaysInMonth(currentYear, barberMenuCurrentMonthNr) + dayAfterMonthEnd + 1; i++)
+        {
+            GameObject day = Instantiate(calendarDayPrefab); //create the object
+            day.transform.SetParent(calendarDayPrefab.transform.parent); //set the parent to be the parent of the prefab
+            day.SetActive(true); //set the obvject to be visible
+            day.transform.localPosition = new Vector3(day.transform.position.x, day.transform.position.y, 0f); //set the z axis to 0 so the object can be seen
+            day.transform.localScale = new Vector3(1, 1, 1); // set the scale to 1 
+            GameObject dayNumber = day.transform.Find("DayInside").gameObject.transform.Find("DayNumber").gameObject; //set the object that holds the day number text component
+            GameObject dayAppointments = day.transform.Find("DayInside").gameObject.transform.Find("AppointmentsNumber").gameObject; //set the object that holds the appointments number text component
+            if (i > DateTime.DaysInMonth(currentYear, barberMenuCurrentMonthNr) + 1)
+            {
+                day.name = nextMonthDay + "\t" + (barberMenuCurrentMonthNr + 1); //set the name of the object to be [dayNumber + monthNumber]
+                dayNumber.GetComponent<TextMeshProUGUI>().text = nextMonthDay.ToString(); //set the text number of the day
+                day.GetComponent<CanvasGroup>().alpha = 1 - (float)nextMonthDay / 10; //set the visibility for every day from the next month
+                dayAppointments.GetComponent<TextMeshProUGUI>().text = "........."; //set the appointments from that day
+                nextMonthDay++;
+            }
+            else
+            {
+                day.name = i + "\t" + barberMenuCurrentMonthNr; //set the name of the object to be [dayNumber + monthNumber]
+                dayNumber.GetComponent<TextMeshProUGUI>().text = i.ToString(); //set the text number of the day
+                //set the number of appointments for each day of this month.
+                switch (appmanagerClass.SelectedLanguage)
+                {
+                    case 1:
+                        dayAppointments.GetComponent<TextMeshProUGUI>().text = appointmentsInDay[i] + " programari"; //set the appointments from that day
+                        break;
+                    case 2:
+                        dayAppointments.GetComponent<TextMeshProUGUI>().text = appointmentsInDay[i] + " appointments"; //set the appointments from that day
+                        break;
+                }
+            }
+            calendarDaysList.Add(day); //add the object to the list so it can be deleted if month changed.
+        }
+        loadingScreen.SetActive(false); //loading screen off
     }
     public void GetTimeToCut()
     {
@@ -1190,7 +1310,6 @@ public class Appointments : MonoBehaviour
         nextMonthDateBTN.SetActive(false);
         previousMonthDateBTN.SetActive(false);
         nextToServicesBTN.SetActive(true);
-        clientMentionsObj.SetActive(true);
 
     }
     public void CreateMinutes()//function to create the minutes buttons to create a new appointment
@@ -1311,7 +1430,6 @@ public class Appointments : MonoBehaviour
         form.AddField("year", currentYear);
         form.AddField("hour", selectedHour);
         form.AddField("minute", selectedMinute);
-        form.AddField("mentions", clientMentionInputField.text);
         form.AddField("services", appointmentSelectedServices);
         form.AddField("totalprice", totalPrice);
         WWW www = new WWW("http://mybarber.vlcapps.com/appscripts/createappointment.php", form);

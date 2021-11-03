@@ -5,7 +5,6 @@ using UnityEngine.UI;
 public class menubar : MonoBehaviour
 {
     [SerializeField] private CanvasGroup menuVisibility;
-    [SerializeField] private GameObject menuBar;
     private float speedFadeIn = 4f; // the speed of the fade in transition;
     private float speedFadeOut = 4f; // the speed of the fade out transition;
     private float fadeTime = 0f; 

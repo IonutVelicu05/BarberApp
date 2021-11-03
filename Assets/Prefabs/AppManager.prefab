@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 2823922496958728437}
   - component: {fileID: 718938161}
   - component: {fileID: 718938165}
+  - component: {fileID: 744176103}
+  - component: {fileID: 744176104}
   m_Layer: 0
   m_Name: AppManager
   m_TagString: Untagged
@@ -49,17 +51,46 @@ MonoBehaviour:
   manageShopButton: {fileID: 0}
   loginButton: {fileID: 0}
   loginMenu: {fileID: 0}
-  manageShopMenu: {fileID: 0}
   adminMenu: {fileID: 0}
   registerButton: {fileID: 0}
   registerMenu: {fileID: 0}
+  registerMenuFirstFields: {fileID: 0}
+  registerMenuSecondFields: {fileID: 0}
+  createShopMenuFirstFields: {fileID: 0}
+  createShopMenuSecondFields: {fileID: 0}
+  barberMenu: {fileID: 0}
+  barberTimeToCutMenu: {fileID: 0}
+  barberAppointmentsCalendar: {fileID: 0}
+  barberAppointmentsList: {fileID: 0}
+  manageShopMenuList: {fileID: 0}
+  manageShopMenu: {fileID: 0}
+  editDescriptionMenu: {fileID: 0}
+  editWorkingProgramMenuDayList: {fileID: 0}
+  editWorkingProgramMenuHMList: {fileID: 0}
+  editEmployeesMenu: {fileID: 0}
+  editEmployeesMenuAddEmployee: {fileID: 0}
+  editEmployeesMenuAddEmployeeInfo: {fileID: 0}
+  editServicesMenu: {fileID: 0}
+  editServicesMenuAddService: {fileID: 0}
+  editServicesMenuAddServiceInfo: {fileID: 0}
+  editServicesMenuServiceSelected: {fileID: 0}
+  editShopLogoMenu: {fileID: 0}
+  shopMenuBarberList: {fileID: 0}
+  shopMenuInfoList: {fileID: 0}
+  appointmentCalendar: {fileID: 0}
+  appointmentHMList: {fileID: 0}
+  appointmentServiceList: {fileID: 0}
+  shopListScrollView: {fileID: 0}
   barberMenuBTN: {fileID: 0}
   backBTN: {fileID: 0}
   profileMenu: {fileID: 0}
+  profilePicture: {fileID: 0}
   settingsMenu: {fileID: 0}
   locationPickMenu: {fileID: 0}
-  appointments: {fileID: 0}
   pageTitle: {fileID: 0}
+  logoutBtn: {fileID: 0}
+  homepageImage: {fileID: 0}
+  calendarImage: {fileID: 0}
   locationShowShopBTN: {fileID: 0}
   locationShowShopsInfo: {fileID: 0}
   settingsMenuLanguageTxt: {fileID: 0}
@@ -73,30 +104,21 @@ MonoBehaviour:
   registerMenuRegisterBtn: {fileID: 0}
   registerMenuBackBtn: {fileID: 0}
   registerMenuNextBtn: {fileID: 0}
+  logoutBtnTxt: {fileID: 0}
   barberMenuTimePerCutTxt: {fileID: 0}
   barberMenuTimePerCutBtn: {fileID: 0}
   barberMenuCheckAppointmentsTxt: {fileID: 0}
   barberMenuCheckAppointmentsBtn: {fileID: 0}
-  barberMenuEditPricesTxt: {fileID: 0}
-  barberMenuEditPricesBtn: {fileID: 0}
   editShopSelectShopTxt: {fileID: 0}
   editShopDescriptionBtn: {fileID: 0}
   editShopWorkingProgramBtn: {fileID: 0}
   editShopPhotosBtn: {fileID: 0}
   editShopBarbersBtn: {fileID: 0}
-  editShopPricesBtn: {fileID: 0}
+  editShopServicesBtn: {fileID: 0}
+  editShopLogoImageBtn: {fileID: 0}
   timeToCutMenuPlaceholder: {fileID: 0}
   timeToCutMenuSubmitBtn: {fileID: 0}
   timeToCutMenuInfoTxt: {fileID: 0}
-  editPricesMenuHaircutBtn: {fileID: 0}
-  editPricesMenuBeardBtn: {fileID: 0}
-  editPricesMenuMustacheBtn: {fileID: 0}
-  editPricesMenuHairColourBtn: {fileID: 0}
-  editPricesMenuEyebrowBtn: {fileID: 0}
-  editPricesMenuInfoTxt: {fileID: 0}
-  editPricesMenuInputPlaceholder: {fileID: 0}
-  editPricesMenuInputUpdateBtn: {fileID: 0}
-  editPricesMenuInputBackBtn: {fileID: 0}
   shopMenuEditDescriptionPlaceholder: {fileID: 0}
   shopMenuEditDescriptionUpdateBtn: {fileID: 0}
   editShopMenuWorkingProgramInfoTxt: {fileID: 0}
@@ -118,20 +140,12 @@ MonoBehaviour:
   salonMenuBarberBtn: {fileID: 0}
   salonMenuBarberFirstName: {fileID: 0}
   salonMenuBarberLastName: {fileID: 0}
-  appointmentMenuCheckHoursBtn: {fileID: 0}
   appointmentMenuCheckHoursBackBtn: {fileID: 0}
   appointmentMenuNextToServicesBtn: {fileID: 0}
   appointmentMenuNextToServicesBackBtn: {fileID: 0}
   appointmentMenuMentionsInfoTxt: {fileID: 0}
   appointmentMenuMentionsPlaceholder: {fileID: 0}
-  appointmentMenuInsertNameInfoTxt: {fileID: 0}
-  appointmentMenuInsertNamePlaceholder: {fileID: 0}
   appointmentMenuCreateAppointmentBtn: {fileID: 0}
-  appointmentMenuHaircutServiceBtn: {fileID: 0}
-  appointmentMenuBeardServiceBtn: {fileID: 0}
-  appointmentMenuMustacheServiceBtn: {fileID: 0}
-  appointmentMenuHairColourBtn: {fileID: 0}
-  appointmentMenuEyebrowBtn: {fileID: 0}
   appointmentMenuBackToHourBtn: {fileID: 0}
   shopPrefab: {fileID: 0}
   shopDescription: {fileID: 0}
@@ -148,20 +162,26 @@ MonoBehaviour:
   saturdayHours: {fileID: 0}
   sundayHours: {fileID: 0}
   shopPhoto: {fileID: 0}
+  shopPhotoNull: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   loadingScreen: {fileID: 0}
   shopMenu: {fileID: 0}
   imageFromPhoneName: {fileID: 0}
+  selectedLogoImage: {fileID: 0}
   whatImageToUpload: {fileID: 0}
-  editDescriptionHint: {fileID: 0}
   editDescriptionRoBtn: {fileID: 0}
   editDescriptionEnBtn: {fileID: 0}
-  countyDropdown: {fileID: 0}
-  cityDropdown: {fileID: 0}
+  countyPrefab: {fileID: 0}
+  cityPrefab: {fileID: 0}
+  countyScrollview: {fileID: 0}
+  cityScrollview: {fileID: 0}
+  pickCountyBTN: {fileID: 0}
+  pickCityBTN: {fileID: 0}
+  imageNumberTxt: {fileID: 0}
+  loadingScreenImages: {fileID: 0}
+  noImageLoadedErrorObj: {fileID: 0}
+  noImageLoadedErrorTxt: {fileID: 0}
   manageShopPrefab: {fileID: 0}
   shopInsertEditPrice: {fileID: 0}
-  EditGeneralPricesBTN: {fileID: 0}
-  EditBarberPricesBTN: {fileID: 0}
-  barberInsertEditPrice: {fileID: 0}
   errorObj: {fileID: 0}
   errorTXT: {fileID: 0}
   barberPrefab: {fileID: 0}
@@ -170,8 +190,33 @@ MonoBehaviour:
   createShopMenuBTN: {fileID: 0}
   createShopCityDropdown: {fileID: 0}
   createShopCountyDropdown: {fileID: 0}
-  createShopGeneralPrices: {fileID: 0}
-  TitleText: {fileID: 0}
+  employeePersonalCodeInput: {fileID: 0}
+  employeeInfoBG: {fileID: 0}
+  employeeInfoTxt: {fileID: 0}
+  addEmployeeBTN: {fileID: 0}
+  deleteEmployeeBTN: {fileID: 0}
+  employeePrefab: {fileID: 0}
+  deleteQuestionObject: {fileID: 0}
+  deleteEmployeeQuestion: {fileID: 0}
+  createServiceNameInputRO: {fileID: 0}
+  createServiceNameInputEN: {fileID: 0}
+  createServicePriceInput: {fileID: 0}
+  createServiceCoinInput: {fileID: 0}
+  createServicePrefab: {fileID: 0}
+  serviceActualPrice: {fileID: 0}
+  editServicePriceInput: {fileID: 0}
+  createServiceRoNameInfo: {fileID: 0}
+  createServiceEnNameInfo: {fileID: 0}
+  createServicePriceInfo: {fileID: 0}
+  serviceInfoRoNameInput: {fileID: 0}
+  serviceInfoEnNameInput: {fileID: 0}
+  serviceInfoPriceInput: {fileID: 0}
+  createServiceInfoBG: {fileID: 0}
+  deleteServiceQuestion: {fileID: 0}
+  createServiceBTN: {fileID: 0}
+  deleteServiceBTN: {fileID: 0}
+  deleteServiceQuestionText: {fileID: 0}
+  serviceInputPriceBG: {fileID: 0}
 --- !u!114 &718938161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,11 +259,71 @@ MonoBehaviour:
   secondFields: {fileID: 0}
   registerButton: {fileID: 0}
   nextButton: {fileID: 0}
-  registerError: {fileID: 0}
   profileFirstName: {fileID: 0}
   profileLastName: {fileID: 0}
   profileUsername: {fileID: 0}
+  profilePersonalCode: {fileID: 0}
   errorInfoObj: {fileID: 0}
   errorInfoTXT: {fileID: 0}
   settingsMenu: {fileID: 0}
   loadingScreen: {fileID: 0}
+  registerMenu: {fileID: 0}
+--- !u!114 &744176103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 90035753613596799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 214bdb74e7ace0d44a1478f7bbac351c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentDateTXT: {fileID: 0}
+  dayPrefab: {fileID: 0}
+  dayNumber: {fileID: 0}
+  dayName: {fileID: 0}
+  accountClass: {fileID: 718938165}
+  appmanagerClass: {fileID: 2823922496958728437}
+  loadingScreen: {fileID: 0}
+  timeToCutInput: {fileID: 0}
+  calendarBG: {fileID: 0}
+  selectedDateBG: {fileID: 0}
+  appointmentMenu: {fileID: 0}
+  fullAppointmentMenu: {fileID: 0}
+  hourPrefab: {fileID: 0}
+  minutePrefab: {fileID: 0}
+  createAppointmentBTN: {fileID: 0}
+  errorInfoObj: {fileID: 0}
+  errorInfoTXT: {fileID: 0}
+  servicePrefab: {fileID: 0}
+  selectDateInfoTxt: {fileID: 0}
+  totalServicesPrice: {fileID: 0}
+  notificationsClass: {fileID: 744176104}
+  appointmentDayPrefab: {fileID: 0}
+  occupiedAppointmentPrefab: {fileID: 0}
+  occupiedAppointmentInfo: {fileID: 0}
+  barberMenuCurrentMonth: {fileID: 0}
+--- !u!114 &744176104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 90035753613596799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c5067611ec773040a4534bc9cb00369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  title: {fileID: 0}
+  appointmentsClass: {fileID: 744176103}
+  appmanagerClass: {fileID: 2823922496958728437}
+  accountClass: {fileID: 718938165}
+  errorObj: {fileID: 0}
+  errorTxt: {fileID: 0}
+  barberName: {fileID: 0}
+  reviewMenu: {fileID: 0}
+  reviewInputField: {fileID: 0}
+  notificationTokenTxt: {fileID: 0}

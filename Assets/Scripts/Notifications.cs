@@ -181,11 +181,11 @@ public class Notifications : MonoBehaviour
             reminderNotification.Title = "You have an appointment soon !"; //title of the notification 
             if (minute < 10)
             {
-                reminderNotification.Text = "You have a saloon appointment at " + hour + ":0" + minute; // text of notification, appears under the title
+                reminderNotification.Text = "You have a salon appointment at " + hour + ":0" + minute; // text of notification, appears under the title
             }
             else
             {
-                reminderNotification.Text = "You have a saloon appointment at " + hour + ":" + minute; // text of notification, appears under the title
+                reminderNotification.Text = "You have a salon appointment at " + hour + ":" + minute; // text of notification, appears under the title
             }
             if (minute < minutesBeforeAppointment) // daca e mai putin decat timpu pus de mn
             {
@@ -204,7 +204,7 @@ public class Notifications : MonoBehaviour
             notificationHour = hour;
             //REVIEW NOTIFICATION
             reviewNotification.Title = "Hey! Hope you are doing great !";
-            reviewNotification.Text = "How was your experience at the saloon? Come and leave a review !";
+            reviewNotification.Text = "How was your experience at the salon? Come and leave a review !";
             notificationMinute += minutesAfterAppointment;
             if (notificationMinute > 60)
             {

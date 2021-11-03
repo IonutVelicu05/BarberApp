@@ -32,6 +32,7 @@ public class Account : MonoBehaviour
     [SerializeField] private TextMeshProUGUI errorInfoTXT;
     [SerializeField] private GameObject settingsMenu;
     [SerializeField] private GameObject loadingScreen;
+    [SerializeField] private GameObject registerMenu;
     private string accountUsername;
     private string firstName;
     private string lastName;
@@ -57,7 +58,7 @@ public class Account : MonoBehaviour
     public void Save()
     {
         BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(Application.persistentDataPath + "/userprofile.data");
+        FileStream file = File.Create(Application.persistentDataPath + "/userprofile.info");
         bf.Serialize(file, accountUsername);
         bf.Serialize(file, tempAccount);
         bf.Serialize(file, password);
@@ -67,9 +68,9 @@ public class Account : MonoBehaviour
     public void Logout()
     {
         isLogged = false;
-        if(File.Exists(Application.persistentDataPath + "/userprofile.data"))
+        if(File.Exists(Application.persistentDataPath + "/userprofile.info"))
         {
-            File.Delete(Application.persistentDataPath + "/userprofile.data");
+            File.Delete(Application.persistentDataPath + "/userprofile.info");
         }
         int randomNumber = Mathf.RoundToInt(Random.Range(000000f, 999999f));
         accountUsername = "user" + randomNumber;
@@ -106,10 +107,10 @@ public class Account : MonoBehaviour
     }
     public FileStream Load()
     {
-        if (File.Exists(Application.persistentDataPath + "/userprofile.data"))
+        if (File.Exists(Application.persistentDataPath + "/userprofile.info"))
         {
             BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(Application.persistentDataPath + "/userprofile.data", FileMode.Open);
+            FileStream file = File.Open(Application.persistentDataPath + "/userprofile.info", FileMode.Open);
             accountUsername = bf.Deserialize(file).ToString();
             tempAccount = bool.Parse(bf.Deserialize(file).ToString());
             password = bf.Deserialize(file).ToString();
@@ -243,16 +244,17 @@ public class Account : MonoBehaviour
             if(appmanager.SelectedLanguage == 1)
             {
                 errorInfoTXT.text = "Cerinte de înregistrare: \n -> nume utilizator > 7 caractere \n -> parola > 7 caractere \n -> un email real pentru a putea sa iti recuperezi contul.";
-                errorInfoObj.SetActive(true);
+                //errorInfoObj.SetActive(true);
             }
             else if(appmanager.SelectedLanguage == 2)
             {
                 errorInfoTXT.text = "Register requirements: \n -> username > 7 characters \n -> password > 7 characters \n -> a real email so you can recover your account if lost";
-                errorInfoObj.SetActive(true);
+                //errorInfoObj.SetActive(true);
             }
-            firstFields.SetActive(false);
-            secondFields.SetActive(false);
-            nextButton.SetActive(false);
+            errorInfoObj.SetActive(true);
+            Debug.Log(" libma  este === >> " + appmanager.SelectedLanguage);
+            registerMenu.SetActive(false);
+            appmanager.afterLogin();
         }
     }
     public void resetRegister()
@@ -334,10 +336,6 @@ public class Account : MonoBehaviour
         webreq.Dispose();
         appmanager.afterLogin();
     }
-    public void OnApplicationQuit()
-    {
-        Save();
-    }
     public void LoginAccount()
     {
         StartCoroutine(LoginEnumerator());
@@ -394,6 +392,7 @@ public class Account : MonoBehaviour
             shopsCreated = int.Parse(www.text.Split('\t')[14]);
             shopsToCreate = int.Parse(www.text.Split('\t')[15]);
             appmanager.afterLogin();
+            tempAccount = false;
             if(appmanager.SelectedLanguage == 1)
             {
                 profileUsername.text = "Nume utilizator: " + accountUsername;
@@ -409,7 +408,6 @@ public class Account : MonoBehaviour
                 profilePersonalCode.text = "Personal code: " + personalCode;
             }
             loadingScreen.SetActive(false);
-            tempAccount = false;
             Save();
             Firebase.Messaging.FirebaseMessaging.SubscribeAsync("/barber/" + accountUsername);
         }
@@ -443,6 +441,7 @@ public class Account : MonoBehaviour
             }
             timeToCut = int.Parse(www.text.Split('\t')[11]);
             personalCode = int.Parse(www.text.Split('\t')[12]);
+            tempAccount = false;
             appmanager.afterLogin();
             if (appmanager.SelectedLanguage == 1)
             {
@@ -459,7 +458,6 @@ public class Account : MonoBehaviour
                 profilePersonalCode.text = "Personal code: " + personalCode;
             }
             loadingScreen.SetActive(false);
-            tempAccount = false;
             Save();
             Firebase.Messaging.FirebaseMessaging.SubscribeAsync("/topics/all");
         }
